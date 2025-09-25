@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Exchange code for access token
+    // Exchange code for access token (updated with correct environment variables)
     const tokenResponse = await fetch('https://graph.facebook.com/v18.0/oauth/access_token', {
       method: 'POST',
       headers: {
