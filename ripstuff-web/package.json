@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",
     "clean:uploads": "powershell -NoProfile -Command \"if (Test-Path ./public/uploads) { Remove-Item -Recurse -Force ./public/uploads; New-Item -ItemType Directory ./public/uploads | Out-Null }\"",
