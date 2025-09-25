@@ -82,9 +82,12 @@ function GoogleSignInButton({ onError }: { onError: (error: string) => void }) {
       }
 
       // Build OAuth URL
+      const redirectUri = `${window.location.origin}/api/auth/callback/google`;
+      console.log('Using redirect URI:', redirectUri);
+      
       const params = new URLSearchParams({
         client_id: clientId,
-        redirect_uri: 'https://ripstuff.net/api/auth/callback/google',
+        redirect_uri: redirectUri,
         response_type: 'code',
         scope: 'openid email profile',
         access_type: 'offline',

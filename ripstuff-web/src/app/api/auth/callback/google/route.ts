@@ -33,6 +33,11 @@ export async function GET(request: NextRequest) {
 
   try {
     // Exchange code for access token
+    const redirectUri = new URL('/api/auth/callback/google', request.url).toString();
+    console.log('Token exchange - using redirect URI:', redirectUri);
+    console.log('Token exchange - client ID:', clientId);
+    console.log('Token exchange - code length:', code.length);
+    
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: {
@@ -43,7 +48,7 @@ export async function GET(request: NextRequest) {
         client_secret: clientSecret,
         code,
         grant_type: 'authorization_code',
-        redirect_uri: 'https://ripstuff.net/api/auth/callback/google',
+        redirect_uri: new URL('/api/auth/callback/google', request.url).toString(),
       }),
     });
 
