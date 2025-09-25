@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { InteractiveGraveMap } from "@/components/cemetery/InteractiveGraveMap";
 
@@ -11,7 +11,7 @@ interface District {
   samplePhotoUrl: string | null;
 }
 
-export default function OverworldPage() {
+function OverworldContent() {
   const searchParams = useSearchParams();
   const [districts, setDistricts] = useState<District[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,5 +79,19 @@ export default function OverworldPage() {
         initialFocus={initialFocus}
       />
     </div>
+  );
+}
+
+export default function OverworldPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] p-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Loading Map...</h1>
+        </div>
+      </div>
+    }>
+      <OverworldContent />
+    </Suspense>
   );
 }

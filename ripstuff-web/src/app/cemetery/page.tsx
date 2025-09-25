@@ -2,6 +2,8 @@ import { HeadstoneCard } from "@/components/HeadstoneCard";
 import prisma from "@/lib/prisma";
 import type { FeedItem } from "@/lib/validation";
 
+export const dynamic = 'force-dynamic';
+
 function shortKeeper(id?: string | null) {
   if (!id) return "Unknown";
   return `Keeper ${id.slice(0, 8)}`;
