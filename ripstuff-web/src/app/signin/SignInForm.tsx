@@ -57,9 +57,9 @@ function FacebookSignInButton({ onError }: { onError: (error: string) => void })
 
 function GoogleSignInButton({ onError }: { onError: (error: string) => void }) {
   const handleGoogleSignIn = () => {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '891056842631-btvtbmkds563jbh0hvl8t1l1eiq6m0a4.apps.googleusercontent.com';
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     
-    if (!clientId || clientId === 'your-google-client-id-here') {
+    if (!clientId) {
       onError('Google OAuth client ID not configured. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID in your environment.');
       return;
     }

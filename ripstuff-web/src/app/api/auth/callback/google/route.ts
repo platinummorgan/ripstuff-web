@@ -17,6 +17,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/signin?error=no_code', request.url));
   }
 
+  // Validate OAuth credentials are available
+  if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+    console.error('Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID environment variable');
+    return NextResponse.redirect(new URL('/signin?error=config_missing_client_id', request.url));
+  }
+  
+  if (!process.env.GOOGLE_CLIENT_SECRET) {
+    console.error('Missing GOOGLE_CLIENT_SECRET environment variable');
+    return NextResponse.redirect(new URL('/signin?error=config_missing_secret', request.url));
+  }
+
   try {
     // Exchange code for access token
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
