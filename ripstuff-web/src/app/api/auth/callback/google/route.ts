@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
         statusText: tokenResponse.statusText,
         error: tokens,
         redirectUri: 'https://ripstuff.net/api/auth/callback/google',
-        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        clientIdExists: !!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        clientIdLength: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.length,
         hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
         clientSecretLength: process.env.GOOGLE_CLIENT_SECRET?.length
       });
