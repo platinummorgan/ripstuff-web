@@ -18,13 +18,16 @@ export async function GET(request: NextRequest) {
   }
 
   // Get OAuth credentials
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim();
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
   
   if (!clientId || !clientSecret) {
     console.error('Missing OAuth credentials:', {
       hasClientId: !!clientId,
-      hasSecret: !!clientSecret
+      hasSecret: !!clientSecret,
+      clientIdRaw: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      clientIdLength: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.length,
+      clientSecretLength: process.env.GOOGLE_CLIENT_SECRET?.length,
     });
     return NextResponse.redirect(new URL('/signin?error=oauth_config_error', request.url));
   }
@@ -55,19 +58,25 @@ export async function GET(request: NextRequest) {
     const tokens = await tokenResponse.json();
 
     if (!tokenResponse.ok) {
-      console.error('Token exchange failed:', {
+      const fullError = {
         status: tokenResponse.status,
         statusText: tokenResponse.statusText,
         error: tokens,
-        redirectUri: 'https://ripstuff.net/api/auth/callback/google',
+        redirectUri: redirectUri,
+        requestUrl: request.url,
         clientIdExists: !!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         clientIdLength: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.length,
+        clientIdTruncated: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.substring(0, 20) + '...',
         hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
-        clientSecretLength: process.env.GOOGLE_CLIENT_SECRET?.length
-      });
+        clientSecretLength: process.env.GOOGLE_CLIENT_SECRET?.length,
+        codeLength: code.length,
+        codeTruncated: code.substring(0, 20) + '...',
+      };
+      
+      console.error('Token exchange failed:', fullError);
       
       // For debugging, let's show the error in the URL
-      const errorMsg = tokens?.error_description || tokens?.error || 'Unknown error';
+      const errorMsg = tokens?.error_description || tokens?.error || `HTTP ${tokenResponse.status}: ${tokenResponse.statusText}`;
       return NextResponse.redirect(new URL(`/signin?error=token_error&details=${encodeURIComponent(errorMsg)}`, request.url));
     }
 
