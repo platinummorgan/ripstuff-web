@@ -110,7 +110,8 @@ export default function SignInForm() {
           setError('No authorization code received');
           break;
         case 'token_error':
-          setError('Failed to exchange token');
+          const details = searchParams.get('details');
+          setError(details ? `Failed to exchange token: ${details}` : 'Failed to exchange token');
           break;
         case 'user_info_error':
           setError('Failed to get user information');

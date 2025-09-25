@@ -40,11 +40,15 @@ export async function GET(request: NextRequest) {
         status: tokenResponse.status,
         statusText: tokenResponse.statusText,
         error: tokens,
-        redirectUri: `${request.nextUrl.origin}/api/auth/callback/google`,
+        redirectUri: 'https://ripstuff.net/api/auth/callback/google',
         clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET
+        hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+        clientSecretLength: process.env.GOOGLE_CLIENT_SECRET?.length
       });
-      return NextResponse.redirect(new URL('/signin?error=token_error', request.url));
+      
+      // For debugging, let's show the error in the URL
+      const errorMsg = tokens?.error_description || tokens?.error || 'Unknown error';
+      return NextResponse.redirect(new URL(`/signin?error=token_error&details=${encodeURIComponent(errorMsg)}`, request.url));
     }
 
     // Get user info
