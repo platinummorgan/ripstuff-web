@@ -1,5 +1,23 @@
-import { PrismaClient, GraveStatus, GraveCategory } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
+
+// Define enum values as constants to match Prisma schema
+const GraveStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  HIDDEN: 'HIDDEN'
+} as const
+
+const GraveCategory = {
+  TECH_GADGETS: 'TECH_GADGETS',
+  KITCHEN_FOOD: 'KITCHEN_FOOD', 
+  CLOTHING_LAUNDRY: 'CLOTHING_LAUNDRY',
+  TOYS_GAMES: 'TOYS_GAMES',
+  CAR_TOOLS: 'CAR_TOOLS',
+  PETS_CHEWABLES: 'PETS_CHEWABLES',
+  OUTDOORS_ACCIDENTS: 'OUTDOORS_ACCIDENTS',
+  MISC: 'MISC'
+} as const
 
 async function main() {
   const sampleGraves = [
