@@ -1,0 +1,195 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GraveStatus {
+  PENDING
+  APPROVED
+  HIDDEN
+}
+
+enum GraveCategory {
+  TECH_GADGETS
+  KITCHEN_FOOD
+  CLOTHING_LAUNDRY
+  TOYS_GAMES
+  CAR_TOOLS
+  PETS_CHEWABLES
+  OUTDOORS_ACCIDENTS
+  MISC
+}
+
+enum ModerationActionType {
+  APPROVE
+  HIDE
+  FEATURE
+  UNHIDE
+  NOTE
+  DELETE
+}
+
+enum ReactionType {
+  HEART
+  CANDLE
+  ROSE
+  LOL
+}
+
+model Grave {
+  id              String             @id @default(uuid()) @db.Uuid @map("id")
+  slug            String             @unique @db.VarChar(128) @map("slug")
+  title           String             @db.VarChar(120) @map("title")
+  datesText       String?            @db.VarChar(64) @map("dates_text")
+  backstory       String?            @db.VarChar(140) @map("backstory")
+  photoUrl        String?            @db.VarChar(2048) @map("photo_url")
+  eulogyText      String             @db.Text @map("eulogy_text")
+  category        GraveCategory      @map("category")
+  status          GraveStatus        @default(PENDING) @map("status")
+  creatorDeviceHash String?          @db.VarChar(128) @map("creator_device_hash")
+  mapX            Int?               @map("map_x")
+  mapY            Int?               @map("map_y")
+  heartCount      Int                @default(0) @map("heart_count")
+  candleCount     Int                @default(0) @map("candle_count")
+  roseCount       Int                @default(0) @map("rose_count")
+  lolCount        Int                @default(0) @map("lol_count")
+  featured        Boolean            @default(false) @map("featured")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  sympathies      Sympathy[]         @relation("GraveSympathies")
+  reactionEvents  ReactionEvent[]    @relation("GraveReactionEvents")
+  moderationTrail ModerationAction[] @relation("GraveModerationActions")
+  reports         Report[]           @relation("GraveReports")
+
+  @@index([status, featured, createdAt], map: "idx_graves_status_featured_created_at")
+  @@index([creatorDeviceHash, createdAt], map: "idx_graves_creator_created_at")
+  @@index([createdAt], map: "idx_graves_created_at")
+  @@index([mapX, mapY, status], map: "idx_graves_map_coords_status")
+  @@map("graves")
+}
+
+model Sympathy {
+  id          String   @id @default(uuid()) @db.Uuid @map("id")
+  graveId     String   @db.Uuid @map("grave_id")
+  deviceHash  String   @db.VarChar(128) @map("device_hash")
+  body        String   @db.VarChar(140) @map("body")
+  createdAt   DateTime @default(now()) @map("created_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  grave Grave @relation("GraveSympathies", fields: [graveId], references: [id], onDelete: Cascade)
+
+  @@index([graveId, createdAt], map: "idx_sympathy_grave_created_at")
+  @@index([deviceHash, createdAt], map: "idx_sympathy_device_created_at")
+  @@map("sympathies")
+}
+
+model ReactionEvent {
+  id         BigInt       @id @default(autoincrement()) @map("id")
+  graveId    String       @db.Uuid @map("grave_id")
+  deviceHash String       @db.VarChar(128) @map("device_hash")
+  type       ReactionType @map("reaction_type")
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  grave Grave @relation("GraveReactionEvents", fields: [graveId], references: [id], onDelete: Cascade)
+
+  @@unique([graveId, deviceHash, type], map: "uq_reaction_grave_device_type")
+  @@index([graveId, createdAt], map: "idx_reaction_grave_created_at")
+  @@map("reaction_events")
+}
+
+model ModerationAction {
+  id           String               @id @default(uuid()) @db.Uuid @map("id")
+  graveId      String               @db.Uuid @map("grave_id")
+  moderatorId  String?              @db.VarChar(64) @map("moderator_id")
+  action       ModerationActionType @map("action")
+  reason       String?              @db.VarChar(280) @map("reason")
+  createdAt    DateTime             @default(now()) @map("created_at")
+
+  grave Grave @relation("GraveModerationActions", fields: [graveId], references: [id], onDelete: Cascade)
+
+  @@index([graveId, createdAt], map: "idx_moderation_grave_created_at")
+  @@map("moderation_actions")
+}
+
+model Report {
+  id         String   @id @default(uuid()) @db.Uuid @map("id")
+  graveId    String   @db.Uuid @map("grave_id")
+  deviceHash String   @db.VarChar(128) @map("device_hash")
+  reason     String?  @db.VarChar(280) @map("reason")
+  createdAt  DateTime @default(now()) @map("created_at")
+  resolvedAt DateTime? @map("resolved_at")
+
+  grave Grave @relation("GraveReports", fields: [graveId], references: [id], onDelete: Cascade)
+
+  @@unique([graveId, deviceHash], map: "uq_report_grave_device")
+  @@index([graveId, createdAt], map: "idx_report_grave_created_at")
+  @@map("reports")
+}
+
+model EulogyDraft {
+  id          String        @id @default(uuid()) @db.Uuid @map("id")
+  deviceHash  String        @db.VarChar(128) @map("device_hash")
+  title       String        @db.VarChar(120) @map("title")
+  yearsText   String?       @db.VarChar(32) @map("years_text")
+  backstory   String?       @db.VarChar(140) @map("backstory")
+  category    GraveCategory @map("category")
+  eulogyText  String        @db.Text @map("eulogy_text")
+  tokensUsed  Int           @map("tokens_used")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  expiresAt   DateTime      @map("expires_at")
+
+  @@index([deviceHash, createdAt], map: "idx_eulogy_draft_device_created")
+  @@map("eulogy_drafts")
+}
+model User {
+  id          String   @id @default(uuid()) @db.Uuid @map("id")
+  email       String   @unique @db.VarChar(255) @map("email")
+  name        String?  @db.VarChar(100) @map("name")
+  picture     String?  @db.VarChar(500) @map("picture")
+  provider    String   @db.VarChar(20) @map("provider") // 'google', 'apple', 'facebook'
+  providerId  String   @db.VarChar(100) @map("provider_id")
+  deviceHash  String?  @db.VarChar(128) @map("device_hash") // Optional fallback
+  isModerator Boolean  @default(false) @map("is_moderator")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([provider, providerId], map: "uq_user_provider_id")
+  @@index([deviceHash], map: "idx_user_device_hash")
+  @@index([email], map: "idx_user_email")
+  @@map("users")
+}
+
+model RateLimit {
+  id          BigInt    @id @default(autoincrement()) @map("id")
+  deviceHash  String    @db.VarChar(128) @map("device_hash")
+  scope       String    @db.VarChar(64) @map("scope")
+  windowStart DateTime  @map("window_start")
+  count       Int       @default(0) @map("count")
+  expiresAt   DateTime? @map("expires_at")
+
+  @@index([deviceHash, scope, windowStart], map: "idx_ratelimit_device_scope_window")
+  @@map("rate_limits")
+}
+
+model ContactMessage {
+  id              String    @id @default(uuid()) @db.Uuid @map("id")
+  senderDeviceHash String   @db.VarChar(128) @map("sender_device_hash")
+  subject         String    @db.VarChar(120) @map("subject")
+  message         String    @db.Text @map("message")
+  status          String    @default("UNREAD") @db.VarChar(20) @map("status")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  resolvedAt      DateTime? @map("resolved_at")
+  moderatorNotes  String?   @db.Text @map("moderator_notes")
+
+  @@index([status, createdAt], map: "idx_contact_messages_status_created_at")
+  @@index([senderDeviceHash, createdAt], map: "idx_contact_messages_device_created_at")
+  @@map("contact_messages")
+}
+

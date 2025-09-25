@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+  --background: #04070f;
+  --foreground: #f5f7ff;
+  --muted: #c8cad9;
+  --surface: rgba(18, 24, 38, 0.72);
+  --surface-strong: rgba(30, 37, 53, 0.94);
+  --accent: #8e7bff;
+  --accent-soft: rgba(142, 123, 255, 0.2);
+  --border: rgba(142, 123, 255, 0.25);
+  --glow: radial-gradient(circle at top, rgba(142, 123, 255, 0.12), transparent 60%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  background-image: var(--glow), url("/textures/mist.svg");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: rgba(142, 123, 255, 0.35);
+}
+
+@layer utilities {
+  .frosted {
+    backdrop-filter: blur(18px);
+    background-color: var(--surface);
+  }
+
+  .frosted-strong {
+    backdrop-filter: blur(24px);
+    background-color: var(--surface-strong);
+  }
+}

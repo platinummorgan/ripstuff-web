@@ -1,0 +1,47 @@
+# RIPStuff command reference (current)
+
+node --version
+  Prints installed Node.js version to confirm runtime.
+
+pnpm install
+  Installs workspace dependencies in the monorepo (root).
+
+pnpm approve-builds
+  Approves postinstall builds for native deps (Prisma, Sharp, etc.).
+
+pnpm config set allowed-build-scripts "@prisma/client @prisma/engines prisma @tailwindcss/oxide sharp unrs-resolver"
+  Persists approvals so pnpm auto-allows listed build scripts on future installs.
+
+pnpm --filter ripstuff-web dev
+  Starts the Next.js dev server for ripstuff-web at http://localhost:3000.
+
+pnpm --filter ripstuff-web build
+  Builds the Next.js app for production.
+
+pnpm --filter ripstuff-web start
+  Starts the production server (after build).
+
+pnpm --filter ripstuff-web lint
+  Runs ESLint for ripstuff-web.
+
+pnpm --filter ripstuff-web prisma:migrate
+  Applies Prisma migrations for ripstuff-web to the configured database.
+
+pnpm --filter ripstuff-web prisma:generate
+  Regenerates Prisma Client for ripstuff-web from prisma/schema.prisma.
+
+pnpm --filter ripstuff-web prisma:studio
+  Opens Prisma Studio to browse/edit database records.
+
+pnpm --filter ripstuff-web clean:uploads
+  Deletes local uploaded media (recreates public/uploads). Good for dev cleanup.
+
+pnpm --filter ripstuff-web migrate:local-to-s3 -- --bucket <bucket> --region <region> [--update-db]
+  Migrates files from public/uploads to S3. With --update-db, rewrites Grave.photoUrl from local paths ("/uploads/…") to S3 object URLs.
+
+ollama serve
+  Starts the local Ollama server for AI eulogy generation.
+
+ollama pull qwen2.5:7b-instruct
+  Downloads the model used for local eulogies (first-time setup).
+

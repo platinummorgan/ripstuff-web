@@ -1,0 +1,157 @@
+import Link from "next/link";
+
+import { Button } from "@/components/Button";
+import { SectionHeader } from "@/components/SectionHeader";
+import { moderationQueueResponse } from "@/lib/validation";
+
+type SearchParams = {
+  status?: string;
+  reported?: string;
+  cursor?: string;
+};
+
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
+const moderatorSecret = process.env.MODERATOR_SECRET;
+
+async function loadQueue(searchParams: SearchParams) {
+  if (!moderatorSecret) {
+    return { error: "MOD_AUTH_NOT_CONFIGURED" } as const;
+  }
+
+  const query = new URLSearchParams();
+  query.set("limit", "25");
+  if (searchParams.status) query.set("status", searchParams.status);
+  if (searchParams.reported) query.set("reported", searchParams.reported);
+  if (searchParams.cursor) query.set("cursor", searchParams.cursor);
+
+  const res = await fetch(`${baseUrl}/api/moderation/graves?${query.toString()}`, {
+    headers: {
+      "x-moderator-secret": moderatorSecret,
+    },
+    cache: "no-store",
+  });
+
+  if (res.status === 401) {
+    return { error: "UNAUTHORIZED" } as const;
+  }
+
+  if (!res.ok) {
+    return { error: "REQUEST_FAILED" } as const;
+  }
+
+  const json = await res.json();
+  const data = moderationQueueResponse.parse(json);
+  return { data } as const;
+}
+
+export default async function ModerationPage({ searchParams }: { searchParams: SearchParams }) {
+  const result = await loadQueue(searchParams);
+
+  if (result.error === "MOD_AUTH_NOT_CONFIGURED") {
+    return (
+      <div className="space-y-6 py-16">
+        <SectionHeader
+          title="Moderation not configured"
+          description="Set MODERATOR_SECRET in your environment to enable the moderation console."
+        />
+      </div>
+    );
+  }
+
+  if (result.error === "UNAUTHORIZED") {
+    return (
+      <div className="space-y-6 py-16">
+        <SectionHeader
+          title="Moderator access required"
+          description="Provide the x-moderator-secret header to view the queue."
+        />
+      </div>
+    );
+  }
+
+  if (result.error) {
+    return (
+      <div className="space-y-6 py-16">
+        <SectionHeader
+          title="Something went wrong"
+          description="We couldn’t load the moderation queue. Try refreshing in a moment."
+        />
+      </div>
+    );
+  }
+
+  const { data } = result;
+
+  return (
+    <div className="space-y-10 pb-16">
+      <div className="flex items-start justify-between gap-4">
+        <SectionHeader
+          eyebrow="Moderator"
+          title="Pending and reported graves"
+          description="Review the latest submissions and community reports."
+        />
+        <div className="flex gap-2">
+          <Button asChild>
+            <Link href="/moderation">Refresh</Link>
+          </Button>
+          <Button variant="ghost" asChild>
+            <Link href="/feed">Back to feed</Link>
+          </Button>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[rgba(10,14,25,0.82)]">
+        <table className="w-full text-sm text-[var(--muted)]">
+          <thead>
+            <tr className="bg-[rgba(142,123,255,0.08)] text-left uppercase tracking-[0.3em] text-xs">
+              <th className="px-4 py-3 text-[var(--muted)]">Title</th>
+              <th className="px-4 py-3 text-[var(--muted)]">Status</th>
+              <th className="px-4 py-3 text-[var(--muted)]">Reports</th>
+              <th className="px-4 py-3 text-[var(--muted)]">Created</th>
+              <th className="px-4 py-3 text-[var(--muted)]">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.items.map((item) => (
+              <tr key={item.id} className="border-t border-[rgba(255,255,255,0.05)]">
+                <td className="px-4 py-4 text-white">
+                  <div className="font-medium text-white">{item.title}</div>
+                  <div className="text-xs text-[var(--muted)]">{item.eulogyPreview}</div>
+                </td>
+                <td className="px-4 py-4">
+                  <span className="rounded-full bg-[rgba(255,255,255,0.05)] px-3 py-1 text-xs">
+                    {item.status}
+                  </span>
+                </td>
+                <td className="px-4 py-4">{item.reports}</td>
+                <td className="px-4 py-4">{new Date(item.createdAt).toLocaleString()}</td>
+                <td className="px-4 py-4">
+                  <Button variant="ghost" asChild>
+                    <Link href={`/grave/${item.slug}`} target="_blank">
+                      View grave
+                    </Link>
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {data.nextCursor && (
+        <div className="flex justify-center">
+          <Button asChild variant="secondary">
+            <Link
+              href={`/moderation?${new URLSearchParams({
+                ...searchParams,
+                cursor: data.nextCursor,
+              }).toString()}`}
+            >
+              Load more
+            </Link>
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}

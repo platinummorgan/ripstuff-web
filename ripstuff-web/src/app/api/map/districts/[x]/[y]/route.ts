@@ -1,0 +1,94 @@
+import { NextRequest } from "next/server";
+import prisma from "@/lib/prisma";
+import { json, internalError, validationError } from "@/lib/http";
+import { GraveStatus } from "@prisma/client";
+
+// GET /api/map/districts/[x]/[y] - Get graves for a specific district
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { x: string; y: string } }
+) {
+  try {
+    const x = parseInt(params.x);
+    const y = parseInt(params.y);
+
+    if (isNaN(x) || isNaN(y) || x < 0 || y < 0 || x > 31 || y > 31) {
+      return validationError({
+        issues: [
+          {
+            code: "custom",
+            path: ["coordinates"],
+            message: "Invalid coordinates. X and Y must be between 0 and 31.",
+          },
+        ],
+        name: "ZodError",
+        errors: [],
+      } as any);
+    }
+
+    // For now, return some sample graves since we can't query by map coordinates yet
+    const totalGraves = await prisma.grave.count({
+      where: {
+        status: GraveStatus.APPROVED,
+      },
+    });
+
+    // Calculate how many graves this district should have based on demo distribution
+    const gravesPerDistrict = Math.ceil(totalGraves / 4);
+    let expectedGraves = 0;
+    
+    // Match our demo districts from the main endpoint
+    if ((x === 2 && y === 3) || (x === 5 && y === 7) || (x === 8 && y === 2) || (x === 12 && y === 9)) {
+      expectedGraves = Math.min(gravesPerDistrict, totalGraves);
+    }
+
+    const graves = expectedGraves > 0 ? await prisma.grave.findMany({
+      where: {
+        status: GraveStatus.APPROVED,
+      },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        photoUrl: true,
+        category: true,
+        heartCount: true,
+        candleCount: true,
+        roseCount: true,
+        lolCount: true,
+        createdAt: true,
+        featured: true,
+      },
+      take: expectedGraves,
+      orderBy: {
+        createdAt: "desc",
+      },
+    }) : [];
+
+    const districtData = {
+      x,
+      y,
+      graveCount: graves.length,
+      graves: graves.map((grave) => ({
+        id: grave.id,
+        slug: grave.slug,
+        title: grave.title,
+        photoUrl: grave.photoUrl,
+        category: grave.category,
+        reactions: {
+          heart: grave.heartCount,
+          candle: grave.candleCount,
+          rose: grave.roseCount,
+          lol: grave.lolCount,
+        },
+        createdAt: grave.createdAt.toISOString(),
+        featured: grave.featured,
+      })),
+    };
+
+    return json(districtData);
+  } catch (error) {
+    console.error(`Error fetching district ${params.x},${params.y}:`, error);
+    return internalError();
+  }
+}
