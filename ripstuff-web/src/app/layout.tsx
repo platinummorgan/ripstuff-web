@@ -17,7 +17,7 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://ripstuff.net"),
   title: "RipStuff — Bury Your Fallen Items with Honor",
   description:
     "Turn broken belongings into bittersweet laughs. Generate instant eulogies, share memorial cards, and let the internet leave flowers.",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "RipStuff — Virtual Graveyard",
     description:
       "Bury your fallen stuff, get a somber-but-sly eulogy, and invite sympathies.",
-    url: "https://ripstuff.app",
+    url: "https://ripstuff.net",
     siteName: "RipStuff",
     images: [
       {
