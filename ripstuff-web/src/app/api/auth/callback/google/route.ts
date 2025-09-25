@@ -17,16 +17,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/signin?error=no_code', request.url));
   }
 
-  // Validate OAuth credentials are available
-  if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
-    console.error('Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID environment variable');
-    return NextResponse.redirect(new URL('/signin?error=config_missing_client_id', request.url));
+  // Get OAuth credentials
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  
+  if (!clientId || !clientSecret) {
+    console.error('Missing OAuth credentials:', {
+      hasClientId: !!clientId,
+      hasSecret: !!clientSecret
+    });
+    return NextResponse.redirect(new URL('/signin?error=oauth_config_error', request.url));
   }
   
-  if (!process.env.GOOGLE_CLIENT_SECRET) {
-    console.error('Missing GOOGLE_CLIENT_SECRET environment variable');
-    return NextResponse.redirect(new URL('/signin?error=config_missing_secret', request.url));
-  }
+  console.log('OAuth callback processing with valid credentials');
 
   try {
     // Exchange code for access token
@@ -36,8 +39,8 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+        client_id: clientId,
+        client_secret: clientSecret,
         code,
         grant_type: 'authorization_code',
         redirect_uri: 'https://ripstuff.net/api/auth/callback/google',

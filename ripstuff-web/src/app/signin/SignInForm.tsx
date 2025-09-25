@@ -56,25 +56,46 @@ function FacebookSignInButton({ onError }: { onError: (error: string) => void })
 }
 
 function GoogleSignInButton({ onError }: { onError: (error: string) => void }) {
-  const handleGoogleSignIn = () => {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-    
-    if (!clientId) {
-      onError('Google OAuth client ID not configured. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID in your environment.');
-      return;
+  const handleGoogleSignIn = async () => {
+    try {
+      // First try to get client ID from environment
+      let clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      
+      // If not available, try to fetch from API
+      if (!clientId) {
+        console.log('Client ID not in environment, fetching from API...');
+        const response = await fetch('/api/auth/google-config');
+        const data = await response.json();
+        
+        if (data.configured) {
+          clientId = data.clientId;
+        } else {
+          console.error('Google config error:', data);
+          onError('Google OAuth is not properly configured. Please contact support.');
+          return;
+        }
+      }
+      
+      if (!clientId) {
+        onError('Google OAuth client ID not available.');
+        return;
+      }
+
+      // Build OAuth URL
+      const params = new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: 'https://ripstuff.net/api/auth/callback/google',
+        response_type: 'code',
+        scope: 'openid email profile',
+        access_type: 'offline',
+      });
+
+      // Redirect to Google OAuth
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      onError('Failed to initialize Google sign-in. Please try again.');
     }
-
-    // Build OAuth URL
-    const params = new URLSearchParams({
-      client_id: clientId,
-      redirect_uri: 'https://ripstuff.net/api/auth/callback/google',
-      response_type: 'code',
-      scope: 'openid email profile',
-      access_type: 'offline',
-    });
-
-    // Redirect to Google OAuth
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };
 
   return (
