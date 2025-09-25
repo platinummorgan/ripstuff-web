@@ -56,3 +56,4 @@ pnpm --filter ripstuff-web clean:uploads
 See the root `commands.txt` for a concise command reference.
 # Updated 09/25/2025 15:10:38
 # Environment variables updated 09/25/2025 15:23:01
+# Updated to ripstuff.net 09/25/2025 15:38:15
