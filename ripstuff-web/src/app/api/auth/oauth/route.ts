@@ -60,6 +60,31 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+    } else if (provider === 'facebook') {
+      try {
+        // For Facebook, credential should be the access token
+        const userResponse = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${credential}`);
+        
+        if (!userResponse.ok) {
+          throw new Error('Failed to get Facebook user info');
+        }
+        
+        const userData = await userResponse.json();
+        
+        userInfo = {
+          email: userData.email || `${userData.id}@facebook.temp`,
+          name: userData.name,
+          picture: userData.picture?.data?.url,
+          provider: 'facebook',
+          providerId: userData.id,
+        };
+        
+      } catch (error) {
+        return NextResponse.json(
+          { error: 'Invalid Facebook credential' }, 
+          { status: 400 }
+        );
+      }
     } else {
       return NextResponse.json(
         { error: 'Unsupported OAuth provider' }, 
