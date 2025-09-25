@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
         client_secret: process.env.GOOGLE_CLIENT_SECRET!,
         code,
         grant_type: 'authorization_code',
-        redirect_uri: `${request.nextUrl.origin}/api/auth/callback/google`,
+        redirect_uri: 'https://ripstuff.net/api/auth/callback/google',
       }),
     });
 
