@@ -6,6 +6,8 @@ import { internalError, json, validationError } from "@/lib/http";
 import prisma from "@/lib/prisma";
 import { feedQuery, feedResponse } from "@/lib/validation";
 
+export const dynamic = 'force-dynamic';
+
 function coerceFeatured(value: unknown): boolean | undefined {
   if (typeof value === "boolean") {
     return value;

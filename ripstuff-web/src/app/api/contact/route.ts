@@ -3,6 +3,8 @@ import { resolveDeviceHash } from "@/lib/device";
 import { checkRateLimit, rateLimitRetrySeconds } from "@/lib/rate-limit";
 import prisma from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const deviceHash = resolveDeviceHash();

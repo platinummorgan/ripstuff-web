@@ -10,6 +10,8 @@ import { checkRateLimit, rateLimitRetrySeconds } from "@/lib/rate-limit";
 import { generateSlug } from "@/lib/slug";
 import { createGraveInput, createGraveResponse } from "@/lib/validation";
 
+export const dynamic = 'force-dynamic';
+
 const CREATE_LIMIT = Number.parseInt(process.env.GRAVE_CREATE_LIMIT ?? "3", 10);
 const CREATE_WINDOW_SECONDS = Number.parseInt(process.env.GRAVE_CREATE_WINDOW ?? "86400", 10);
 

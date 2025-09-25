@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma";
 import { json, internalError } from "@/lib/http";
 import { GraveStatus } from "@prisma/client";
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/map/districts - Get all districts with grave counts
 export async function GET(req: NextRequest) {
   try {
