@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 
+import { getCurrentUser } from "@/lib/auth";
 import { generateEulogy, MissingOpenAiKeyError } from "@/lib/ai/eulogy";
 import { resolveDeviceHash } from "@/lib/device";
 import { forbidden, internalError, json, rateLimitError, validationError } from "@/lib/http";
@@ -17,6 +18,12 @@ export async function POST(req: NextRequest) {
   const parsed = eulogyGenerateInput.safeParse(raw);
   if (!parsed.success) {
     return validationError(parsed.error);
+  }
+
+  // Check if user is authenticated
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    return json({ error: 'Authentication required to generate eulogies' }, { status: 401 });
   }
 
   const deviceHash = resolveDeviceHash();

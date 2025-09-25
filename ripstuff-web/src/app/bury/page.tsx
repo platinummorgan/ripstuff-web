@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PageHero } from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
 import { Button } from "@/components/Button";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export default function BuryPage() {
   const [formData, setFormData] = useState({
@@ -222,12 +223,13 @@ export default function BuryPage() {
   };
 
   return (
-    <div className="space-y-12">
-      <PageHero
-        eyebrow="Memorial Service"
-        title="Lay Your Fallen Item to Rest"
-        description="Share the story of something that served you well, then let our AI eulogist craft a fitting farewell."
-      />
+    <ProtectedRoute fallbackMessage="Please sign in to create memorials for your departed items.">
+      <div className="space-y-12">
+        <PageHero
+          eyebrow="Memorial Service"
+          title="Lay Your Fallen Item to Rest"
+          description="Share the story of something that served you well, then let our AI eulogist craft a fitting farewell."
+        />
 
       <div className="mx-auto max-w-2xl">
         <div className="space-y-8">
@@ -479,6 +481,7 @@ export default function BuryPage() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
 
