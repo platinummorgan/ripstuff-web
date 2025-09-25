@@ -19,6 +19,8 @@ export async function performModerationAction({ graveId, action, reason }: Moder
     throw new Error(payload.error.issues[0]?.message ?? "Invalid action");
   }
 
+  // Fixed: Added NEXT_PUBLIC_SITE_URL environment variable to resolve server action URL issues
+
   // Get cookies for authentication
   const cookieStore = cookies();
   const cookieHeader = cookieStore.toString();
