@@ -36,7 +36,14 @@ export async function GET(request: NextRequest) {
     const tokens = await tokenResponse.json();
 
     if (!tokenResponse.ok) {
-      console.error('Token exchange failed:', tokens);
+      console.error('Token exchange failed:', {
+        status: tokenResponse.status,
+        statusText: tokenResponse.statusText,
+        error: tokens,
+        redirectUri: `${request.nextUrl.origin}/api/auth/callback/google`,
+        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET
+      });
       return NextResponse.redirect(new URL('/signin?error=token_error', request.url));
     }
 
