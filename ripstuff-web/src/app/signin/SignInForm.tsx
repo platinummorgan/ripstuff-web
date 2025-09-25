@@ -58,23 +58,23 @@ function FacebookSignInButton({ onError }: { onError: (error: string) => void })
 function GoogleSignInButton({ onError }: { onError: (error: string) => void }) {
   const handleGoogleSignIn = async () => {
     try {
-      // First try to get client ID from environment
-      let clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      // Always fetch client ID from API since env vars aren't working consistently
+      console.log('Fetching Google client ID from API...');
+      const response = await fetch('/api/auth/google-config');
       
-      // If not available, try to fetch from API
-      if (!clientId) {
-        console.log('Client ID not in environment, fetching from API...');
-        const response = await fetch('/api/auth/google-config');
-        const data = await response.json();
-        
-        if (data.configured) {
-          clientId = data.clientId;
-        } else {
-          console.error('Google config error:', data);
-          onError('Google OAuth is not properly configured. Please contact support.');
-          return;
-        }
+      if (!response.ok) {
+        throw new Error(`API responded with ${response.status}`);
       }
+      
+      const data = await response.json();
+      
+      if (!data.configured || !data.clientId) {
+        console.error('Google config error:', data);
+        onError('Google OAuth is not properly configured. Please contact support.');
+        return;
+      }
+      
+      const clientId = data.clientId.trim(); // Make sure to trim any whitespace
       
       if (!clientId) {
         onError('Google OAuth client ID not available.');
