@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 
 import { getCurrentUser } from "@/lib/auth";
 import { generateEulogy, MissingOpenAiKeyError } from "@/lib/ai/eulogy";
+import { MissingGeminiKeyError } from "@/lib/ai/gemini";
 import { resolveDeviceHash } from "@/lib/device";
 import { forbidden, internalError, json, rateLimitError, validationError } from "@/lib/http";
 import prisma from "@/lib/prisma";
@@ -102,7 +103,7 @@ export async function POST(req: NextRequest) {
 
     return json(payload, 200);
   } catch (error) {
-    if (error instanceof MissingOpenAiKeyError) {
+    if (error instanceof MissingOpenAiKeyError || error instanceof MissingGeminiKeyError) {
       return json(
         {
           code: "SERVICE_UNAVAILABLE",
@@ -115,6 +116,8 @@ export async function POST(req: NextRequest) {
     // Handle known OpenAI errors more gracefully
     const anyErr = error as any;
     const code = anyErr?.code ?? anyErr?.error?.code;
+    const message = anyErr?.message || "Unknown error";
+    
     if (code === "insufficient_quota") {
       return json(
         {
@@ -125,7 +128,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.error("/api/eulogies error", error);
-    return internalError();
+    // Log the full error for debugging
+    console.error("/api/eulogies error", {
+      message: message,
+      code: code,
+      stack: anyErr?.stack,
+      fullError: error
+    });
+    
+    return json(
+      {
+        code: "INTERNAL_ERROR",
+        message: `Eulogy generation failed: ${message}. Please try again or use the 'Write My Own' option.`,
+      },
+      500,
+    );
   }
 }
