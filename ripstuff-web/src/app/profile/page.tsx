@@ -53,7 +53,7 @@ function AccountLinkingSection({ user }: AccountLinkingSectionProps) {
           if (data.configured) {
             const params = new URLSearchParams({
               client_id: data.clientId,
-              redirect_uri: `${window.location.origin}/api/auth/callback/google?linking=true`,
+              redirect_uri: `${window.location.origin}/api/auth/callback/google`,
               response_type: 'code',
               scope: 'openid email profile',
               access_type: 'offline',
@@ -74,10 +74,10 @@ function AccountLinkingSection({ user }: AccountLinkingSectionProps) {
           if (data.configured) {
             const params = new URLSearchParams({
               client_id: data.appId,
-              redirect_uri: `${window.location.origin}/api/auth/callback/facebook?linking=true`,
+              redirect_uri: `${window.location.origin}/api/auth/callback/facebook`,
               scope: 'public_profile',
               response_type: 'code',
-              state: 'linking', // Add state to indicate this is for linking
+              state: 'linking', // Use state parameter for linking
             });
             window.location.href = `https://www.facebook.com/v18.0/dialog/oauth?${params.toString()}`;
           }
