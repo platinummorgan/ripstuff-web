@@ -125,8 +125,15 @@ export async function generateEulogyWithGemini(
     const userPrompt = `${prompt}\n\nFollow this template:\nOpening: 'We gather to remember [NAME], faithful [ROLE]...'\nService: Reference 1-2 concrete memories in ${emotionStyle} tone.\nDemise: Describe what ended its service using ${emotionStyle} approach.\nLegacy: What it meant using ${emotionStyle} perspective.\nFarewell: 'May [NAME] rest among ...' using category motif.\nMaintain ${emotionStyle} throughout. Avoid emojis.`;
 
     console.log('🚀 Making API call to Gemini...');
+    console.log('📝 Full prompt length:', (`${systemPrompt}\n\n${userPrompt}`).length);
+    
+    // Try a simple test request first
+    const testResult = await model.generateContent("Say hello");
+    console.log('✅ Simple test successful!');
+    
+    // Now try the full request
     const result = await model.generateContent(`${systemPrompt}\n\n${userPrompt}`);
-    console.log('✅ API call successful!');
+    console.log('✅ Full API call successful!');
 
     const response = result.response;
     const rawText = normalizeText(response.text() ?? "");
