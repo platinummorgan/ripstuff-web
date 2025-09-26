@@ -7,14 +7,17 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const state = searchParams.get('state');
   const error = searchParams.get('error');
+  const linking = searchParams.get('linking'); // Check if this is a linking request
 
   if (error) {
     console.error('OAuth error:', error);
-    return NextResponse.redirect(new URL('/signin?error=oauth_error', request.url));
+    const redirectUrl = linking ? '/profile?error=oauth_error' : '/signin?error=oauth_error';
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
   if (!code) {
-    return NextResponse.redirect(new URL('/signin?error=no_code', request.url));
+    const redirectUrl = linking ? '/profile?error=no_code' : '/signin?error=no_code';
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
   // Get OAuth credentials
@@ -91,10 +94,54 @@ export async function GET(request: NextRequest) {
 
     if (!userResponse.ok) {
       console.error('User info failed:', userInfo);
-      return NextResponse.redirect(new URL('/signin?error=user_info_error', request.url));
+      const redirectUrl = linking ? '/profile?error=user_info_error' : '/signin?error=user_info_error';
+      return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
 
-    // Create or find user in database
+    // Handle account linking flow
+    if (linking === 'true' || state === 'linking') {
+      // This is an account linking request - check if user is already logged in
+      const { getCurrentUser } = await import('@/lib/auth');
+      const currentUser = await getCurrentUser();
+      
+      if (!currentUser) {
+        return NextResponse.redirect(new URL('/profile?error=not_logged_in', request.url));
+      }
+
+      // Check if this Google account is already linked to any user
+      const existingAccount = await prisma.oAuthAccount.findUnique({
+        where: {
+          provider_providerId: {
+            provider: 'google',
+            providerId: userInfo.id,
+          },
+        },
+      });
+
+      if (existingAccount) {
+        if (existingAccount.userId === currentUser.id) {
+          return NextResponse.redirect(new URL('/profile?message=already_linked', request.url));
+        } else {
+          return NextResponse.redirect(new URL('/profile?error=account_already_linked', request.url));
+        }
+      }
+
+      // Link the Google account to the current user
+      await prisma.oAuthAccount.create({
+        data: {
+          userId: currentUser.id,
+          provider: 'google',
+          providerId: userInfo.id,
+          email: userInfo.email,
+          name: userInfo.name,
+          picture: userInfo.picture,
+        },
+      });
+
+      return NextResponse.redirect(new URL('/profile?message=google_linked', request.url));
+    }
+
+    // Create or find user in database (regular sign-in flow)
     const existingUser = await prisma.user.findUnique({
       where: {
         provider_providerId: {
