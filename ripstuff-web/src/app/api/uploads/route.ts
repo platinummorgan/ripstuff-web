@@ -118,6 +118,11 @@ export async function POST(req: NextRequest) {
     }
 
     console.error("/api/uploads error", error);
-    return internalError();
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Upload configuration error:", errorMessage);
+    return json({
+      code: "INTERNAL_ERROR",
+      message: `Upload configuration error: ${errorMessage}`
+    }, 500);
   }
 }

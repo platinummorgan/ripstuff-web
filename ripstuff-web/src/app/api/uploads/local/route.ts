@@ -94,9 +94,11 @@ export async function PUT(req: NextRequest) {
     }
   } catch (err) {
     console.error("/api/uploads/local error", err);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    console.error("Detailed error:", errorMessage, err);
     return json({ 
       code: "INTERNAL_ERROR", 
-      message: "File processing failed. Please check file format and size (max 50MB)." 
+      message: `File processing failed: ${errorMessage}. Please check file format and size (max 50MB).` 
     }, 500);
   }
 }

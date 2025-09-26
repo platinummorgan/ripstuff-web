@@ -110,9 +110,11 @@ export default function BuryPage() {
         body: JSON.stringify({ contentType: file.type, contentLength: file.size }),
       });
       const token = await createRes.json().catch(() => ({} as any));
+      console.log("Upload token response:", token);
       if (!createRes.ok) {
         const msg = token?.message || "Could not prepare upload";
         const hint = file.type ? ` (type: ${file.type}, size: ${file.size}B)` : "";
+        console.error("Upload token error:", { status: createRes.status, token, file: { type: file.type, size: file.size } });
         throw new Error(`${msg}${hint}`);
       }
       if (token.provider === "blob") {
@@ -141,6 +143,7 @@ export default function BuryPage() {
         }
         setMedia((prev) => ({ ...prev, uploadedUrl: token.objectUrl ?? null }));
       } else if (token.provider === "local") {
+        console.log("Attempting local upload to:", token.url);
         const putRes = await fetch(token.url, {
           method: token.method,
           headers: {
@@ -148,10 +151,14 @@ export default function BuryPage() {
           },
           body: file,
         });
+        console.log("Upload response status:", putRes.status);
         if (!putRes.ok) {
-          throw new Error("Upload failed");
+          const errorText = await putRes.text().catch(() => "Unknown error");
+          console.error("Upload failed:", { status: putRes.status, error: errorText });
+          throw new Error(`Upload failed: ${errorText}`);
         }
   const out = (await putRes.json().catch(() => ({}))) as { url?: string };
+  console.log("Upload result:", out);
   setMedia((prev) => ({ ...prev, uploadedUrl: out.url ?? token.objectUrl ?? null }));
       } else {
         throw new Error("Unknown upload provider");
