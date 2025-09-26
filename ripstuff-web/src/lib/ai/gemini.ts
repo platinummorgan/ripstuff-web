@@ -116,8 +116,8 @@ export async function generateEulogyWithGemini(
     const client = getClient();
     console.log('✅ Client created successfully');
     
-    const model = client.getGenerativeModel({ model: "gemini-1.5-flash" });
-    console.log('📱 Model created: gemini-1.5-flash');
+    const model = client.getGenerativeModel({ model: "gemini-pro" });
+    console.log('📱 Model created: gemini-pro');
 
     const emotionStyle = EMOTION_STYLES[input.emotion];
     const systemPrompt = `You are an empathetic eulogist for beloved everyday objects. Your voice should be ${emotionStyle}. Keep outputs between 85 and 150 words, with 4-5 short paragraphs or sentences separated by newlines. Never mention that the subject is fictional; avoid dark or real-world tragedies. Focus on the object's service and impact with the requested emotional tone.`;
