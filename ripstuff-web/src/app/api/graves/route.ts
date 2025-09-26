@@ -2,6 +2,7 @@ import { Prisma, GraveStatus } from "@prisma/client";
 import { NextRequest } from "next/server";
 
 import { getCurrentUser } from "@/lib/auth";
+import { requireNotBanned, handleBanError } from "@/lib/ban-enforcement";
 import { enforceGuidelines } from "@/lib/content-guard";
 import { resolveDeviceHash } from "@/lib/device";
 import { forbidden, internalError, json, rateLimitError, validationError } from "@/lib/http";
@@ -36,6 +37,16 @@ export async function POST(req: NextRequest) {
   }
 
   const deviceHash = resolveDeviceHash();
+
+  // Check if user or device is banned
+  try {
+    await requireNotBanned(currentUser.id, deviceHash);
+  } catch (error) {
+    if (error instanceof Error) {
+      return handleBanError(error);
+    }
+    throw error;
+  }
 
   const rateResult = await checkRateLimit({
     scope: "grave:create",

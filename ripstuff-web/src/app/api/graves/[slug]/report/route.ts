@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { requireNotBanned, handleBanError } from "@/lib/ban-enforcement";
 import { resolveDeviceHash } from "@/lib/device";
 import prisma from "@/lib/prisma";
 import { internalError, json, notFound, rateLimitError, validationError } from "@/lib/http";
@@ -22,6 +23,16 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
   if (!rateResult.ok) {
     return rateLimitError(rateLimitRetrySeconds(rateResult));
+  }
+
+  // Check if user or device is banned
+  try {
+    await requireNotBanned(undefined, deviceHash);
+  } catch (error) {
+    if (error instanceof Error) {
+      return handleBanError(error);
+    }
+    throw error;
   }
 
   // Parse request body

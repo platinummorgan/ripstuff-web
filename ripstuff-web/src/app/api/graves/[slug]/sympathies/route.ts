@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 
+import { requireNotBanned, handleBanError } from "@/lib/ban-enforcement";
 import { resolveDeviceHash } from "@/lib/device";
 import { forbidden, internalError, json, notFound, rateLimitError, validationError } from "@/lib/http";
 import prisma from "@/lib/prisma";
@@ -26,6 +27,16 @@ export async function POST(req: NextRequest, context: RouteContext) {
 
 	const { slug } = await context.params;
 	const deviceHash = resolveDeviceHash();
+
+	// Check if user or device is banned
+	try {
+		await requireNotBanned(undefined, deviceHash);
+	} catch (error) {
+		if (error instanceof Error) {
+			return handleBanError(error);
+		}
+		throw error;
+	}
 
 	// Find grave by id (uuid) or slug
 	const grave = await prisma.grave.findFirst({

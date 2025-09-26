@@ -33,6 +33,11 @@ enum ModerationActionType {
   UNHIDE
   NOTE
   DELETE
+  BAN_USER
+  UNBAN_USER
+  BAN_DEVICE
+  UNBAN_DEVICE
+  SUSPEND_USER
 }
 
 enum ReactionType {
@@ -157,12 +162,20 @@ model User {
   providerId  String   @db.VarChar(100) @map("provider_id")
   deviceHash  String?  @db.VarChar(128) @map("device_hash") // Optional fallback
   isModerator Boolean  @default(false) @map("is_moderator")
+  isBanned    Boolean  @default(false) @map("is_banned")
+  bannedAt    DateTime? @map("banned_at")
+  bannedBy    String?  @db.VarChar(128) @map("banned_by") // moderator device hash or user id
+  banReason   String?  @db.VarChar(280) @map("ban_reason")
+  banExpiresAt DateTime? @map("ban_expires_at") // null = permanent ban
+  suspendedUntil DateTime? @map("suspended_until") // temporary suspension
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@unique([provider, providerId], map: "uq_user_provider_id")
   @@index([deviceHash], map: "idx_user_device_hash")
   @@index([email], map: "idx_user_email")
+  @@index([isBanned, bannedAt], map: "idx_user_banned")
+  @@index([suspendedUntil], map: "idx_user_suspended")
   @@map("users")
 }
 
@@ -191,5 +204,37 @@ model ContactMessage {
   @@index([status, createdAt], map: "idx_contact_messages_status_created_at")
   @@index([senderDeviceHash, createdAt], map: "idx_contact_messages_device_created_at")
   @@map("contact_messages")
+}
+
+model BannedDevice {
+  deviceHash  String    @id @db.VarChar(128) @map("device_hash")
+  reason      String?   @db.VarChar(280) @map("reason")
+  bannedAt    DateTime  @default(now()) @map("banned_at")
+  bannedBy    String    @db.VarChar(128) @map("banned_by") // moderator device hash or user id
+  expiresAt   DateTime? @map("expires_at") // null = permanent ban
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([isActive, bannedAt], map: "idx_banned_device_active")
+  @@index([expiresAt], map: "idx_banned_device_expires")
+  @@map("banned_devices")
+}
+
+model UserModerationAction {
+  id           String               @id @default(uuid()) @db.Uuid @map("id")
+  targetUserId String?              @db.Uuid @map("target_user_id") // user being moderated
+  targetDeviceHash String?          @db.VarChar(128) @map("target_device_hash") // device being moderated
+  moderatorId  String?              @db.VarChar(64) @map("moderator_id")
+  action       ModerationActionType @map("action")
+  reason       String?              @db.VarChar(280) @map("reason")
+  expiresAt    DateTime?            @map("expires_at") // for temporary bans/suspensions
+  metadata     String?              @db.Text @map("metadata") // JSON for additional data
+  createdAt    DateTime             @default(now()) @map("created_at")
+
+  @@index([targetUserId, createdAt], map: "idx_user_moderation_user_created_at")
+  @@index([targetDeviceHash, createdAt], map: "idx_user_moderation_device_created_at")
+  @@index([action, createdAt], map: "idx_user_moderation_action_created_at")
+  @@map("user_moderation_actions")
 }
 
