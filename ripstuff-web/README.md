@@ -1,5 +1,9 @@
 ## RIPStuff Web
 
+Next.js 14 App Router app with Prisma + Postgres and local/AI features to create and view memorials ("graves").
+
+**🚀 Deployment Platform:** Vercel (production at ripstuff.net)RIPStuff Web
+
 Next.js 14 App Router app with Prisma + Postgres and local/AI features to create and view memorials (“graves”).
 
 ### Dev Quickstart

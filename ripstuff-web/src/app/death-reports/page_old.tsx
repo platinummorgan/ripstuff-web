@@ -1,125 +1,86 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useState, useEffect } from "react";
 import { PageHero } from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
 import { DeathReportActions } from "@/components/DeathReportActions";
 import { InteractiveGraveMap } from "@/components/cemetery/InteractiveGraveMap";
-import { prisma } from "@/lib/prisma";
 
-export const metadata: Metadata = {
-  title: "Death Reports - Ripstuff",
-  description: "Daily death statistics, trending obituaries, and graveyard analytics that are perfect for sharing.",
-};
 
-async function getDeathReport() {
-  try {
-    const currentDate = new Date();
-    const startOfDay = new Date(currentDate.setHours(0, 0, 0, 0));
-    
-    // Get total counts
-    const totalDeaths = await prisma.grave.count();
-    const newDeathsToday = await prisma.grave.count({
-      where: {
-        createdAt: {
-          gte: startOfDay,
-        },
-      },
-    });
 
-    // Get top category
-    const topCategoryData = await prisma.grave.groupBy({
-      by: ['category'],
-      _count: {
-        category: true,
-      },
-      orderBy: {
-        _count: {
-          category: 'desc',
-        },
-      },
-      take: 1,
-    });
-
-    // Get viral death (most reactions)
-    const viralDeath = await prisma.grave.findFirst({
-      select: {
-        title: true,
-        category: true,
-        heartCount: true,
-        candleCount: true,
-        roseCount: true,
-        lolCount: true,
-      },
-      orderBy: [
-        { heartCount: 'desc' },
-        { candleCount: 'desc' },
-        { roseCount: 'desc' },
-        { lolCount: 'desc' },
-      ],
-    });
-
-    const topCategory = topCategoryData[0]?.category || 'MISC';
-    const viralShares = viralDeath ? 
-      (viralDeath.heartCount + viralDeath.candleCount + viralDeath.roseCount + viralDeath.lolCount) : 0;
-
-    return {
-      date: new Date().toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      }),
-      totalDeaths,
-      newDeaths: newDeathsToday,
-      topCategory,
-      viralDeath: {
-        title: viralDeath?.title || "No viral deaths today",
-        shares: viralShares,
-        category: viralDeath?.category || 'MISC',
-      },
-      dailyStats: {
-        mostCommonCause: "Time and Neglect",
-        averageLifespan: "2.3 years",
-        mostMourned: topCategory.replace(/_/g, ' ').toLowerCase(),
-      },
-      quirkyFacts: [
-        `${newDeathsToday} new memorials were created today`,
-        `${Math.floor(totalDeaths * 0.15)} people have custom photos in their memorials`,
-        `The average eulogy is ${Math.floor(Math.random() * 100 + 150)} characters long`,
-        `${Math.floor(totalDeaths * 0.08)}% of memorials are marked as featured`,
-      ]
-    };
-  } catch (error) {
-    console.error('Error fetching death report:', error);
-    const currentDate = new Date();
-    return {
-      date: currentDate.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      }),
-      totalDeaths: 0,
-      newDeaths: 0,
-      topCategory: 'MISC',
-      viralDeath: {
-        title: "No data available",
-        shares: 0,
-        category: 'MISC',
-      },
-      dailyStats: {
-        mostCommonCause: "Unknown",
-        averageLifespan: "Unknown",
-        mostMourned: "Unknown",
-      },
-      quirkyFacts: [
-        "Unable to load statistics at this time",
-      ]
-    };
-  }
+interface DeathReport {
+  date: string;
+  totalDeaths: number;
+  newDeaths: number;
+  topCategory: string;
+  viralDeath: {
+    title: string;
+    shares: number;
+    category: string;
+  };
+  dailyStats: {
+    mostCommonCause: string;
+    averageLifespan: string;
+    mostMourned: string;
+  };
+  quirkyFacts: string[];
 }
 
-export default async function DeathReportsPage() {
-  const report = await getDeathReport();
+export default function DeathReportsPage() {
+  const [report, setReport] = useState<DeathReport | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchDeathReports() {
+      try {
+        const response = await fetch('/api/death-reports');
+        if (!response.ok) {
+          throw new Error('Failed to fetch death reports');
+        }
+        const data = await response.json();
+        setReport(data);
+      } catch (err) {
+        setError('Failed to load death reports. Please try again later.');
+        console.error('Error fetching death reports:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDeathReports();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="space-y-12 pb-16">
+        <PageHero
+          eyebrow="Daily Death Reports"
+          title="📊 Graveyard Analytics"
+          description="Loading daily statistics..."
+        />
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[var(--accent)] mx-auto"></div>
+          <p className="mt-4 text-[var(--muted)]">Loading death reports...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !report) {
+    return (
+      <div className="space-y-12 pb-16">
+        <PageHero
+          eyebrow="Daily Death Reports"
+          title="📊 Graveyard Analytics"
+          description="Unable to load statistics"
+        />
+        <div className="text-center">
+          <p className="text-red-400">{error || 'No data available'}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-12 pb-16">
