@@ -3,6 +3,20 @@ import { GraveCategory, GraveStatus } from "@prisma/client";
 
 import { reactionAggregate, sympathyDto } from "./interaction";
 
+// Emotion/tone options for AI-generated eulogies
+export const EulogyEmotion = z.enum([
+  "heartfelt",    // Default - warm and sincere
+  "humorous",     // Light and funny
+  "nostalgic",    // Wistful and remembering
+  "grateful",     // Thankful and appreciative  
+  "dramatic",     // Theatrical and grand
+  "poetic",       // Artistic and lyrical
+  "philosophical", // Deep and thoughtful
+  "quirky"        // Playful and unique
+]);
+
+export type EulogyEmotion = z.infer<typeof EulogyEmotion>;
+
 export const graveCoreFields = z.object({
   title: z.string().trim().min(3).max(80),
   category: z.nativeEnum(GraveCategory),
@@ -12,6 +26,7 @@ export const graveCoreFields = z.object({
 
 export const eulogyGenerateInput = graveCoreFields.extend({
   regenerateFromId: z.string().uuid().optional(),
+  emotion: EulogyEmotion.default("heartfelt"),
 });
 
 export const eulogyGenerateResponse = z.object({

@@ -14,6 +14,7 @@ export default function BuryPage() {
     years: "",
     agreeToGuidelines: false,
   });
+  const [selectedEmotion, setSelectedEmotion] = useState<string>("heartfelt");
   const [media, setMedia] = useState<{ file: File | null; preview: string | null; uploadedUrl: string | null }>({ file: null, preview: null, uploadedUrl: null });
   const [isGenerating, setIsGenerating] = useState(false);
   const [eulogy, setEulogy] = useState("");
@@ -31,6 +32,17 @@ export default function BuryPage() {
     PETS_CHEWABLES: "Pet Chewables",
     OUTDOORS_ACCIDENTS: "Outdoor Accidents",
     MISC: "Miscellaneous",
+  };
+
+  const emotions = {
+    heartfelt: { label: "💙 Heartfelt", description: "Warm and sincere with gentle emotion" },
+    humorous: { label: "😄 Humorous", description: "Light-hearted and amusing while respectful" },
+    nostalgic: { label: "🌅 Nostalgic", description: "Wistful and reminiscent of fond memories" },
+    grateful: { label: "🙏 Grateful", description: "Thankful and celebrating its contributions" },
+    dramatic: { label: "🎭 Dramatic", description: "Theatrical and grand, like a legendary hero" },
+    poetic: { label: "🌸 Poetic", description: "Lyrical and beautiful with flowing language" },
+    philosophical: { label: "🤔 Philosophical", description: "Thoughtful and exploring deeper meanings" },
+    quirky: { label: "🎪 Quirky", description: "Playful and charmingly eccentric" },
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -56,6 +68,7 @@ export default function BuryPage() {
         category: formData.category,
         ...(formData.backstory.trim() ? { backstory: formData.backstory.trim() } : {}),
         ...(formData.years.trim() ? { years: formData.years.trim() } : {}),
+        emotion: selectedEmotion,
       };
 
       const response = await fetch("/api/eulogies", {
@@ -398,6 +411,43 @@ export default function BuryPage() {
 
             {eulogyMode === "ai" ? (
               <>
+                {/* Emotion Selection */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-3">
+                      Choose the tone for your eulogy
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {Object.entries(emotions).map(([key, emotion]) => (
+                        <div
+                          key={key}
+                          onClick={() => setSelectedEmotion(key)}
+                          className={`cursor-pointer rounded-lg border p-4 transition-all hover:border-[var(--accent)] ${
+                            selectedEmotion === key
+                              ? "border-[var(--accent)] bg-[var(--accent)]/10"
+                              : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)]"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              name="emotion"
+                              value={key}
+                              checked={selectedEmotion === key}
+                              onChange={() => setSelectedEmotion(key)}
+                              className="sr-only"
+                            />
+                            <div className={`flex-1 ${selectedEmotion === key ? "text-white" : "text-[var(--muted)]"}`}>
+                              <div className="font-medium text-sm">{emotion.label}</div>
+                              <div className="text-xs mt-1 opacity-80">{emotion.description}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex justify-center">
                   <Button
                     onClick={generateEulogy}
@@ -417,7 +467,7 @@ export default function BuryPage() {
                         disabled={isGenerating}
                         className="text-sm text-[var(--accent)] hover:underline"
                       >
-                        🔄 Regenerate
+                        🔄 Regenerate ({emotions[selectedEmotion as keyof typeof emotions]?.label || selectedEmotion})
                       </button>
                     </div>
                     <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.04)] p-6">

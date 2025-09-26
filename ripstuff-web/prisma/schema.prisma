@@ -102,6 +102,7 @@ model EulogyDraft {
   category   GraveCategory @map("category")
   eulogyText String        @map("eulogy_text")
   tokensUsed Int           @map("tokens_used")
+  emotion    String        @default("heartfelt") @map("emotion") @db.VarChar(20)
   createdAt  DateTime      @default(now()) @map("created_at")
   expiresAt  DateTime      @map("expires_at")
 

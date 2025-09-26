@@ -40,7 +40,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { text, tokensUsed } = await generateEulogy(parsed.data);
+    const { text, tokensUsed, provider, fallbackUsed } = await generateEulogy(parsed.data);
+    
+    // Log provider usage for monitoring
+    if (fallbackUsed) {
+      console.log(`Eulogy generated using fallback provider: ${provider}`);
+    }
 
     const expiresAt = new Date(Date.now() + DRAFT_TTL_SECONDS * 1000);
 
@@ -53,6 +58,7 @@ export async function POST(req: NextRequest) {
       eulogyText: text,
       tokensUsed,
       expiresAt,
+      emotion: parsed.data.emotion ?? "heartfelt",
     };
 
     let draft;
