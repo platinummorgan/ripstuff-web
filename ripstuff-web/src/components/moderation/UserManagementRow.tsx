@@ -144,6 +144,52 @@ export function UserManagementRow({ user, onUpdate }: UserManagementRowProps) {
     }
   };
 
+  const handleDeleteUser = async () => {
+    const confirmMessage = `Are you sure you want to PERMANENTLY DELETE this user account?
+
+User: ${user.name || 'Anonymous'} (${user.email})
+Provider: ${user.provider.toUpperCase()}
+Graves Created: ${user.stats.gravesCount}
+Messages: ${user.stats.sympathiesCount}
+
+⚠️ WARNING: This action cannot be undone!
+- User account will be deleted permanently
+- OAuth linked accounts will be removed
+- Graves and reactions will remain but become anonymous
+- User will be able to create new accounts with same OAuth provider
+
+Type "DELETE" to confirm:`;
+
+    const confirmation = prompt(confirmMessage);
+    if (confirmation !== 'DELETE') {
+      return;
+    }
+
+    setIsActionPending(true);
+    try {
+      const response = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`User deleted successfully!\n\nImpact:\n- Graves created: ${result.impact.gravesCreated}\n- Reactions given: ${result.impact.reactionsGiven}\n\n${result.impact.note}`);
+        onUpdate();
+      } else {
+        const error = await response.json();
+        alert(`Failed to delete user: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      alert('Failed to delete user: Network error');
+    } finally {
+      setIsActionPending(false);
+    }
+  };
+
   const getStatusBadge = () => {
     if (user.isModerator) {
       return <span className="bg-purple-600 text-white px-2 py-1 rounded-full text-xs font-bold">MODERATOR</span>;
@@ -255,18 +301,36 @@ export function UserManagementRow({ user, onUpdate }: UserManagementRowProps) {
                     📱 Ban Device
                   </Button>
                 )}
+                <Button
+                  variant="ghost"
+                  disabled={isActionPending}
+                  onClick={handleDeleteUser}
+                  className="text-xs px-2 py-1 text-red-400 hover:text-red-300"
+                >
+                  🗑️ Delete User
+                </Button>
               </>
             )}
             
             {(isCurrentlyBanned || isCurrentlySuspended) && (
-              <Button
-                variant="ghost"
-                disabled={isActionPending}
-                onClick={handleUnbanUser}
-                className="text-xs px-2 py-1 text-green-400 hover:text-green-300"
-              >
-                ✅ Unban
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  disabled={isActionPending}
+                  onClick={handleUnbanUser}
+                  className="text-xs px-2 py-1 text-green-400 hover:text-green-300"
+                >
+                  ✅ Unban
+                </Button>
+                <Button
+                  variant="ghost"
+                  disabled={isActionPending}
+                  onClick={handleDeleteUser}
+                  className="text-xs px-2 py-1 text-red-400 hover:text-red-300"
+                >
+                  🗑️ Delete User
+                </Button>
+              </>
             )}
             
             {user.isModerator && (
