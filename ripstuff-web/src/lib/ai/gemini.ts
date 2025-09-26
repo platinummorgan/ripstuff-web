@@ -116,7 +116,8 @@ export async function generateEulogyWithGemini(
 
   const prompt = buildPrompt(input);
   const client = getClient();
-  const model = client.getGenerativeModel({ model: "gemini-1.5-flash" });
+  // Use gemini-pro which should be available in the free tier
+  const model = client.getGenerativeModel({ model: "gemini-pro" });
 
   const emotionStyle = EMOTION_STYLES[input.emotion];
   const systemPrompt = `You are an empathetic eulogist for beloved everyday objects. Your voice should be ${emotionStyle}. Keep outputs between 85 and 150 words, with 4-5 short paragraphs or sentences separated by newlines. Never mention that the subject is fictional; avoid dark or real-world tragedies. Focus on the object's service and impact with the requested emotional tone.`;
@@ -144,15 +145,31 @@ export async function generateEulogyWithGemini(
       provider: "gemini" as const,
     };
   } catch (error: any) {
-    // Handle specific Gemini errors
+    console.error("Gemini API error:", error);
+    
+    // Handle specific Gemini errors with helpful messages
     if (error?.message?.includes("quota")) {
-      throw new Error("Gemini API quota exceeded");
+      throw new Error("Gemini API quota exceeded. Please try again later or check your Google Cloud usage limits.");
     }
-    if (error?.message?.includes("API key")) {
+    
+    if (error?.message?.includes("API key") || error?.message?.includes("authentication")) {
       throw new MissingGeminiKeyError();
     }
     
-    console.error("Gemini API error:", error);
-    throw new Error(`Gemini generation failed: ${error?.message || "Unknown error"}`);
+    if (error?.message?.includes("models/gemini") || error?.message?.includes("not found")) {
+      throw new Error("The Gemini model is not available. Please enable the Generative AI API in your Google Cloud project at https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com");
+    }
+    
+    if (error?.status === 403) {
+      throw new Error("Gemini API access denied. Please check your API key has the correct permissions for the Generative Language API.");
+    }
+    
+    if (error?.status === 400) {
+      throw new Error("Invalid request to Gemini API. The input may be too long or contain unsupported content.");
+    }
+    
+    // Generic fallback with the original error message
+    const errorMessage = error?.message || error?.toString() || "Unknown error";
+    throw new Error(`Gemini generation failed: ${errorMessage}`);
   }
 }
