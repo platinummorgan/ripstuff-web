@@ -119,7 +119,7 @@ export default async function GravePage({ params }: { params: { slug: string } }
             <Button variant="ghost" asChild>
               <a href="/bury">Bury another</a>
             </Button>
-            <ReportButton graveId={grave.id} />
+            <ReportButton graveSlug={grave.slug} />
           </div>
         </div>
         {grave.photoUrl ? (
