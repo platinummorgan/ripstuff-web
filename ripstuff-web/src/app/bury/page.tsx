@@ -104,28 +104,57 @@ export default function BuryPage() {
     setMedia({ file, preview, uploadedUrl: null });
 
     try {
+      console.log("🚀 Starting upload process...", { 
+        fileName: file.name, 
+        fileType: file.type, 
+        fileSize: file.size 
+      });
+      
       const createRes = await fetch("/api/uploads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contentType: file.type, contentLength: file.size }),
       });
+      
+      console.log("📋 Token request response:", { status: createRes.status, statusText: createRes.statusText });
+      
       const token = await createRes.json().catch(() => ({} as any));
+      console.log("🎫 Upload token:", { provider: token?.provider, hasClientToken: !!token?.clientToken });
+      
       if (!createRes.ok) {
         const msg = token?.message || "Could not prepare upload";
         const hint = file.type ? ` (type: ${file.type}, size: ${file.size}B)` : "";
+        console.error("❌ Token request failed:", token);
         throw new Error(`${msg}${hint}`);
       }
       if (token.provider === "blob") {
-        const putRes = await fetch("https://blob.vercel-storage.com", {
-          method: "POST",
+        console.log("🔄 Uploading to Vercel Blob...", { 
+          fileName: file.name, 
+          fileSize: file.size, 
+          fileType: file.type,
+          pathname: token.pathname,
+          clientToken: token.clientToken?.substring(0, 20) + '...'
+        });
+        
+        const uploadUrl = `https://blob.vercel-storage.com/${token.pathname}`;
+        const putRes = await fetch(uploadUrl, {
+          method: "PUT",
           headers: {
             Authorization: `Bearer ${token.clientToken}`,
+            "x-content-type": file.type,
           },
           body: file,
         });
-        const putData = (await putRes.json()) as { url?: string; pathname?: string };
+        
+        console.log("📡 Blob upload response:", { status: putRes.status, statusText: putRes.statusText });
+        
+        const putData = (await putRes.json().catch(() => null)) as { url?: string; pathname?: string; error?: any };
+        console.log("📦 Blob upload data:", putData);
+        
         if (!putRes.ok || !putData?.url) {
-          throw new Error("Upload failed");
+          const errorMsg = putData?.error || putData || "Unknown upload error";
+          console.error("❌ Blob upload failed:", errorMsg);
+          throw new Error(`Upload failed: ${JSON.stringify(errorMsg)}`);
         }
         setMedia((prev) => ({ ...prev, uploadedUrl: putData.url ?? null }));
       } else if (token.provider === "s3") {

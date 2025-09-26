@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
+        .error { color: red; background: #ffeeee; padding: 10px; margin: 10px 0; }
+        .success { color: green; background: #eeffee; padding: 10px; margin: 10px 0; }
+        .info { color: blue; background: #eeeeff; padding: 10px; margin: 10px 0; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>RipStuff Upload Debug Test</h1>
+    
+    <div>
+        <input type="file" id="fileInput" accept="image/*,video/*">
+        <button onclick="testUpload()" id="uploadBtn" disabled>Test Upload</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        let selectedFile = null;
+        
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            selectedFile = e.target.files[0];
+            document.getElementById('uploadBtn').disabled = !selectedFile;
+            
+            if (selectedFile) {
+                log('info', `Selected file: ${selectedFile.name} (${selectedFile.type}, ${selectedFile.size} bytes)`);
+            }
+        });
+
+        function log(type, message) {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            document.getElementById('results').appendChild(div);
+        }
+
+        async function testUpload() {
+            if (!selectedFile) return;
+            
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                log('info', 'Step 1: Requesting upload token...');
+                
+                const createRes = await fetch('https://ripstuff.net/api/uploads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contentType: selectedFile.type,
+                        contentLength: selectedFile.size
+                    })
+                });
+                
+                log('info', `API Response Status: ${createRes.status}`);
+                
+                const token = await createRes.json();
+                log('info', `Token Response: <pre>${JSON.stringify(token, null, 2)}</pre>`);
+                
+                if (!createRes.ok) {
+                    throw new Error(`Token request failed: ${token?.message || 'Unknown error'}`);
+                }
+                
+                if (token.provider === 'blob') {
+                    log('info', 'Step 2: Uploading to Vercel Blob...');
+                    
+                    const putRes = await fetch('https://blob.vercel-storage.com', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token.clientToken}`,
+                        },
+                        body: selectedFile
+                    });
+                    
+                    log('info', `Upload Response Status: ${putRes.status}`);
+                    
+                    const putData = await putRes.json();
+                    log('info', `Upload Response: <pre>${JSON.stringify(putData, null, 2)}</pre>`);
+                    
+                    if (!putRes.ok || !putData?.url) {
+                        throw new Error(`Upload failed: ${putData?.error || 'Unknown error'}`);
+                    }
+                    
+                    log('success', `✅ Upload successful! URL: ${putData.url}`);
+                    
+                } else {
+                    throw new Error(`Unexpected provider: ${token.provider}`);
+                }
+                
+            } catch (error) {
+                log('error', `❌ Upload failed: ${error.message}`);
+                console.error('Full error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
