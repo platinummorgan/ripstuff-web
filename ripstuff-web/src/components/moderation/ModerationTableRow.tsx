@@ -45,7 +45,7 @@ export function ModerationTableRow({ item }: ModerationTableRowProps) {
   return (
     <>
       <tr className={`border-t border-[rgba(255,255,255,0.05)] transition-colors ${showReports ? 'bg-[rgba(255,255,255,0.02)]' : 'hover:bg-[rgba(255,255,255,0.01)]'}`}>
-        <td className="px-3 py-4 text-white max-w-0 w-2/5">
+        <td className="px-3 py-4 text-white max-w-0 w-2/5 overflow-hidden">
           <div className="space-y-2">
             <div className="flex items-start gap-2">
               <div className="flex-1 min-w-0">
@@ -68,8 +68,10 @@ export function ModerationTableRow({ item }: ModerationTableRowProps) {
               )}
             </div>
             
-            <div className="text-[11px] text-[var(--muted)] break-words line-clamp-2 mt-1">
-              {item.eulogyPreview}
+            <div className="text-[11px] text-[var(--muted)] break-words line-clamp-2 mt-1 overflow-hidden">
+              <div className="truncate max-w-full">
+                {item.eulogyPreview}
+              </div>
             </div>
             
             {item.backstory && (

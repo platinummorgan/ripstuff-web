@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
     include: {
       reports: {
         where: { resolvedAt: null },
-        select: { reason: true, createdAt: true },
+        select: { id: true, reason: true, createdAt: true, deviceHash: true },
         orderBy: { createdAt: "desc" },
       },
       moderationTrail: {
@@ -93,8 +93,10 @@ export async function GET(req: NextRequest) {
       createdAt: grave.createdAt.toISOString(),
       reports: grave.reports.length,
       reportDetails: grave.reports.map((report) => ({
+        id: report.id,
         reason: report.reason,
         createdAt: report.createdAt.toISOString(),
+        deviceHash: report.deviceHash.substring(0, 8) + "...", // Partial hash for privacy
       })),
       category: grave.category,
       eulogyPreview: grave.eulogyText.slice(0, 160),
