@@ -87,11 +87,9 @@ interface GraveLocationCardProps {
 }
 
 function GraveLocationCard({ grave }: GraveLocationCardProps) {
-  // Generate coordinates based on grave ID for consistent placement
-  // In a real implementation, you'd store these coordinates when the grave is created
-  const seedValue = grave.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const x = seedValue % 16;
-  const y = Math.floor(seedValue / 16) % 16;
+  // Use the real coordinates stored in the database
+  const x = grave.mapX ?? 0;
+  const y = grave.mapY ?? 0;
 
   const handleLocationClick = () => {
     // Navigate to overworld map focused on this district

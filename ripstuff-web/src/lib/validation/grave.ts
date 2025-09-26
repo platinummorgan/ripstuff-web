@@ -54,6 +54,8 @@ export const feedItem = z.object({
   reactions: reactionAggregate,
   createdAt: z.string().datetime(),
   featured: z.boolean(),
+  mapX: z.number().int().nullable().optional(),
+  mapY: z.number().int().nullable().optional(),
 });
 
 export const feedResponse = z.object({

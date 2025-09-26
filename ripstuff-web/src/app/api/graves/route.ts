@@ -216,6 +216,8 @@ export async function GET(req: NextRequest) {
         lolCount: true,
         createdAt: true,
         featured: true,
+        mapX: true,
+        mapY: true,
       },
     });
 
@@ -240,6 +242,8 @@ export async function GET(req: NextRequest) {
       },
       createdAt: grave.createdAt.toISOString(),
       featured: grave.featured,
+      mapX: grave.mapX,
+      mapY: grave.mapY,
     }));
 
     return json({ items, nextCursor }, 200);
