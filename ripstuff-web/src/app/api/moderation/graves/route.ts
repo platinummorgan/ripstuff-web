@@ -32,6 +32,8 @@ export async function GET(req: NextRequest) {
 
   const { limit, cursor, status, reported } = parsedQuery.data;
 
+  console.log("Moderation API query params:", { limit, cursor, status, reported });
+
   const where: Prisma.GraveWhereInput = {};
 
   if (status) {
@@ -45,10 +47,13 @@ export async function GET(req: NextRequest) {
 
   if (reported !== undefined) {
     const wantsReported = reported === true || reported === "true";
+    console.log("Reported filter:", { reported, wantsReported });
     where.reports = wantsReported
       ? { some: { resolvedAt: null } }
       : { none: { resolvedAt: null } };
   }
+
+  console.log("Final where clause:", JSON.stringify(where, null, 2));
 
   if (cursor) {
     const cursorDate = new Date(cursor);
@@ -126,6 +131,8 @@ export async function GET(req: NextRequest) {
         createdAt: action.createdAt.toISOString(),
       })),
     }));
+
+    console.log(`Found ${items.length} graves, reports in items:`, items.map(item => ({ slug: item.slug, reports: item.reports, reportCount: item.reportDetails?.length })));
 
     const payload = moderationQueueResponse.parse({
       items,
