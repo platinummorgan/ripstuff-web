@@ -105,11 +105,77 @@ export interface GenerateEulogyResult {
 export async function generateEulogyWithGemini(
   input: GraveCoreFields & { emotion: EulogyEmotion }
 ): Promise<GenerateEulogyResult> {
-  // For now, let's just use a fallback until we get Gemini working
-  // This will at least unblock you from using the emotion system
-  const style = EMOTION_STYLES[input.emotion];
-  const fake = `We gather to remember ${input.title}, a ${style} companion that brought joy to our lives.\n\nFor ${input.years ?? "many seasons"}, it served faithfully ${CATEGORY_SLOGANS[input.category]}. ${input.backstory ? `Its story of ${input.backstory} will be remembered fondly.` : "Its quiet service made our days brighter."}\n\nThough its time has passed, the memories it created live on in our hearts.\n\nMay ${input.title} find peace ${CATEGORY_SLOGANS[input.category]}.`;
-  return { text: clampToRange(fake, 80, 280), tokensUsed: 50, provider: "gemini" };
+  console.log('🔍 Gemini Debug - Starting generation...');
+  console.log('🔑 API Key exists:', !!process.env.GEMINI_API_KEY);
+  console.log('🔑 API Key preview:', process.env.GEMINI_API_KEY?.substring(0, 10) + '...');
+  
+  try {
+    const prompt = buildPrompt(input);
+    console.log('📝 Prompt built:', prompt.substring(0, 100) + '...');
+    
+    const client = getClient();
+    console.log('✅ Client created successfully');
+    
+    const model = client.getGenerativeModel({ model: "gemini-1.5-flash" });
+    console.log('📱 Model created: gemini-1.5-flash');
+
+    const emotionStyle = EMOTION_STYLES[input.emotion];
+    const systemPrompt = `You are an empathetic eulogist for beloved everyday objects. Your voice should be ${emotionStyle}. Keep outputs between 85 and 150 words, with 4-5 short paragraphs or sentences separated by newlines. Never mention that the subject is fictional; avoid dark or real-world tragedies. Focus on the object's service and impact with the requested emotional tone.`;
+
+    const userPrompt = `${prompt}\n\nFollow this template:\nOpening: 'We gather to remember [NAME], faithful [ROLE]...'\nService: Reference 1-2 concrete memories in ${emotionStyle} tone.\nDemise: Describe what ended its service using ${emotionStyle} approach.\nLegacy: What it meant using ${emotionStyle} perspective.\nFarewell: 'May [NAME] rest among ...' using category motif.\nMaintain ${emotionStyle} throughout. Avoid emojis.`;
+
+    console.log('🚀 Making API call to Gemini...');
+    const result = await model.generateContent(`${systemPrompt}\n\n${userPrompt}`);
+    console.log('✅ API call successful!');
+
+    const response = result.response;
+    const rawText = normalizeText(response.text() ?? "");
+    console.log('📄 Raw response length:', rawText.length);
+    
+    if (!rawText) {
+      throw new Error("Gemini returned an empty eulogy");
+    }
+
+    const text = clampToRange(rawText, 80, 280);
+    const estimatedTokens = Math.ceil(text.length / 4);
+
+    console.log('✅ Gemini generation completed successfully!');
+    return {
+      text,
+      tokensUsed: estimatedTokens,
+      provider: "gemini" as const,
+    };
+  } catch (error: any) {
+    console.error('❌ Gemini API error details:');
+    console.error('Error message:', error?.message);
+    console.error('Error status:', error?.status);
+    console.error('Full error:', error);
+    
+    // Handle specific Gemini errors with helpful messages
+    if (error?.message?.includes("quota")) {
+      throw new Error("Gemini API quota exceeded. Please try again later or check your Google Cloud usage limits.");
+    }
+    
+    if (error?.message?.includes("API key") || error?.message?.includes("authentication")) {
+      throw new MissingGeminiKeyError();
+    }
+    
+    if (error?.message?.includes("models/gemini") || error?.message?.includes("not found")) {
+      throw new Error("The Gemini model is not available. Please enable the Generative AI API in your Google Cloud project at https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com");
+    }
+    
+    if (error?.status === 403) {
+      throw new Error("Gemini API access denied. Please check your API key has the correct permissions for the Generative Language API.");
+    }
+    
+    if (error?.status === 400) {
+      throw new Error("Invalid request to Gemini API. The input may be too long or contain unsupported content.");
+    }
+    
+    // Generic fallback with the original error message
+    const errorMessage = error?.message || error?.toString() || "Unknown error";
+    throw new Error(`Gemini generation failed: ${errorMessage}`);
+  }
 
   // TODO: Re-enable actual Gemini API once Google's setup is working
   /*
