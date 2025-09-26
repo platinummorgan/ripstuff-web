@@ -109,7 +109,7 @@ export async function generateEulogyWithGemini(
   // This will at least unblock you from using the emotion system
   const style = EMOTION_STYLES[input.emotion];
   const fake = `We gather to remember ${input.title}, a ${style} companion that brought joy to our lives.\n\nFor ${input.years ?? "many seasons"}, it served faithfully ${CATEGORY_SLOGANS[input.category]}. ${input.backstory ? `Its story of ${input.backstory} will be remembered fondly.` : "Its quiet service made our days brighter."}\n\nThough its time has passed, the memories it created live on in our hearts.\n\nMay ${input.title} find peace ${CATEGORY_SLOGANS[input.category]}.`;
-  return { text: clampToRange(fake, 80, 280), tokensUsed: 0, provider: "gemini" };
+  return { text: clampToRange(fake, 80, 280), tokensUsed: 50, provider: "gemini" };
 
   // TODO: Re-enable actual Gemini API once Google's setup is working
   /*
