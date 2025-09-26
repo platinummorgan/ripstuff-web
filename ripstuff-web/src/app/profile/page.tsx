@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@/components/UserContext';
 import { Button } from '@/components/Button';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface LinkedAccount {
   provider: string;
@@ -21,10 +21,46 @@ function AccountLinkingSection({ user }: AccountLinkingSectionProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isLinking, setIsLinking] = useState<string | null>(null);
   const [linkingMessage, setLinkingMessage] = useState('');
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     fetchLinkedAccounts();
   }, []);
+
+  // Handle OAuth callback messages
+  useEffect(() => {
+    const error = searchParams?.get('error');
+    const message = searchParams?.get('message');
+    const details = searchParams?.get('details');
+    
+    if (error) {
+      let errorMessage = 'Account linking failed';
+      if (error === 'token_error' && details) {
+        errorMessage = `Token error: ${decodeURIComponent(details)}`;
+      } else if (error === 'not_logged_in') {
+        errorMessage = 'Please sign in before linking accounts';
+      } else if (error === 'account_already_linked') {
+        errorMessage = 'This account is already linked to another user';
+      } else if (error === 'user_info_error') {
+        errorMessage = 'Failed to get user information from provider';
+      } else if (details) {
+        errorMessage = `Error: ${decodeURIComponent(details)}`;
+      }
+      setLinkingMessage(errorMessage);
+      setIsLinking(null);
+    } else if (message) {
+      if (message === 'facebook_linked') {
+        setLinkingMessage('Facebook account linked successfully!');
+        fetchLinkedAccounts(); // Refresh the linked accounts
+      } else if (message === 'google_linked') {
+        setLinkingMessage('Google account linked successfully!');
+        fetchLinkedAccounts();
+      } else if (message === 'already_linked') {
+        setLinkingMessage('This account is already linked to your profile');
+      }
+      setIsLinking(null);
+    }
+  }, [searchParams]);
 
   const fetchLinkedAccounts = async () => {
     try {
