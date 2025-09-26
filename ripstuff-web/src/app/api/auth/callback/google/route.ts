@@ -79,8 +79,9 @@ export async function GET(request: NextRequest) {
       console.error('Token exchange failed:', fullError);
       
       // For debugging, let's show the error in the URL
-      const errorMsg = tokens?.error_description || tokens?.error || `HTTP ${tokenResponse.status}: ${tokenResponse.statusText}`;
-      return NextResponse.redirect(new URL(`/signin?error=token_error&details=${encodeURIComponent(errorMsg)}`, request.url));
+      const errorMsg = tokens?.error_description || tokens?.error || JSON.stringify(tokens) || `HTTP ${tokenResponse.status}: ${tokenResponse.statusText}`;
+      const redirectUrl = linking ? '/profile' : '/signin';
+      return NextResponse.redirect(new URL(`${redirectUrl}?error=token_error&details=${encodeURIComponent(errorMsg)}`, request.url));
     }
 
     // Get user info
