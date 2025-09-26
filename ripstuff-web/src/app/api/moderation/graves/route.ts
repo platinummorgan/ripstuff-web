@@ -37,7 +37,10 @@ export async function GET(req: NextRequest) {
   if (status) {
     where.status = status;
   } else {
-    where.status = { in: ["PENDING", "HIDDEN"] };
+    // If filtering by reported only, show all statuses, otherwise show pending/hidden
+    if (reported === undefined) {
+      where.status = { in: ["PENDING", "HIDDEN"] };
+    }
   }
 
   if (reported !== undefined) {
@@ -71,7 +74,12 @@ export async function GET(req: NextRequest) {
         createdAt: true,
         reports: {
           where: { resolvedAt: null },
-          select: { id: true },
+          select: { 
+            id: true,
+            reason: true,
+            createdAt: true,
+            deviceHash: true,
+          },
         },
         moderationTrail: {
           orderBy: { createdAt: "desc" },
@@ -102,6 +110,12 @@ export async function GET(req: NextRequest) {
       featured: grave.featured,
       createdAt: grave.createdAt.toISOString(),
       reports: grave.reports.length,
+      reportDetails: grave.reports.map((report) => ({
+        id: report.id,
+        reason: report.reason,
+        createdAt: report.createdAt.toISOString(),
+        deviceHash: report.deviceHash.substring(0, 8) + "...", // Partial hash for privacy
+      })),
       category: grave.category,
       eulogyPreview: grave.eulogyText.slice(0, 160),
       backstory: grave.backstory ?? null,

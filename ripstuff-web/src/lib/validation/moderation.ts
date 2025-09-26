@@ -31,6 +31,14 @@ export const moderationQueueItem = z.object({
   featured: z.boolean(),
   createdAt: z.string().datetime(),
   reports: z.number().int().nonnegative(),
+  reportDetails: z.array(
+    z.object({
+      id: z.string().uuid(),
+      reason: z.string().nullable(),
+      createdAt: z.string().datetime(),
+      deviceHash: z.string(),
+    }),
+  ),
   category: z.nativeEnum(GraveCategory),
   eulogyPreview: z.string().max(160),
   backstory: z.string().nullable(),
