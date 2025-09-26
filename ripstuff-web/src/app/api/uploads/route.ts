@@ -119,10 +119,23 @@ export async function POST(req: NextRequest) {
 
     console.error("/api/uploads error", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Upload configuration error:", errorMessage);
+    console.error("Upload configuration error:", {
+      provider: process.env.UPLOAD_PROVIDER || 'not set',
+      nodeEnv: process.env.NODE_ENV || 'not set',
+      error: errorMessage
+    });
+    
+    // Provide helpful error message based on the error type
+    if (errorMessage.includes("BLOB_READ_WRITE_TOKEN is not configured")) {
+      return json({
+        code: "UPLOADS_NOT_CONFIGURED",
+        message: "File upload service is not configured. Please contact support."
+      }, 500);
+    }
+    
     return json({
       code: "INTERNAL_ERROR",
-      message: `Upload configuration error: ${errorMessage}`
+      message: "Upload service temporarily unavailable. Please try again later."
     }, 500);
   }
 }
