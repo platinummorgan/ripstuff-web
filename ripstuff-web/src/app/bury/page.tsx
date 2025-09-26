@@ -302,7 +302,8 @@ export default function BuryPage() {
                   rows={3}
                   placeholder="How you got it, memorable moments, what made it special..."
                   maxLength={140}
-                  className="w-full rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(10,14,25,0.8)] px-4 py-3 text-white placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:outline-none resize-y"
+                  className="w-full rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(10,14,25,0.8)] px-4 py-3 text-white placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:outline-none resize-y break-words"
+                  style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
                 />
                 <div className="mt-1 text-xs text-[var(--muted)]">{formData.backstory.length}/140</div>
               </div>
@@ -413,7 +414,8 @@ export default function BuryPage() {
                     rows={8}
                     placeholder="Today we say goodbye to my beloved [item name]. For [time period], it was more than just an object—it was a faithful companion that..."
                     maxLength={1000}
-                    className="w-full rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(10,14,25,0.8)] px-4 py-3 text-white placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:outline-none resize-y"
+                    className="w-full rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(10,14,25,0.8)] px-4 py-3 text-white placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:outline-none resize-y break-words overflow-wrap-anywhere"
+                    style={{ wordWrap: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}
                   />
                   <div className="mt-2 flex justify-between items-center">
                     <div className="text-xs text-[var(--muted)]">{manualEulogy.length}/1000 characters</div>

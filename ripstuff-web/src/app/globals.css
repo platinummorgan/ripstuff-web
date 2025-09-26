@@ -52,3 +52,9 @@ a {
     background-color: var(--surface-strong);
   }
 }
+
+/* Fix text overflow in all text inputs */
+textarea, input[type="text"] {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}

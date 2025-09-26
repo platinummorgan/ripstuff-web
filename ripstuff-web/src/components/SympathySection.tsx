@@ -64,7 +64,8 @@ export function SympathySection({ graveId, initialSympathies }: SympathySectionP
           maxLength={140}
           onChange={(event) => setBody(event.target.value)}
           placeholder="Offer a gentle condolence (max 140 characters)"
-          className="h-28 w-full rounded-xl border border-[rgba(255,255,255,0.1)] bg-[rgba(10,14,25,0.8)] px-4 py-3 text-sm text-white focus:border-[var(--accent)] focus:outline-none"
+          className="h-28 w-full rounded-xl border border-[rgba(255,255,255,0.1)] bg-[rgba(10,14,25,0.8)] px-4 py-3 text-sm text-white focus:border-[var(--accent)] focus:outline-none break-words resize-none"
+          style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
         />
         <div className="flex items-center gap-3">
           <Button type="button" disabled={submitting || !body.trim()} onClick={submitSympathy}>
