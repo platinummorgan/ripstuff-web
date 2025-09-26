@@ -37,7 +37,7 @@ export function GraveCard({ grave }: GraveCardProps) {
             {grave.category.replace(/_/g, " ")}
           </p>
           <Link href={`/grave/${grave.slug}`}>
-            <h3 className="mt-2 text-lg font-semibold text-white hover:text-[var(--accent)] transition-colors">
+            <h3 className="mt-2 text-lg font-semibold text-white hover:text-[var(--accent)] transition-colors break-words overflow-hidden">
               {grave.title}
             </h3>
           </Link>
@@ -75,7 +75,7 @@ export function GraveCard({ grave }: GraveCardProps) {
             </div>
           </div>
         )}
-        <p className="mt-4 text-sm leading-6 text-[var(--muted)]">{grave.eulogyPreview}</p>
+        <p className="mt-4 text-sm leading-6 text-[var(--muted)] break-words overflow-hidden">{grave.eulogyPreview}</p>
       </Link>
       
       <div className="mt-5 flex items-center justify-between">
