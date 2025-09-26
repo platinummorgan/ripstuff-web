@@ -16,20 +16,26 @@ export function TrendingFeedList({ timeframe = '24h' }: TrendingFeedListProps) {
   useEffect(() => {
     const fetchTrendingGraves = async () => {
       try {
-        // For now, fetch regular graves and sort by reactions to simulate trending
-        const response = await fetch(`/api/graves?limit=6&featured=true`);
+        // Fetch all graves (not just featured) and sort by engagement for true trending
+        const response = await fetch(`/api/feed?limit=20`); // Get more items to find truly trending ones
         if (!response.ok) throw new Error('Failed to fetch');
         
         const data = await response.json();
         
-        // Sort by total reactions to simulate "trending"
+        // Sort by total reactions to find truly trending content
         const sortedByEngagement = data.items.sort((a: FeedItem, b: FeedItem) => {
           const aTotal = Object.values(a.reactions).reduce((sum, count) => sum + count, 0);
           const bTotal = Object.values(b.reactions).reduce((sum, count) => sum + count, 0);
           return bTotal - aTotal;
         });
         
-        setTrendingGraves(sortedByEngagement.slice(0, 6));
+        // Only show items that have at least 1 reaction to be considered "trending"
+        const actuallyTrending = sortedByEngagement.filter((item: FeedItem) => {
+          const totalReactions = Object.values(item.reactions).reduce((sum: number, count: number) => sum + count, 0);
+          return totalReactions > 0;
+        });
+        
+        setTrendingGraves(actuallyTrending.slice(0, 6));
       } catch (error) {
         console.error('Failed to fetch trending graves:', error);
         setTrendingGraves([]);
