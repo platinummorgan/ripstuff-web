@@ -196,14 +196,14 @@ export function ModerationContent({ searchParams }: ModerationContentProps) {
         {data.items.length === 0 ? (
           <div className="p-10 text-center text-sm text-[var(--muted)]">No graves match these filters.</div>
         ) : (
-          <table className="w-full min-w-[1200px] text-sm text-[var(--muted)]">
+          <table className="w-full min-w-[1000px] text-sm text-[var(--muted)]">
             <thead>
-              <tr className="bg-[rgba(142,123,255,0.08)] text-left uppercase tracking-[0.3em] text-xs">
-                <th className="px-4 py-3 text-[var(--muted)] w-2/5">Title</th>
-                <th className="px-4 py-3 text-[var(--muted)] w-1/6">Status</th>
-                <th className="px-4 py-3 text-[var(--muted)] w-1/12">Reports</th>
-                <th className="px-4 py-3 text-[var(--muted)] w-1/6">Created</th>
-                <th className="px-4 py-3 text-[var(--muted)] w-1/4">Actions</th>
+              <tr className="bg-[rgba(142,123,255,0.08)] text-left uppercase tracking-[0.2em] text-[10px]">
+                <th className="px-2 py-2 text-[var(--muted)] w-2/5">Title</th>
+                <th className="px-2 py-2 text-[var(--muted)] w-1/8">Status</th>
+                <th className="px-2 py-2 text-[var(--muted)] w-1/12 text-center">Reports</th>
+                <th className="px-2 py-2 text-[var(--muted)] w-1/8">Created</th>
+                <th className="px-2 py-2 text-[var(--muted)] w-1/4">Actions</th>
               </tr>
             </thead>
             <tbody>

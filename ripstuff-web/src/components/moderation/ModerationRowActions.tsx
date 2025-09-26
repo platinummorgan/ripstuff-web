@@ -91,25 +91,25 @@ export function ModerationRowActions({ graveId, initialStatus, initialFeatured, 
   }
 
   return (
-    <div className="space-y-2 text-xs text-[var(--muted)]">
-      <div className="flex flex-wrap gap-1">
+    <div className="space-y-1 text-[10px] text-[var(--muted)]">
+      <div className="flex flex-wrap gap-0.5">
         {currentStatus === "PENDING" && (
           <>
             <Button 
               variant="ghost" 
               disabled={isPending} 
               onClick={() => run("APPROVE")}
-              className="text-green-400 hover:text-green-300 text-xs px-2 py-1 h-auto"
+              className="text-green-400 hover:text-green-300 text-[9px] px-1.5 py-0.5 h-5 leading-none"
             >
-              {pendingAction === "APPROVE" ? "Approving..." : "Approve"}
+              {pendingAction === "APPROVE" ? "✓..." : "✓"}
             </Button>
             <Button 
               variant="ghost" 
               disabled={isPending} 
               onClick={() => run("HIDE")}
-              className="text-orange-400 hover:text-orange-300 text-xs px-2 py-1 h-auto"
+              className="text-orange-400 hover:text-orange-300 text-[9px] px-1.5 py-0.5 h-5 leading-none"
             >
-              {pendingAction === "HIDE" ? "Hiding..." : "Hide"}
+              {pendingAction === "HIDE" ? "Hide..." : "Hide"}
             </Button>
           </>
         )}
@@ -119,9 +119,9 @@ export function ModerationRowActions({ graveId, initialStatus, initialFeatured, 
             variant="ghost" 
             disabled={isPending} 
             onClick={() => run("UNHIDE")}
-            className="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 h-auto"
+            className="text-blue-400 hover:text-blue-300 text-[9px] px-1.5 py-0.5 h-5 leading-none"
           >
-            {pendingAction === "UNHIDE" ? "Unhiding..." : "Unhide"}
+            {pendingAction === "UNHIDE" ? "Show..." : "Show"}
           </Button>
         )}
         
@@ -130,9 +130,9 @@ export function ModerationRowActions({ graveId, initialStatus, initialFeatured, 
             variant="ghost" 
             disabled={isPending} 
             onClick={() => run("FEATURE")}
-            className="text-yellow-400 hover:text-yellow-300 text-xs px-2 py-1 h-auto"
+            className="text-yellow-400 hover:text-yellow-300 text-[9px] px-1.5 py-0.5 h-5 leading-none"
           >
-            {pendingAction === "FEATURE" ? "Featuring..." : "Feature"}
+            {pendingAction === "FEATURE" ? "★..." : "★"}
           </Button>
         )}
         
@@ -140,9 +140,9 @@ export function ModerationRowActions({ graveId, initialStatus, initialFeatured, 
           variant="ghost" 
           disabled={isPending} 
           onClick={() => setIsNoteOpen((prev) => !prev)}
-          className="text-xs px-2 py-1 h-auto"
+          className="text-[9px] px-1.5 py-0.5 h-5 leading-none"
         >
-          {isNoteOpen ? "Cancel" : "Note"}
+          {isNoteOpen ? "✕" : "📝"}
         </Button>
         
         <Button 
@@ -153,34 +153,35 @@ export function ModerationRowActions({ graveId, initialStatus, initialFeatured, 
               run("DELETE");
             }
           }}
-          className="text-red-400 hover:text-red-300 text-xs px-2 py-1 h-auto"
+          className="text-red-400 hover:text-red-300 text-[9px] px-1.5 py-0.5 h-5 leading-none"
         >
-          {pendingAction === "DELETE" ? "Deleting..." : "Delete"}
+          {pendingAction === "DELETE" ? "🗑️..." : "🗑️"}
         </Button>
       </div>
       
-      <div>
-        <span className="mr-3">Reports: {reports}</span>
-        <span>Status: {currentStatus}</span>
-        {featured && <span className="ml-3 text-yellow-400">Featured</span>}
+      <div className="text-[9px] opacity-75 leading-tight">
+        <span className="mr-2">📊 {reports}</span>
+        <span className="mr-2">📍 {currentStatus}</span>
+        {featured && <span className="text-yellow-400">⭐</span>}
       </div>
       
       {isNoteOpen && (
-        <div className="space-y-2 rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-3">
+        <div className="space-y-1 rounded-lg border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-2 mt-1">
           <textarea
             value={note}
             maxLength={280}
             onChange={(event) => setNote(event.target.value)}
-            placeholder="Leave a moderator note (visible in audit trail)"
-            className="h-20 w-full rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(10,14,25,0.8)] px-3 py-2 text-[var(--foreground)] focus:border-[var(--accent)] focus:outline-none"
+            placeholder="Moderator note..."
+            className="h-12 w-full rounded text-[10px] border border-[rgba(255,255,255,0.1)] bg-[rgba(10,14,25,0.8)] px-2 py-1 text-[var(--foreground)] focus:border-[var(--accent)] focus:outline-none resize-none"
           />
           <div className="flex justify-end">
             <Button 
               variant="primary" 
               disabled={noteDisabled} 
               onClick={() => run("NOTE", note)}
+              className="text-[9px] px-2 py-0.5 h-5"
             >
-              {pendingAction === "NOTE" ? "Saving..." : "Save note"}
+              {pendingAction === "NOTE" ? "💾..." : "💾 Save"}
             </Button>
           </div>
         </div>
