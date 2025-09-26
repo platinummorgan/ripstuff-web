@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
       return json(
         {
           code: "SERVICE_UNAVAILABLE",
-          message: "OpenAI quota exhausted. Please check billing or use EULOGY_FAKE=1 for local testing.",
+          message: "AI eulogy service is temporarily unavailable. Please try writing your own eulogy using the 'Write My Own' option, or contact support.",
         },
         503,
       );

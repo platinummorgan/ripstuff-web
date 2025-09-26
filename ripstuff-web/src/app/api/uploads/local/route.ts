@@ -94,6 +94,9 @@ export async function PUT(req: NextRequest) {
     }
   } catch (err) {
     console.error("/api/uploads/local error", err);
-    return json({ code: "INTERNAL_ERROR", message: "Upload failed" }, 500);
+    return json({ 
+      code: "INTERNAL_ERROR", 
+      message: "File processing failed. Please check file format and size (max 50MB)." 
+    }, 500);
   }
 }

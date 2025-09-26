@@ -110,7 +110,10 @@ export async function POST(req: NextRequest) {
       }
 
       if (error.message === "BLOB_READ_WRITE_TOKEN is not configured" || error.message === "S3 environment is not configured") {
-        return json({ code: "UPLOADS_NOT_CONFIGURED", message: error.message }, 500);
+        return json({ 
+          code: "UPLOADS_NOT_CONFIGURED", 
+          message: "File upload is temporarily unavailable. Please try again later or contact support." 
+        }, 500);
       }
     }
 

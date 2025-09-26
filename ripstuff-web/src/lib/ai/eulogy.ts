@@ -99,7 +99,11 @@ export interface GenerateEulogyResult {
 
 export async function generateEulogy(input: GraveCoreFields): Promise<GenerateEulogyResult> {
   // Dev fallback: allow bypassing OpenAI to unblock local testing
-  if (process.env.EULOGY_FAKE === "1") {
+  // Also automatically enable in development if OpenAI is not configured
+  const shouldUseFake = process.env.EULOGY_FAKE === "1" || 
+    (process.env.NODE_ENV === "development" && !process.env.OPENAI_API_KEY);
+  
+  if (shouldUseFake) {
     const fake = `We gather to remember ${input.title}, faithful companion.\n\nIt served ${input.years ?? "for many seasons"} ${CATEGORY_SLOGANS[input.category]}.\n\nThough its final day came with little fanfare, its small miracles made life easier.\n\nMay ${input.title} rest ${CATEGORY_SLOGANS[input.category]}.`;
     return { text: clampToRange(fake), tokensUsed: 0 };
   }
