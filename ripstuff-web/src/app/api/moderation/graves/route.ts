@@ -32,8 +32,6 @@ export async function GET(req: NextRequest) {
 
   const { limit, cursor, status, reported } = parsedQuery.data;
 
-  console.log("Moderation API query params:", { limit, cursor, status, reported });
-
   const where: Prisma.GraveWhereInput = {};
 
   if (status) {
@@ -47,13 +45,10 @@ export async function GET(req: NextRequest) {
 
   if (reported !== undefined) {
     const wantsReported = reported === true || reported === "true";
-    console.log("Reported filter:", { reported, wantsReported });
     where.reports = wantsReported
       ? { some: { resolvedAt: null } }
       : { none: { resolvedAt: null } };
   }
-
-  console.log("Final where clause:", JSON.stringify(where, null, 2));
 
   if (cursor) {
     const cursorDate = new Date(cursor);
@@ -63,43 +58,29 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const graves = await prisma.grave.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      take: limit + 1,
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        status: true,
-        featured: true,
-        category: true,
-        backstory: true,
-        eulogyText: true,
-        createdAt: true,
-        reports: {
-          where: { resolvedAt: null },
-          select: { 
-            id: true,
-            reason: true,
-            createdAt: true,
-            deviceHash: true,
-          },
-        },
-        moderationTrail: {
-          orderBy: { createdAt: "desc" },
-          take: 5, // Last 5 actions
-          select: {
-            id: true,
-            action: true,
-            reason: true,
-            createdAt: true,
-          },
-        },
+  const graves = await prisma.grave.findMany({
+    where,
+    cursor: cursor ? { id: cursor } : undefined,
+    take: limit + 1,
+    orderBy: { createdAt: "desc" },
+    include: {
+      reports: {
+        where: { resolvedAt: null },
+        select: { reason: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
       },
-    });
+      moderationTrail: {
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      },
+    },
+  });
 
-    let nextCursor: string | null = null;
+  // Debug: Count how many graves have reports
+  if (reported !== undefined) {
+    const gravesWithReports = graves.filter(g => g.reports.length > 0);
+    console.log(`Found ${graves.length} graves total, ${gravesWithReports.length} with reports`);
+  }    let nextCursor: string | null = null;
     if (graves.length > limit) {
       const next = graves.pop();
       if (next) {
@@ -116,10 +97,8 @@ export async function GET(req: NextRequest) {
       createdAt: grave.createdAt.toISOString(),
       reports: grave.reports.length,
       reportDetails: grave.reports.map((report) => ({
-        id: report.id,
         reason: report.reason,
         createdAt: report.createdAt.toISOString(),
-        deviceHash: report.deviceHash.substring(0, 8) + "...", // Partial hash for privacy
       })),
       category: grave.category,
       eulogyPreview: grave.eulogyText.slice(0, 160),
