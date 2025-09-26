@@ -78,6 +78,13 @@ export function SiteHeader() {
                       >
                         🛡️ Moderation
                       </Link>
+                      <Link 
+                        href="/moderation/users" 
+                        className="block px-4 py-2 text-sm text-purple-400 hover:text-purple-300 hover:bg-[rgba(147,51,234,0.1)] font-medium"
+                        onClick={() => setShowMoreMenu(false)}
+                      >
+                        👥 User Management
+                      </Link>
                     </>
                   )}
                   <hr className="border-[rgba(255,255,255,0.08)] my-2" />
