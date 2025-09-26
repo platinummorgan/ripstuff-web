@@ -7,16 +7,19 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const state = searchParams.get('state');
   const error = searchParams.get('error');
+  const linking = searchParams.get('linking'); // Check if this is a linking request
 
   // Check for Facebook OAuth errors
   if (error) {
     console.error('Facebook OAuth error:', error);
-    return NextResponse.redirect(new URL('/signin?error=oauth_error', request.url));
+    const redirectUrl = linking ? '/profile?error=oauth_error' : '/signin?error=oauth_error';
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
   if (!code) {
     console.error('No authorization code received from Facebook');
-    return NextResponse.redirect(new URL('/signin?error=no_code', request.url));
+    const redirectUrl = linking ? '/profile?error=no_code' : '/signin?error=no_code';
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
   // Check environment variables
@@ -66,7 +69,8 @@ export async function GET(request: NextRequest) {
 
     if (!userResponse.ok) {
       console.error('User info failed:', userInfo);
-      return NextResponse.redirect(new URL('/signin?error=user_info_error', request.url));
+      const redirectUrl = linking ? '/profile?error=user_info_error' : '/signin?error=user_info_error';
+      return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
 
     console.log('Facebook user info received:', {
@@ -76,7 +80,50 @@ export async function GET(request: NextRequest) {
       hasPicture: !!userInfo.picture
     });
 
-    // Create or find user in database
+    // Handle account linking flow
+    if (linking === 'true' || state === 'linking') {
+      // This is an account linking request - check if user is already logged in
+      const { getCurrentUser } = await import('@/lib/auth');
+      const currentUser = await getCurrentUser();
+      
+      if (!currentUser) {
+        return NextResponse.redirect(new URL('/profile?error=not_logged_in', request.url));
+      }
+
+      // Check if this Facebook account is already linked to any user
+      const existingAccount = await prisma.oAuthAccount.findUnique({
+        where: {
+          provider_providerId: {
+            provider: 'facebook',
+            providerId: userInfo.id,
+          },
+        },
+      });
+
+      if (existingAccount) {
+        if (existingAccount.userId === currentUser.id) {
+          return NextResponse.redirect(new URL('/profile?message=already_linked', request.url));
+        } else {
+          return NextResponse.redirect(new URL('/profile?error=account_already_linked', request.url));
+        }
+      }
+
+      // Link the Facebook account to the current user
+      await prisma.oAuthAccount.create({
+        data: {
+          userId: currentUser.id,
+          provider: 'facebook',
+          providerId: userInfo.id,
+          email: userInfo.email || null,
+          name: userInfo.name,
+          picture: userInfo.picture?.data?.url,
+        },
+      });
+
+      return NextResponse.redirect(new URL('/profile?message=facebook_linked', request.url));
+    }
+
+    // Create or find user in database (regular sign-in flow)
     const existingUser = await prisma.user.findUnique({
       where: {
         provider_providerId: {
