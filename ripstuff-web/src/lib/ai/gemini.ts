@@ -166,32 +166,57 @@ export async function generateEulogyWithGemini(
     console.error('❌ Gemini API error details:');
     console.error('Error message:', error?.message);
     console.error('Error status:', error?.status);
-    console.error('Full error:', error);
+    console.error('Error code:', error?.code);
+    console.error('Error name:', error?.name);
+    console.error('Error cause:', error?.cause);
+    console.error('Error stack:', error?.stack);
+    console.error('Full error object:', JSON.stringify(error, null, 2));
     
-    // Handle specific Gemini errors with helpful messages
-    if (error?.message?.includes("quota")) {
-      throw new Error("Gemini API quota exceeded. Please try again later or check your Google Cloud usage limits.");
+    // Check if this is a GoogleGenerativeAIError
+    if (error.constructor?.name) {
+      console.error('Error constructor:', error.constructor.name);
     }
     
-    if (error?.message?.includes("API key") || error?.message?.includes("authentication")) {
-      throw new MissingGeminiKeyError();
+    // Check for specific Google error properties
+    if (error?.error) {
+      console.error('Nested error:', error.error);
+      console.error('Nested error code:', error.error?.code);
+      console.error('Nested error message:', error.error?.message);
+      console.error('Nested error status:', error.error?.status);
     }
     
-    if (error?.message?.includes("models/gemini") || error?.message?.includes("not found")) {
-      throw new Error("The Gemini model is not available. Please enable the Generative AI API in your Google Cloud project at https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com");
+    // Check response details if available
+    if (error?.response) {
+      console.error('Response status:', error.response?.status);
+      console.error('Response data:', error.response?.data);
     }
     
-    if (error?.status === 403) {
-      throw new Error("Gemini API access denied. Please check your API key has the correct permissions for the Generative Language API.");
+    // Handle specific error codes from Google's troubleshooting guide
+    const errorCode = error?.code || error?.error?.code || error?.status;
+    const errorMessage = error?.message || error?.error?.message || "Unknown error";
+    
+    if (errorCode === 400) {
+      throw new Error(`Gemini API 400 Bad Request: ${errorMessage}. Check request format and parameters.`);
     }
     
-    if (error?.status === 400) {
-      throw new Error("Invalid request to Gemini API. The input may be too long or contain unsupported content.");
+    if (errorCode === 403) {
+      throw new Error(`Gemini API 403 Forbidden: ${errorMessage}. Check API key permissions and project access.`);
     }
     
-    // Generic fallback with the original error message
-    const errorMessage = error?.message || error?.toString() || "Unknown error";
-    throw new Error(`Gemini generation failed: ${errorMessage}`);
+    if (errorCode === 404) {
+      throw new Error(`Gemini API 404 Not Found: ${errorMessage}. The model or endpoint may not exist.`);
+    }
+    
+    if (errorCode === 429) {
+      throw new Error(`Gemini API 429 Rate Limited: ${errorMessage}. Too many requests, try again later.`);
+    }
+    
+    if (errorCode === 500) {
+      throw new Error(`Gemini API 500 Internal Error: ${errorMessage}. Google server error, try again later.`);
+    }
+    
+    // Generic fallback with all available info
+    throw new Error(`Gemini generation failed (${errorCode || 'unknown'}): ${errorMessage}`);
   }
 
   // TODO: Re-enable actual Gemini API once Google's setup is working
