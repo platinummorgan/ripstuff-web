@@ -92,14 +92,14 @@ export function ModerationRowActions({ graveId, initialStatus, initialFeatured, 
 
   return (
     <div className="space-y-2 text-xs text-[var(--muted)]">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1">
         {currentStatus === "PENDING" && (
           <>
             <Button 
               variant="ghost" 
               disabled={isPending} 
               onClick={() => run("APPROVE")}
-              className="text-green-400 hover:text-green-300"
+              className="text-green-400 hover:text-green-300 text-xs px-2 py-1 h-auto"
             >
               {pendingAction === "APPROVE" ? "Approving..." : "Approve"}
             </Button>
@@ -107,7 +107,7 @@ export function ModerationRowActions({ graveId, initialStatus, initialFeatured, 
               variant="ghost" 
               disabled={isPending} 
               onClick={() => run("HIDE")}
-              className="text-orange-400 hover:text-orange-300"
+              className="text-orange-400 hover:text-orange-300 text-xs px-2 py-1 h-auto"
             >
               {pendingAction === "HIDE" ? "Hiding..." : "Hide"}
             </Button>
@@ -119,7 +119,7 @@ export function ModerationRowActions({ graveId, initialStatus, initialFeatured, 
             variant="ghost" 
             disabled={isPending} 
             onClick={() => run("UNHIDE")}
-            className="text-blue-400 hover:text-blue-300"
+            className="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 h-auto"
           >
             {pendingAction === "UNHIDE" ? "Unhiding..." : "Unhide"}
           </Button>
@@ -130,7 +130,7 @@ export function ModerationRowActions({ graveId, initialStatus, initialFeatured, 
             variant="ghost" 
             disabled={isPending} 
             onClick={() => run("FEATURE")}
-            className="text-yellow-400 hover:text-yellow-300"
+            className="text-yellow-400 hover:text-yellow-300 text-xs px-2 py-1 h-auto"
           >
             {pendingAction === "FEATURE" ? "Featuring..." : "Feature"}
           </Button>
@@ -140,8 +140,9 @@ export function ModerationRowActions({ graveId, initialStatus, initialFeatured, 
           variant="ghost" 
           disabled={isPending} 
           onClick={() => setIsNoteOpen((prev) => !prev)}
+          className="text-xs px-2 py-1 h-auto"
         >
-          {isNoteOpen ? "Cancel note" : "Add note"}
+          {isNoteOpen ? "Cancel" : "Note"}
         </Button>
         
         <Button 
@@ -152,7 +153,7 @@ export function ModerationRowActions({ graveId, initialStatus, initialFeatured, 
               run("DELETE");
             }
           }}
-          className="text-red-400 hover:text-red-300"
+          className="text-red-400 hover:text-red-300 text-xs px-2 py-1 h-auto"
         >
           {pendingAction === "DELETE" ? "Deleting..." : "Delete"}
         </Button>

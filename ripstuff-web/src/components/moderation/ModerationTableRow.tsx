@@ -23,10 +23,10 @@ export function ModerationTableRow({ item }: ModerationTableRowProps) {
 
   return (
     <tr className="border-t border-[rgba(255,255,255,0.05)]">
-      <td className="px-4 py-4 text-white">
-        <div className="font-medium text-white">{item.title}</div>
-        <div className="text-xs text-[var(--muted)]">{item.eulogyPreview}</div>
-        <div className="mt-2 text-xs text-[var(--muted)]">Slug: {item.slug}</div>
+      <td className="px-4 py-4 text-white max-w-0 w-2/5">
+        <div className="font-medium text-white break-words">{item.title}</div>
+        <div className="text-xs text-[var(--muted)] break-words line-clamp-2">{item.eulogyPreview}</div>
+        <div className="mt-2 text-xs text-[var(--muted)] break-all">Slug: {item.slug}</div>
         {actions.length > 0 && (
           <div className="mt-3 space-y-1 text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
             <div>Recent actions:</div>
@@ -60,32 +60,34 @@ export function ModerationTableRow({ item }: ModerationTableRowProps) {
         </span>
       </td>
       <td className="px-4 py-4">{new Date(item.createdAt).toLocaleString()}</td>
-      <td className="px-4 py-4 space-y-2">
-        <Button variant="ghost" asChild>
-          <Link href={`/grave/${item.slug}`} target="_blank">
-            View grave
-          </Link>
-        </Button>
-        <ModerationRowActions
-          graveId={item.id}
-          initialStatus={status}
-          initialFeatured={featured}
-          initialReports={reports}
-          onChange={({ status: nextStatus, featured: nextFeatured, reports: nextReports, action, reason }) => {
-            setStatus(nextStatus);
-            setFeatured(nextFeatured);
-            setReports(nextReports);
-            setActions((prev) => [
-              {
-                id: crypto.randomUUID(),
-                action,
-                reason: reason ?? null,
-                createdAt: new Date().toISOString(),
-              },
-              ...prev,
-            ].slice(0, 3));
-          }}
-        />
+      <td className="px-4 py-4 min-w-[300px]">
+        <div className="space-y-2">
+          <Button variant="ghost" asChild>
+            <Link href={`/grave/${item.slug}`} target="_blank">
+              View grave
+            </Link>
+          </Button>
+          <ModerationRowActions
+            graveId={item.id}
+            initialStatus={status}
+            initialFeatured={featured}
+            initialReports={reports}
+            onChange={({ status: nextStatus, featured: nextFeatured, reports: nextReports, action, reason }) => {
+              setStatus(nextStatus);
+              setFeatured(nextFeatured);
+              setReports(nextReports);
+              setActions((prev) => [
+                {
+                  id: crypto.randomUUID(),
+                  action,
+                  reason: reason ?? null,
+                  createdAt: new Date().toISOString(),
+                },
+                ...prev,
+              ].slice(0, 3));
+            }}
+          />
+        </div>
       </td>
     </tr>
   );

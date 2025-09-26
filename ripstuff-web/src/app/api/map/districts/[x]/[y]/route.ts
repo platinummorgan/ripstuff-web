@@ -26,25 +26,12 @@ export async function GET(
       } as any);
     }
 
-    // For now, return some sample graves since we can't query by map coordinates yet
-    const totalGraves = await prisma.grave.count({
+    // Get graves that are actually located in this district
+    const graves = await prisma.grave.findMany({
       where: {
         status: GraveStatus.APPROVED,
-      },
-    });
-
-    // Calculate how many graves this district should have based on demo distribution
-    const gravesPerDistrict = Math.ceil(totalGraves / 4);
-    let expectedGraves = 0;
-    
-    // Match our demo districts from the main endpoint
-    if ((x === 2 && y === 3) || (x === 5 && y === 7) || (x === 8 && y === 2) || (x === 12 && y === 9)) {
-      expectedGraves = Math.min(gravesPerDistrict, totalGraves);
-    }
-
-    const graves = expectedGraves > 0 ? await prisma.grave.findMany({
-      where: {
-        status: GraveStatus.APPROVED,
+        mapX: x,
+        mapY: y,
       },
       select: {
         id: true,
@@ -59,11 +46,10 @@ export async function GET(
         createdAt: true,
         featured: true,
       },
-      take: expectedGraves,
       orderBy: {
         createdAt: "desc",
       },
-    }) : [];
+    });
 
     const districtData = {
       x,
