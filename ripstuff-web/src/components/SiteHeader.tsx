@@ -67,6 +67,19 @@ export function SiteHeader() {
                   >
                     📈 Death Reports
                   </Link>
+                  {/* Moderator-only section */}
+                  {user?.isModerator && (
+                    <>
+                      <hr className="border-[rgba(255,255,255,0.08)] my-2" />
+                      <Link 
+                        href="/moderation" 
+                        className="block px-4 py-2 text-sm text-orange-400 hover:text-orange-300 hover:bg-[rgba(255,165,0,0.1)] font-medium"
+                        onClick={() => setShowMoreMenu(false)}
+                      >
+                        🛡️ Moderation
+                      </Link>
+                    </>
+                  )}
                   <hr className="border-[rgba(255,255,255,0.08)] my-2" />
                   <Link 
                     href="/guidelines" 

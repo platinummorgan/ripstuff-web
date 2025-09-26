@@ -7,6 +7,7 @@ interface User {
   email: string;
   name?: string;
   picture?: string;
+  isModerator?: boolean;
 }
 
 interface UserContextType {
