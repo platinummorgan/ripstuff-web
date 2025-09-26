@@ -39,6 +39,7 @@ function getClient() {
   }
 
   if (!client) {
+    // Try with explicit configuration
     client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   }
 
@@ -116,8 +117,17 @@ export async function generateEulogyWithGemini(
     const client = getClient();
     console.log('✅ Client created successfully');
     
-    const model = client.getGenerativeModel({ model: "gemini-pro" });
-    console.log('📱 Model created: gemini-pro');
+    // Try the exact model name from Google AI Studio
+    const model = client.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.8,
+        topK: 40,
+        maxOutputTokens: 1024,
+      }
+    });
+    console.log('📱 Model created: gemini-1.5-flash with config');
 
     const emotionStyle = EMOTION_STYLES[input.emotion];
     const systemPrompt = `You are an empathetic eulogist for beloved everyday objects. Your voice should be ${emotionStyle}. Keep outputs between 85 and 150 words, with 4-5 short paragraphs or sentences separated by newlines. Never mention that the subject is fictional; avoid dark or real-world tragedies. Focus on the object's service and impact with the requested emotional tone.`;
