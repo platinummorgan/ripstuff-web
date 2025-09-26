@@ -10,6 +10,31 @@ function FacebookSignInButton({ onError }: { onError: (error: string) => void })
     setIsLoading(true);
     
     try {
+      // Always fetch app ID from API since env vars aren't working consistently
+      console.log('Fetching Facebook app ID from API...');
+      const response = await fetch('/api/auth/facebook-config');
+      
+      if (!response.ok) {
+        throw new Error(`API responded with ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.configured || !data.appId) {
+        console.error('Facebook config error:', data);
+        onError('Facebook OAuth is not properly configured. Please contact support.');
+        setIsLoading(false);
+        return;
+      }
+      
+      const appId = data.appId.trim(); // Make sure to trim any whitespace
+      
+      if (!appId) {
+        onError('Facebook OAuth app ID not available.');
+        setIsLoading(false);
+        return;
+      }
+
       // Generate state parameter for CSRF protection
       const state = Math.random().toString(36).substring(2, 15) + 
                    Math.random().toString(36).substring(2, 15);
@@ -17,17 +42,18 @@ function FacebookSignInButton({ onError }: { onError: (error: string) => void })
       // Store state in sessionStorage for verification
       sessionStorage.setItem('facebook_oauth_state', state);
       
-      // Facebook OAuth parameters
+      // Facebook OAuth parameters - NOTE: Only requesting public_profile since email requires business verification
       const params = new URLSearchParams({
-        client_id: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '',
+        client_id: appId,
         redirect_uri: `${window.location.origin}/api/auth/callback/facebook`,
-        scope: 'public_profile,email',
+        scope: 'public_profile', // Removed email since we don't have that permission approved
         response_type: 'code',
         state: state,
       });
 
       // Redirect to Facebook OAuth
       const facebookUrl = `https://www.facebook.com/v18.0/dialog/oauth?${params.toString()}`;
+      console.log('Redirecting to Facebook OAuth:', facebookUrl);
       window.location.href = facebookUrl;
       
     } catch (error) {

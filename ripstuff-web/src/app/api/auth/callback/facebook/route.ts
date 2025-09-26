@@ -59,8 +59,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL(`/signin?error=token_error&details=${encodeURIComponent(errorMsg)}`, request.url));
     }
 
-    // Get user info from Facebook
-    const userResponse = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${tokens.access_token}`);
+    // Get user info from Facebook - only requesting fields we have permission for
+    const userResponse = await fetch(`https://graph.facebook.com/me?fields=id,name,picture&access_token=${tokens.access_token}`);
 
     const userInfo = await userResponse.json();
 
@@ -68,6 +68,13 @@ export async function GET(request: NextRequest) {
       console.error('User info failed:', userInfo);
       return NextResponse.redirect(new URL('/signin?error=user_info_error', request.url));
     }
+
+    console.log('Facebook user info received:', {
+      id: userInfo.id,
+      name: userInfo.name,
+      hasEmail: !!userInfo.email,
+      hasPicture: !!userInfo.picture
+    });
 
     // Create or find user in database
     const existingUser = await prisma.user.findUnique({
@@ -83,11 +90,11 @@ export async function GET(request: NextRequest) {
     if (existingUser) {
       user = existingUser;
     } else {
-      // Create new user
+      // Create new user - use a unique placeholder email since we don't have email permission
       user = await prisma.user.create({
         data: {
-          email: userInfo.email || `${userInfo.id}@facebook.temp`,
-          name: userInfo.name,
+          email: userInfo.email || `facebook-${userInfo.id}@ripstuff.local`,
+          name: userInfo.name || 'Facebook User',
           picture: userInfo.picture?.data?.url,
           provider: 'facebook',
           providerId: userInfo.id,
