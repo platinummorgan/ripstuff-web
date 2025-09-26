@@ -46,6 +46,20 @@ export function HeadstoneCard({ grave }: { grave: FeedItem }) {
                 width={220}
                 height={140}
                 className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                onError={(e) => {
+                  console.error('Headstone image failed to load:', grave.photoUrl, e);
+                  // Hide the image and show a fallback
+                  const img = e.currentTarget;
+                  img.style.display = 'none';
+                  const container = img.parentElement;
+                  if (container && !container.querySelector('.headstone-fallback')) {
+                    const fallback = document.createElement('div');
+                    fallback.className = 'headstone-fallback flex h-full w-full items-center justify-center text-2xl';
+                    fallback.textContent = '🪦';
+                    container.appendChild(fallback);
+                  }
+                }}
+                unoptimized={grave.photoUrl.includes('.blob.vercel-storage.com')}
               />
             )}
             {grave.photoUrl && video && (

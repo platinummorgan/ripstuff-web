@@ -9,6 +9,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'localhost', pathname: '/uploads/**' },
       { protocol: 'https', hostname: process.env.AWS_S3_BUCKET ? `${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com` : 'example-bucket.s3.us-east-1.amazonaws.com', pathname: '/**' },
       { protocol: 'https', hostname: 'blob.vercel-storage.com', pathname: '/**' },
+      { protocol: 'https', hostname: '**.blob.vercel-storage.com', pathname: '/**' },
     ],
   },
 };

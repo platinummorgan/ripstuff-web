@@ -71,6 +71,13 @@ export function GraveCard({ grave }: GraveCardProps) {
                 fill
                 sizes="(min-width: 640px) 50vw, 100vw"
                 className="object-cover transition duration-500 group-hover:scale-105"
+                onError={(e) => {
+                  console.error('Image failed to load:', grave.photoUrl, e);
+                  // Hide the image container on error
+                  const container = e.currentTarget.closest('.mt-4') as HTMLElement;
+                  if (container) container.style.display = 'none';
+                }}
+                unoptimized={grave.photoUrl.includes('.blob.vercel-storage.com')}
               />
             </div>
           </div>
