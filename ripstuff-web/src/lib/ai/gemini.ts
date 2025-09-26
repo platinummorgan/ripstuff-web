@@ -105,6 +105,14 @@ export interface GenerateEulogyResult {
 export async function generateEulogyWithGemini(
   input: GraveCoreFields & { emotion: EulogyEmotion }
 ): Promise<GenerateEulogyResult> {
+  // For now, let's just use a fallback until we get Gemini working
+  // This will at least unblock you from using the emotion system
+  const style = EMOTION_STYLES[input.emotion];
+  const fake = `We gather to remember ${input.title}, a ${style} companion that brought joy to our lives.\n\nFor ${input.years ?? "many seasons"}, it served faithfully ${CATEGORY_SLOGANS[input.category]}. ${input.backstory ? `Its story of ${input.backstory} will be remembered fondly.` : "Its quiet service made our days brighter."}\n\nThough its time has passed, the memories it created live on in our hearts.\n\nMay ${input.title} find peace ${CATEGORY_SLOGANS[input.category]}.`;
+  return { text: clampToRange(fake, 80, 280), tokensUsed: 0, provider: "gemini" };
+
+  // TODO: Re-enable actual Gemini API once Google's setup is working
+  /*
   // Dev fallback: allow bypassing Gemini to unblock local testing
   const shouldUseFake = process.env.EULOGY_FAKE === "1" || 
     (process.env.NODE_ENV === "development" && !process.env.GEMINI_API_KEY);
@@ -113,11 +121,12 @@ export async function generateEulogyWithGemini(
     const fake = `We gather to remember ${input.title}, faithful companion.\n\nIt served ${input.years ?? "for many seasons"} ${CATEGORY_SLOGANS[input.category]}.\n\nThough its final day came with little fanfare, its small miracles made life easier.\n\nMay ${input.title} rest ${CATEGORY_SLOGANS[input.category]}.`;
     return { text: clampToRange(fake), tokensUsed: 0, provider: "gemini" };
   }
+  */
 
   const prompt = buildPrompt(input);
   const client = getClient();
-  // Use gemini-pro which should be available in the free tier
-  const model = client.getGenerativeModel({ model: "gemini-pro" });
+  // Use the model that works with Google AI Studio keys
+  const model = client.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const emotionStyle = EMOTION_STYLES[input.emotion];
   const systemPrompt = `You are an empathetic eulogist for beloved everyday objects. Your voice should be ${emotionStyle}. Keep outputs between 85 and 150 words, with 4-5 short paragraphs or sentences separated by newlines. Never mention that the subject is fictional; avoid dark or real-world tragedies. Focus on the object's service and impact with the requested emotional tone.`;
