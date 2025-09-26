@@ -137,13 +137,9 @@ export async function generateEulogyWithGemini(
     console.log('🚀 Making API call to Gemini...');
     console.log('📝 Full prompt length:', (`${systemPrompt}\n\n${userPrompt}`).length);
     
-    // Try a simple test request first
-    const testResult = await model.generateContent("Say hello");
-    console.log('✅ Simple test successful!');
-    
-    // Now try the full request
+    // Make only one API call to avoid rate limits
     const result = await model.generateContent(`${systemPrompt}\n\n${userPrompt}`);
-    console.log('✅ Full API call successful!');
+    console.log('✅ API call successful!');
 
     const response = result.response;
     const rawText = normalizeText(response.text() ?? "");
@@ -208,7 +204,7 @@ export async function generateEulogyWithGemini(
     }
     
     if (errorCode === 429) {
-      throw new Error(`Gemini API 429 Rate Limited: ${errorMessage}. Too many requests, try again later.`);
+      throw new Error(`Gemini API quota exceeded. The free tier has very low rate limits (15 requests per minute, 1500 per day). Please wait a few minutes before trying again, or consider upgrading your Google Cloud plan for higher limits.`);
     }
     
     if (errorCode === 500) {
