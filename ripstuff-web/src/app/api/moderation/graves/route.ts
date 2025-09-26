@@ -76,11 +76,7 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  // Debug: Count how many graves have reports
-  if (reported !== undefined) {
-    const gravesWithReports = graves.filter(g => g.reports.length > 0);
-    console.log(`Found ${graves.length} graves total, ${gravesWithReports.length} with reports`);
-  }    let nextCursor: string | null = null;
+    let nextCursor: string | null = null;
     if (graves.length > limit) {
       const next = graves.pop();
       if (next) {
@@ -110,8 +106,6 @@ export async function GET(req: NextRequest) {
         createdAt: action.createdAt.toISOString(),
       })),
     }));
-
-    console.log(`Found ${items.length} graves, reports in items:`, items.map(item => ({ slug: item.slug, reports: item.reports, reportCount: item.reportDetails?.length })));
 
     const payload = moderationQueueResponse.parse({
       items,
