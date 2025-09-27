@@ -5,6 +5,8 @@ import { internalError, json, unauthorized, validationError } from "@/lib/http";
 import { requireUserModerator } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 const banDeviceSchema = z.object({
   deviceHash: z.string().min(1),
   reason: z.string().min(1).max(280).optional(),

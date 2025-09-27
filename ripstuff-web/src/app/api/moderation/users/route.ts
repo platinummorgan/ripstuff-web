@@ -5,6 +5,8 @@ import { internalError, json, unauthorized, validationError } from "@/lib/http";
 import { requireUserModerator } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 const userSearchSchema = z.object({
   query: z.string().optional(),
   status: z.enum(['all', 'active', 'banned', 'suspended']).optional().default('all'),

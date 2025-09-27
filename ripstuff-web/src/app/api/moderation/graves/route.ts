@@ -4,6 +4,8 @@ import { NextRequest } from "next/server";
 import { internalError, json, unauthorized, validationError } from "@/lib/http";
 import { requireUserModerator } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+
+export const dynamic = 'force-dynamic';
 import { moderationListQuery, moderationQueueResponse } from "@/lib/validation";
 
 export async function GET(req: NextRequest) {

@@ -1,6 +1,8 @@
 import { ModerationPanel } from "@/components/moderation/ModerationPanel";
 import { ModerationContent } from "@/components/moderation/ModerationContent";
 
+export const dynamic = 'force-dynamic';
+
 type SearchParams = {
   status?: string;
   reported?: string;

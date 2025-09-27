@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import { UserManagementContent } from "@/components/moderation/UserManagementContent";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "User Management - RipStuff",
   description: "Manage user accounts and moderation actions",

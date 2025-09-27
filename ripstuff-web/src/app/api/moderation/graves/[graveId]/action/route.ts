@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { internalError, json, notFound, unauthorized, validationError } from "@/lib/http";
 import { requireUserModerator } from "@/lib/auth";
 import { moderationActionInput } from "@/lib/validation";
+
+export const dynamic = 'force-dynamic';
 import prisma from "@/lib/prisma";
 
 interface Context {

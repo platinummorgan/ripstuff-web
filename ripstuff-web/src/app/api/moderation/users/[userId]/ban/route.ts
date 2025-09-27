@@ -5,6 +5,8 @@ import { internalError, json, notFound, unauthorized, validationError } from "@/
 import { requireUserModerator } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 const banUserSchema = z.object({
   reason: z.string().min(1).max(280).optional(),
   expiresAt: z.string().datetime().optional(), // ISO string for expiration

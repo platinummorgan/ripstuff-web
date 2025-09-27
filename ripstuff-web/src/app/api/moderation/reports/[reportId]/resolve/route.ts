@@ -3,6 +3,8 @@ import { requireUserModerator } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { internalError, json, notFound, unauthorized } from "@/lib/http";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest, { params }: { params: { reportId: string } }) {
   try {
     await requireUserModerator();
