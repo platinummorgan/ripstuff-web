@@ -12,6 +12,7 @@ interface DeathCertificateProps {
     createdAt: string;
     roastCount?: number;
     eulogyCount?: number;
+    datesText?: string; // For cause of death extraction
   };
   graveUrl: string;
 }
@@ -26,6 +27,69 @@ interface ControversyScore {
 export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const certificateRef = useRef<HTMLDivElement>(null);
+
+  const determineCauseOfDeath = (): string => {
+    const category = grave.category.toLowerCase();
+    const title = grave.title.toLowerCase();
+    const datesText = grave.datesText?.toLowerCase() || '';
+    
+    // Extract cause from category and context
+    if (category.includes('tech')) {
+      if (title.includes('phone') || title.includes('iphone') || title.includes('android')) {
+        return 'Catastrophic Screen Failure';
+      }
+      if (title.includes('laptop') || title.includes('computer') || title.includes('pc') || title.includes('macbook')) {
+        return 'Hardware Malfunction';
+      }
+      if (title.includes('headphone') || title.includes('airpod') || title.includes('earbud')) {
+        return 'Audio Driver Separation';
+      }
+      if (title.includes('cable') || title.includes('charger')) {
+        return 'Connector Deterioration';
+      }
+      return 'Electronic Component Failure';
+    }
+    
+    if (category.includes('appliance')) {
+      return 'Mechanical Breakdown';
+    }
+    
+    if (category.includes('toy')) {
+      return 'Childhood Neglect Syndrome';
+    }
+    
+    if (category.includes('clothing')) {
+      return 'Fabric Integrity Loss';
+    }
+    
+    if (category.includes('furniture')) {
+      return 'Structural Collapse';
+    }
+    
+    if (category.includes('vehicle')) {
+      return 'Mechanical Failure';
+    }
+    
+    if (category.includes('accessory')) {
+      return 'Wear and Tear';
+    }
+    
+    // Check dates text for clues
+    if (datesText.includes('drop') || datesText.includes('fell')) {
+      return 'Gravity-Related Trauma';
+    }
+    if (datesText.includes('water') || datesText.includes('spill')) {
+      return 'Liquid Damage';
+    }
+    if (datesText.includes('break') || datesText.includes('broke')) {
+      return 'Structural Failure';
+    }
+    if (datesText.includes('lost') || datesText.includes('missing')) {
+      return 'Mysterious Disappearance';
+    }
+    
+    return 'Natural Wear and Obsolescence';
+  };
 
   const calculateControversy = (): ControversyScore => {
     const roasts = grave.roastCount || 0;
@@ -176,9 +240,15 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
               </div>
             </div>
             
-            <div className="mt-4">
-              <div className="text-amber-300 font-semibold">Date of Passing:</div>
-              <div className="text-lg">{formatDate(grave.createdAt)}</div>
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-amber-300 font-semibold">Date of Passing:</div>
+                <div className="text-lg">{formatDate(grave.createdAt)}</div>
+              </div>
+              <div>
+                <div className="text-amber-300 font-semibold">Cause of Death:</div>
+                <div className="text-lg">{determineCauseOfDeath()}</div>
+              </div>
             </div>
           </div>
 
@@ -215,11 +285,11 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-green-900/30 rounded-lg p-3 border border-green-600/50 text-center">
               <div className="text-2xl font-bold text-green-300">{grave.eulogyCount || 0}</div>
-              <div className="text-sm text-green-200">Eulogies</div>
+              <div className="text-sm text-green-200">Eulogy Votes</div>
             </div>
             <div className="bg-red-900/30 rounded-lg p-3 border border-red-600/50 text-center">
               <div className="text-2xl font-bold text-red-300">{grave.roastCount || 0}</div>
-              <div className="text-sm text-red-200">Roasts</div>
+              <div className="text-sm text-red-200">Roast Votes</div>
             </div>
           </div>
 
@@ -228,8 +298,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
             <div className="flex-1">
               <div className="text-xs text-gray-400 leading-relaxed">
                 This certificate verifies the digital death and memorial of the above-named item. 
-                All controversy ratings are calculated based on community voting and reflect 
-                the democratic opinion of our mourners.
+                Controversy ratings reflect the ratio of roast votes to eulogy votes on the memorial's 
+                single eulogy, representing community sentiment toward the deceased item.
               </div>
             </div>
             <div className="ml-4">
