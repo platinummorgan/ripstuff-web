@@ -20,7 +20,7 @@ interface DeathCertificateProps {
 
 interface ControversyScore {
   score: number;
-  level: 'Saint' | 'Balanced' | 'Controversial' | 'Roasted';
+  level: 'Saint' | 'Respected' | 'Divisive' | 'Controversial' | 'Roasted';
   color: string;
   description: string;
 }
@@ -29,67 +29,84 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const certificateRef = useRef<HTMLDivElement>(null);
 
-  const determineCauseOfDeath = (): string => {
+  const calculateAge = (): string => {
+    const createdDate = new Date(grave.createdAt);
+    const now = new Date();
+    const diffMs = now.getTime() - createdDate.getTime();
+    const years = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365));
+    const months = Math.floor((diffMs % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
+    const days = Math.floor((diffMs % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+
+    if (years > 0) {
+      return months > 0 ? `${years}y ${months}m` : `${years}y`;
+    } else if (months > 0) {
+      return days > 0 ? `${months}m ${days}d` : `${months}m`;
+    } else {
+      return `${days}d`;
+    }
+  };
+
+  const determineCauseOfDeath = (): { icon: string; cause: string } => {
     const category = grave.category.toLowerCase();
     const title = grave.title.toLowerCase();
     const datesText = grave.datesText?.toLowerCase() || '';
     
+    // Check dates text for clues first
+    if (datesText.includes('drop') || datesText.includes('fell')) {
+      return { icon: '⚡', cause: 'Gravity-Related Trauma' };
+    }
+    if (datesText.includes('water') || datesText.includes('spill')) {
+      return { icon: '💧', cause: 'Liquid Damage' };
+    }
+    if (datesText.includes('break') || datesText.includes('broke')) {
+      return { icon: '⚡', cause: 'Structural Failure' };
+    }
+    if (datesText.includes('lost') || datesText.includes('missing')) {
+      return { icon: '🔋', cause: 'Mysterious Disappearance' };
+    }
+    
     // Extract cause from category and context
     if (category.includes('tech')) {
       if (title.includes('phone') || title.includes('iphone') || title.includes('android')) {
-        return 'Catastrophic Screen Failure';
+        return { icon: '⚡', cause: 'Catastrophic Screen Failure' };
       }
       if (title.includes('laptop') || title.includes('computer') || title.includes('pc') || title.includes('macbook')) {
-        return 'Hardware Malfunction';
+        return { icon: '🔋', cause: 'Hardware Malfunction' };
       }
       if (title.includes('headphone') || title.includes('airpod') || title.includes('earbud')) {
-        return 'Audio Driver Separation';
+        return { icon: '🔋', cause: 'Audio Driver Separation' };
       }
       if (title.includes('cable') || title.includes('charger')) {
-        return 'Connector Deterioration';
+        return { icon: '⚡', cause: 'Connector Deterioration' };
       }
-      return 'Electronic Component Failure';
+      return { icon: '🔋', cause: 'Electronic Component Failure' };
     }
     
     if (category.includes('appliance')) {
-      return 'Mechanical Breakdown';
+      return { icon: '🔥', cause: 'Mechanical Breakdown' };
     }
     
     if (category.includes('toy')) {
-      return 'Childhood Neglect Syndrome';
+      return { icon: '💧', cause: 'Childhood Neglect Syndrome' };
     }
     
     if (category.includes('clothing')) {
-      return 'Fabric Integrity Loss';
+      return { icon: '💧', cause: 'Fabric Integrity Loss' };
     }
     
     if (category.includes('furniture')) {
-      return 'Structural Collapse';
+      return { icon: '⚡', cause: 'Structural Collapse' };
     }
     
     if (category.includes('vehicle')) {
-      return 'Mechanical Failure';
+      return { icon: '🔥', cause: 'Mechanical Failure' };
     }
     
     if (category.includes('accessory')) {
-      return 'Wear and Tear';
+      return { icon: '💧', cause: 'Wear and Tear' };
     }
     
-    // Check dates text for clues
-    if (datesText.includes('drop') || datesText.includes('fell')) {
-      return 'Gravity-Related Trauma';
-    }
-    if (datesText.includes('water') || datesText.includes('spill')) {
-      return 'Liquid Damage';
-    }
-    if (datesText.includes('break') || datesText.includes('broke')) {
-      return 'Structural Failure';
-    }
-    if (datesText.includes('lost') || datesText.includes('missing')) {
-      return 'Mysterious Disappearance';
-    }
-    
-    return 'Natural Wear and Obsolescence';
+    return { icon: '🔋', cause: 'Natural Wear and Obsolescence' };
   };
 
   const calculateControversy = (): ControversyScore => {
@@ -102,39 +119,46 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
         score: 0,
         level: 'Saint',
         color: '#22c55e',
-        description: 'Uncontested'
+        description: 'Beloved'
       };
     }
 
     const roastPercentage = (roasts / total) * 100;
 
-    if (roastPercentage >= 75) {
+    if (roastPercentage >= 80) {
       return {
         score: Math.round(roastPercentage),
         level: 'Roasted',
         color: '#dc2626',
-        description: 'Heavily Criticized'
+        description: 'Mercilessly Roasted'
       };
-    } else if (roastPercentage >= 40) {
+    } else if (roastPercentage >= 60) {
       return {
         score: Math.round(roastPercentage),
         level: 'Controversial',
         color: '#f59e0b',
-        description: 'Highly Debated'
+        description: 'Controversial'
       };
-    } else if (roastPercentage >= 10) {
+    } else if (roastPercentage >= 40) {
       return {
         score: Math.round(roastPercentage),
-        level: 'Balanced',
+        level: 'Divisive',
+        color: '#f59e0b',
+        description: 'Divisive'
+      };
+    } else if (roastPercentage >= 20) {
+      return {
+        score: Math.round(roastPercentage),
+        level: 'Respected',
         color: '#3b82f6',
-        description: 'Mixed Reception'
+        description: 'Mostly Respected'
       };
     } else {
       return {
         score: Math.round(roastPercentage),
         level: 'Saint',
         color: '#22c55e',
-        description: 'Widely Beloved'
+        description: 'Beloved'
       };
     }
   };
@@ -219,10 +243,13 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
         {/* Header */}
         <div className="text-center mb-6">
           <div className="text-3xl font-bold text-amber-300 mb-2">
-            ⚰️ OFFICIAL DEATH CERTIFICATE ⚰️
+            ⚰️ Official Death Certificate ⚰️
           </div>
-          <div className="text-lg text-gray-300">
+          <div className="text-lg text-gray-300 mb-1">
             Virtual Graveyard Registry • RipStuff.net
+          </div>
+          <div className="text-xs text-amber-600 font-mono">
+            Certificate #VG-{grave.title.replace(/[^A-Z0-9]/gi, '').toUpperCase().substring(0, 8)}-{new Date().getFullYear()}
           </div>
         </div>
 
@@ -233,7 +260,9 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="text-amber-300 font-semibold">Deceased:</div>
-                <div className="text-xl font-bold">{grave.title}</div>
+                <div className="text-xl font-bold">
+                  {grave.title} <span className="text-sm text-gray-400 font-normal">Age: {calculateAge()}</span>
+                </div>
               </div>
               <div>
                 <div className="text-amber-300 font-semibold">Category:</div>
@@ -248,7 +277,10 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
               </div>
               <div>
                 <div className="text-amber-300 font-semibold">Cause of Death:</div>
-                <div className="text-lg">{determineCauseOfDeath()}</div>
+                <div className="text-lg flex items-center gap-2">
+                  <span>{determineCauseOfDeath().icon}</span>
+                  <span>{determineCauseOfDeath().cause}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -256,41 +288,40 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
           {/* Roast Meter */}
           <div className="bg-black/30 rounded-lg p-4 border border-amber-600/50">
             <div className="text-amber-300 font-semibold mb-3">ROAST METER — CONDOLENCES VS ROASTS</div>
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Beloved</span>
-                  <span>Roasted</span>
-                </div>
-                <div className="h-6 bg-gray-700 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full transition-all duration-500"
-                    style={{
-                      width: `${controversy.score}%`,
-                      backgroundColor: controversy.color,
-                    }}
-                  ></div>
-                </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-green-400">Condolences ({grave.eulogyCount || 0})</span>
+                <span className="text-red-400">Roasts ({grave.roastCount || 0})</span>
               </div>
+              
+              <div className="relative h-6 bg-gray-700 rounded-full overflow-hidden">
+                <div 
+                  className="h-full transition-all duration-500"
+                  style={{
+                    width: `${controversy.score}%`,
+                    backgroundColor: controversy.color,
+                  }}
+                ></div>
+                {/* 50% tick mark */}
+                <div className="absolute top-0 left-1/2 transform -translate-x-0.5 w-0.5 h-full bg-gray-400/50"></div>
+              </div>
+              
               <div className="text-center">
-                <div className="text-2xl font-bold" style={{ color: controversy.color }}>
-                  {controversy.score}%
+                <div className="text-lg font-bold" style={{ color: controversy.color }}>
+                  {controversy.level}
                 </div>
-                <div className="text-sm text-gray-300">roasted</div>
+                <div className="text-xs text-gray-400">
+                  {controversy.description}
+                </div>
               </div>
-            </div>
-            <div className="mt-2 text-sm text-gray-400 text-center">
-              Condolences: {grave.eulogyCount || 0} • Roasts: {grave.roastCount || 0} → {controversy.score}% roasted
             </div>
           </div>
 
           {/* Epitaph Excerpt */}
           <div className="bg-black/30 rounded-lg p-4 border border-amber-600/50">
-            <div className="text-amber-300 font-semibold mb-2">EPITAPH</div>
-            <div className="text-gray-200 text-sm leading-relaxed italic">
-              "{grave.eulogyText.length > 150 ? 
-                grave.eulogyText.substring(0, 150) + '...' : 
-                grave.eulogyText}"
+            <div className="text-amber-300 font-semibold mb-2">Epitaph</div>
+            <div className="text-gray-200 text-sm leading-relaxed italic line-clamp-2">
+              "{grave.eulogyText}"
             </div>
           </div>
 
@@ -303,6 +334,13 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
             <div className="bg-yellow-900/30 rounded-lg p-3 border border-yellow-600/50 text-center">
               <div className="text-2xl font-bold text-yellow-300">{grave.candleCount || 0}</div>
               <div className="text-sm text-yellow-200">Candles Lit</div>
+            </div>
+          </div>
+
+          {/* Micro-CTA */}
+          <div className="text-center py-2 border-t border-amber-600/30">
+            <div className="text-xs text-amber-400">
+              💭 Share your thoughts • Vote Condolences or Roasts
             </div>
           </div>
 
