@@ -21,16 +21,19 @@ model Grave {
   candleCount       Int                @default(0) @map("candle_count")
   roseCount         Int                @default(0) @map("rose_count")
   lolCount          Int                @default(0) @map("lol_count")
+  roastCount        Int                @default(0) @map("roast_count")
+  eulogyCount       Int                @default(0) @map("eulogy_count")
   featured          Boolean            @default(false) @map("featured")
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
   creatorDeviceHash String?            @map("creator_device_hash") @db.VarChar(128)
   mapX              Int?               @map("map_x")
   mapY              Int?               @map("map_y")
-  moderationTrail   ModerationAction[] @relation("GraveModerationActions")
-  reactionEvents    ReactionEvent[]    @relation("GraveReactionEvents")
-  reports           Report[]           @relation("GraveReports")
-  sympathies        Sympathy[]         @relation("GraveSympathies")
+  moderationTrail     ModerationAction[]     @relation("GraveModerationActions")
+  reactionEvents      ReactionEvent[]        @relation("GraveReactionEvents")
+  reports             Report[]               @relation("GraveReports")
+  sympathies          Sympathy[]             @relation("GraveSympathies")
+  roastEulogyReactions RoastEulogyReaction[] @relation("GraveRoastEulogyReactions")
 
   @@index([status, featured, createdAt], map: "idx_graves_status_featured_created_at")
   @@index([creatorDeviceHash, createdAt], map: "idx_graves_creator_created_at")
@@ -182,6 +185,19 @@ model ContactMessage {
   @@map("contact_messages")
 }
 
+model RoastEulogyReaction {
+  id         String                @id @default(uuid()) @map("id") @db.Uuid
+  graveId    String                @map("grave_id") @db.Uuid
+  deviceHash String                @map("device_hash") @db.VarChar(128)
+  type       RoastEulogyType       @map("type")
+  createdAt  DateTime              @default(now()) @map("created_at")
+  grave      Grave                 @relation("GraveRoastEulogyReactions", fields: [graveId], references: [id], onDelete: Cascade)
+
+  @@unique([graveId, deviceHash], map: "uq_roast_eulogy_grave_device")
+  @@index([graveId, createdAt], map: "idx_roast_eulogy_grave_created_at")
+  @@map("roast_eulogy_reactions")
+}
+
 model BannedDevice {
   deviceHash String    @id @map("device_hash") @db.VarChar(128)
   reason     String?   @map("reason") @db.VarChar(280)
@@ -250,4 +266,9 @@ enum ReactionType {
   CANDLE
   ROSE
   LOL
+}
+
+enum RoastEulogyType {
+  ROAST
+  EULOGY
 }
