@@ -32,17 +32,24 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
   const calculateAge = (): string => {
     const createdDate = new Date(grave.createdAt);
     const now = new Date();
+    
+    // Calculate difference in total days to avoid month/year calculation issues
     const diffMs = now.getTime() - createdDate.getTime();
-    const years = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365));
-    const months = Math.floor((diffMs % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
-    const days = Math.floor((diffMs % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
-
-    if (years > 0) {
+    const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (totalDays >= 365) {
+      const years = Math.floor(totalDays / 365);
+      const remainingDays = totalDays % 365;
+      const months = Math.floor(remainingDays / 30);
       return months > 0 ? `${years}y ${months}m` : `${years}y`;
-    } else if (months > 0) {
+    } else if (totalDays >= 30) {
+      const months = Math.floor(totalDays / 30);
+      const days = totalDays % 30;
       return days > 0 ? `${months}m ${days}d` : `${months}m`;
+    } else if (totalDays > 0) {
+      return `${totalDays}d`;
     } else {
-      return `${days}d`;
+      return "New";
     }
   };
 
@@ -73,8 +80,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       if (title.includes('laptop') || title.includes('computer') || title.includes('pc') || title.includes('macbook')) {
         return { icon: '🔋', cause: 'Hardware Malfunction' };
       }
-      if (title.includes('headphone') || title.includes('airpod') || title.includes('earbud')) {
-        return { icon: '🔋', cause: 'Audio Driver Separation' };
+      if (title.includes('headphone') || title.includes('airpod') || title.includes('earbud') || title.includes('pro (right ear)') || title.includes('pro (left ear)')) {
+        return { icon: '�', cause: 'Audio Driver Separation' };
       }
       if (title.includes('cable') || title.includes('charger')) {
         return { icon: '⚡', cause: 'Connector Deterioration' };
@@ -164,6 +171,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
   };
 
   const controversy = calculateControversy();
+  const causeInfo = determineCauseOfDeath();
 
   const generateQRCode = async (url: string): Promise<string> => {
     try {
@@ -278,8 +286,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
               <div>
                 <div className="text-amber-300 font-semibold">Cause of Death:</div>
                 <div className="text-lg flex items-center gap-2">
-                  <span>{determineCauseOfDeath().icon}</span>
-                  <span>{determineCauseOfDeath().cause}</span>
+                  <span>{causeInfo.icon}</span>
+                  <span>{causeInfo.cause}</span>
                 </div>
               </div>
             </div>
