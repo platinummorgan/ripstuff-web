@@ -219,10 +219,11 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       const canvas = await html2canvas(certificateRef.current, {
         backgroundColor: '#1a1a1a',
         scale: 2,
-        width: 800,
-        height: 700,
         useCORS: true,
         allowTaint: true,
+        logging: false,
+        imageTimeout: 0,
+        removeContainer: true,
       });
 
       const link = document.createElement('a');
