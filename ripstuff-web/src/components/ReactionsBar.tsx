@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { analytics } from "@/lib/analytics";
 
 import type { FeedItem } from "@/lib/validation";
 
@@ -68,6 +69,8 @@ export function ReactionsBar({ graveId, initialCounts }: ReactionsBarProps) {
         const next = new Set(prev);
         if (action === "ADD") {
           next.add(type);
+          // Track reaction addition
+          analytics.trackReaction(graveId, type.toLowerCase());
         } else {
           next.delete(type);
         }

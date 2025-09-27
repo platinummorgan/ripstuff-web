@@ -10,6 +10,7 @@ import { SocialShare } from "@/components/SocialShare";
 import { SympathySection } from "@/components/SympathySection";
 import { MemorialBadges, calculateBadges } from "@/components/MemorialBadges";
 import { DeathCertificate } from "@/components/DeathCertificate";
+import { GraveViewTracker } from "@/components/GraveViewTracker";
 import type { GraveDetailResponse } from "@/lib/validation";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
@@ -94,6 +95,13 @@ export default async function GravePage({ params }: { params: { slug: string } }
 
   return (
     <div className="space-y-12 pb-16">
+      {/* Track grave view for analytics */}
+      <GraveViewTracker 
+        graveId={grave.id} 
+        graveTitle={grave.title}
+        graveCategory={grave.category}
+      />
+      
       <header className="grid gap-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:grid-cols-[2fr,1fr] sm:p-10">
         <div className="space-y-4">
           <p className="text-xs uppercase tracking-[0.4em] text-[var(--muted)]">

@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { UserProvider } from "@/components/UserContext";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -51,9 +52,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
   return (
     <html lang="en">
       <body className={`${inter.variable} ${roboto.variable} antialiased bg-[var(--background)] text-[var(--foreground)]`}>
+        {/* Google Analytics */}
+        <GoogleAnalytics measurementId={gaId} />
+        
         <UserProvider>
           <div className="flex min-h-screen flex-col">
             <SiteHeader />

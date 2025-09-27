@@ -43,11 +43,19 @@ export function SocialShare({
   };
 
   const handleShare = (platform: keyof typeof shareLinks) => {
-    // Track sharing event
-    analytics.trackShare(platform, 'memorial', url.split('/').pop() || 'unknown');
+    // Track sharing event with improved analytics
+    const graveId = url.split('/').pop() || 'unknown';
+    analytics.trackSocialShare(platform, graveId, 'grave');
     
     window.open(shareLinks[platform], "_blank", "noopener,noreferrer,width=600,height=400");
     setShowDropdown(false);
+  };
+
+  const handleCopyLink = async () => {
+    await copyToClipboard();
+    // Track copy link as a share event
+    const graveId = url.split('/').pop() || 'unknown';
+    analytics.trackSocialShare('copy_link', graveId, 'grave');
   };
 
   return (
@@ -93,7 +101,7 @@ export function SocialShare({
             <hr className="border-[rgba(255,255,255,0.08)] my-2" />
             
             <button
-              onClick={copyToClipboard}
+              onClick={handleCopyLink}
               className="w-full flex items-center gap-3 px-3 py-2 text-sm text-white hover:bg-[rgba(255,255,255,0.05)] rounded transition-colors"
             >
               {copied ? (
