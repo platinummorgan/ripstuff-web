@@ -82,6 +82,8 @@ export const graveDetailResponse = feedItem.extend({
   eulogyText: z.string(),
   datesText: z.string().nullable(),
   backstory: z.string().nullable(),
+  roastCount: z.number().int().nonnegative(),
+  eulogyCount: z.number().int().nonnegative(),
   sympathies: z.array(sympathyDto),
   status: z.nativeEnum(GraveStatus),
 });

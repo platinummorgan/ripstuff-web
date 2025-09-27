@@ -54,6 +54,8 @@ export async function GET(_req: NextRequest, context: RouteContext) {
         rose: grave.roseCount,
         lol: grave.lolCount,
       },
+      roastCount: grave.roastCount,
+      eulogyCount: grave.eulogyCount,
       createdAt: grave.createdAt.toISOString(),
       featured: grave.featured,
       eulogyText: grave.eulogyText,

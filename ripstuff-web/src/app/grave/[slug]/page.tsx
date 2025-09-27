@@ -9,6 +9,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { SocialShare } from "@/components/SocialShare";
 import { SympathySection } from "@/components/SympathySection";
 import { MemorialBadges, calculateBadges } from "@/components/MemorialBadges";
+import { DeathCertificate } from "@/components/DeathCertificate";
 import type { GraveDetailResponse } from "@/lib/validation";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
@@ -164,6 +165,21 @@ export default async function GravePage({ params }: { params: { slug: string } }
         <article className="mt-6 space-y-4 whitespace-pre-line text-base leading-7 text-[var(--foreground)]">
           {grave.eulogyText}
         </article>
+      </section>
+
+      <section className="space-y-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
+        <SectionHeader title="Death Certificate" description="Official documentation of this memorial's legacy and controversy rating." />
+        <DeathCertificate 
+          grave={{
+            title: grave.title,
+            category: grave.category,
+            eulogyText: grave.eulogyText,
+            createdAt: grave.createdAt,
+            roastCount: grave.roastCount || 0,
+            eulogyCount: grave.eulogyCount || 0,
+          }}
+          graveUrl={`${baseUrl}/grave/${grave.slug}`}
+        />
       </section>
 
       <section className="space-y-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
