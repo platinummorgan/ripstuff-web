@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from 'react';
-import html2canvas from 'html2canvas';
 import domtoimage from 'dom-to-image';
 import QRCode from 'qrcode';
 
@@ -179,6 +178,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
   const causeInfo = determineCauseOfDeath();
 
   const generateQRCode = async (url: string): Promise<string> => {
+    let restoreColors: (() => void) | null = null;
+
     try {
       return await QRCode.toDataURL(url, {
         width: 120,
@@ -194,10 +195,84 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
     }
   };
 
+  const normalizeColorValue = (property: keyof CSSStyleDeclaration, value: string) => {
+    if (!value || !value.includes('oklch')) {
+      return value;
+    }
+
+    const probe = document.createElement('div');
+    Object.assign(probe.style, {
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      left: '-9999px',
+      top: '0',
+      pointerEvents: 'none',
+      visibility: 'hidden',
+    });
+
+    document.body.appendChild(probe);
+    try {
+      (probe.style as any)[property] = value;
+      const computed = getComputedStyle(probe)[property];
+      return computed || value;
+    } catch {
+      return value;
+    } finally {
+      document.body.removeChild(probe);
+    }
+  };
+
+  const applyLegacyColorOverrides = (root: HTMLElement) => {
+    const properties: (keyof CSSStyleDeclaration)[] = [
+      'color',
+      'backgroundColor',
+      'borderColor',
+      'borderTopColor',
+      'borderRightColor',
+      'borderBottomColor',
+      'borderLeftColor',
+      'outlineColor',
+      'backgroundImage',
+      'boxShadow',
+    ];
+
+    const elements = [root, ...Array.from(root.querySelectorAll<HTMLElement>('*'))];
+    const originals: Array<{ element: HTMLElement; property: keyof CSSStyleDeclaration; value: string } > = [];
+
+    for (const element of elements) {
+      const computed = getComputedStyle(element);
+
+      for (const property of properties) {
+        const currentValue = computed[property];
+        if (typeof currentValue === 'string' && currentValue.includes('oklch')) {
+          const legacyValue = normalizeColorValue(property, currentValue);
+          if (legacyValue && legacyValue !== currentValue) {
+            const inlineValue = (element.style as any)[property] as string;
+            originals.push({ element, property, value: inlineValue });
+            (element.style as any)[property] = legacyValue;
+          }
+        }
+      }
+    }
+
+    return () => {
+      for (const { element, property, value } of originals) {
+        if (value) {
+          (element.style as any)[property] = value;
+        } else {
+          (element.style as any)[property] = '';
+        }
+      }
+    };
+  };
+
   const downloadCertificate = async () => {
     if (!certificateRef.current) return;
 
     setIsGenerating(true);
+
+    let restoreColors: (() => void) | null = null;
 
     try {
       // Generate QR code
@@ -216,6 +291,9 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
 
       // Wait a moment for QR code to render
       await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Convert Tailwind oklch colors to rgb() so dom-to-image can parse them
+      restoreColors = applyLegacyColorOverrides(certificateRef.current);
 
       // Try dom-to-image first as it handles modern CSS better
       const dataUrl = await domtoimage.toPng(certificateRef.current, {
@@ -252,6 +330,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       console.error('Certificate generation failed:', error);
       alert(`Failed to generate certificate: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     } finally {
+      restoreColors?.();
       setIsGenerating(false);
     }
   };
