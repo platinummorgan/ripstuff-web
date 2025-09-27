@@ -222,6 +222,47 @@ model User {   // PascalCase for code
 ### Next Steps Recommended by Codex
 1. **Local Environment:** Run `pnpm prisma generate` after pulling changes to update local Prisma Client
 
-**Status:** Production-ready with optimized performance. All critical Prisma issues resolved and analytics page optimized for static generation.
+## 📊 Google Analytics 4 Integration - September 27, 2025 ✅
+**Comprehensive analytics tracking system implemented and deployed.**
 
-Last updated: September 27, 2025 – after comprehensive Prisma schema fixes by Codex team.
+### GA4 Implementation Features
+- **Site-Wide Tracking:** GoogleAnalytics component integrated in root layout with proper Next.js optimization
+- **Automatic Page Views:** Route-based pageview tracking with pathname-based navigation detection
+- **Custom Event Tracking:** Enhanced analytics.ts class with RipStuff-specific event methods
+- **Privacy Compliant:** Configured with `anonymize_ip: true` and disabled ad personalization signals
+
+### RipStuff-Specific Events Tracked
+```typescript
+// Core interactions
+- Grave views (with category and ID tracking)
+- Reaction additions (heart, candle, rose, lol)
+- Social sharing (Twitter, Facebook, Reddit, copy link)
+- Death certificate downloads with controversy scores
+- Roast vs Eulogy voting engagement
+
+// User behavior  
+- Sign-ins via Google/Facebook OAuth with new vs returning user detection
+- Grave creation events with category, photo presence, and eulogy type
+- Sympathy message submissions
+- Moderation actions for admin users
+```
+
+### Technical Implementation
+- **Components:** `GoogleAnalytics.tsx`, `GraveViewTracker.tsx` for automatic event tracking
+- **Enhanced Analytics Class:** Improved `analytics.ts` with GA4-optimized event structure  
+- **Custom Dimensions:** Configured for grave_category, user_type, content_type parameters
+- **SSR Compatible:** Fixed useSearchParams() SSR issues for successful static generation
+
+### Environment Configuration
+- **Environment Variable:** `NEXT_PUBLIC_GA_MEASUREMENT_ID` (configured in Vercel dashboard)
+- **Local Development:** Analytics events logged to console when GA ID not present
+- **Production Ready:** Graceful fallback when measurement ID unavailable
+
+### Deployment Status
+- ✅ **Code Deployed:** All GA4 integration pushed to production
+- ⚠️ **Activation Pending:** Requires `NEXT_PUBLIC_GA_MEASUREMENT_ID` to be added in Vercel environment variables
+- 🎯 **Ready to Track:** Once GA ID configured, comprehensive analytics will be active
+
+**Status:** Production-ready with optimized performance and comprehensive analytics. All critical Prisma issues resolved, analytics page optimized for static generation, and GA4 tracking system fully implemented.
+
+Last updated: September 27, 2025 – after Google Analytics 4 integration and Prisma schema fixes by Codex team.

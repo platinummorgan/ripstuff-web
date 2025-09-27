@@ -49,12 +49,14 @@ class Analytics {
     this.sendToCustomEndpoint(event);
   }
 
-  // Track page views manually if needed
+  // Track page views manually if needed (GA measurement ID is configured in GoogleAnalytics component)
   trackPageView(path: string, title?: string) {
     if (typeof window === 'undefined') return;
 
+    // The gtag config is handled by the GoogleAnalytics component
+    // This method is mainly for manual tracking if needed
     if (window.gtag) {
-      window.gtag('config', process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID!, {
+      window.gtag('event', 'page_view', {
         page_path: path,
         page_title: title || document.title,
       });
