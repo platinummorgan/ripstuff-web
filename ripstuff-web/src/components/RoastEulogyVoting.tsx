@@ -109,7 +109,7 @@ export function RoastEulogyVoting({ graveId, graveSlug }: RoastEulogyVotingProps
           } ${state.loading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <span>❤️</span>
-          <span>Leave Sympathy</span>
+          <span>Condolences</span>
           <span className="bg-green-600/30 px-2 py-1 rounded-full text-xs">
             {state.sympathyCount}
           </span>
@@ -125,7 +125,7 @@ export function RoastEulogyVoting({ graveId, graveSlug }: RoastEulogyVotingProps
           } ${state.loading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <span>🔥</span>
-          <span>Roast It</span>
+          <span>Roasts</span>
           <span className="bg-red-600/30 px-2 py-1 rounded-full text-xs">
             {state.roastCount}
           </span>
@@ -135,7 +135,7 @@ export function RoastEulogyVoting({ graveId, graveSlug }: RoastEulogyVotingProps
       {/* Vote Summary */}
       {totalVotes > 0 && (
         <div className="text-center text-sm text-gray-400">
-          Sympathies: {state.sympathyCount} • Roasts: {state.roastCount} → {roastPercentage}% roasted
+          Condolences: {state.sympathyCount} • Roasts: {state.roastCount} → {roastPercentage}% roasted
         </div>
       )}
 

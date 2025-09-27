@@ -255,7 +255,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
 
           {/* Roast Meter */}
           <div className="bg-black/30 rounded-lg p-4 border border-amber-600/50">
-            <div className="text-amber-300 font-semibold mb-3">ROAST METER — SYMPATHIES VS ROASTS</div>
+            <div className="text-amber-300 font-semibold mb-3">ROAST METER — CONDOLENCES VS ROASTS</div>
             <div className="flex items-center gap-4">
               <div className="flex-1">
                 <div className="flex justify-between text-sm mb-2">
@@ -280,7 +280,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
               </div>
             </div>
             <div className="mt-2 text-sm text-gray-400 text-center">
-              Sympathies: {grave.eulogyCount || 0} • Roasts: {grave.roastCount || 0} → {controversy.score}% roasted
+              Condolences: {grave.eulogyCount || 0} • Roasts: {grave.roastCount || 0} → {controversy.score}% roasted
             </div>
           </div>
 
@@ -311,7 +311,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
             <div className="flex-1">
               <div className="text-xs text-gray-400 leading-relaxed">
                 This certificate verifies the digital death and memorial of the above-named item. 
-                The controversy rating reflects the ratio of roast votes to sympathy votes on the 
+                The controversy rating reflects the ratio of roast votes to condolence votes on the 
                 epitaph above, representing community sentiment toward the deceased item.
               </div>
             </div>
