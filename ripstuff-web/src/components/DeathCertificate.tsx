@@ -8,10 +8,10 @@ interface DeathCertificateProps {
   grave: {
     title: string;
     category: string;
-    eulogyText: string;
+    eulogyText: string; // Display as "Epitaph" in UI
     createdAt: string;
     roastCount?: number;
-    eulogyCount?: number;
+    eulogyCount?: number; // Display as "Sympathy Votes" in UI  
     datesText?: string; // For cause of death extraction
   };
   graveUrl: string;
@@ -281,11 +281,21 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
             <div className="mt-2 text-sm text-gray-400">{controversy.description}</div>
           </div>
 
-          {/* Stats */}
+          {/* Epitaph Excerpt */}
+          <div className="bg-black/30 rounded-lg p-4 border border-amber-600/50">
+            <div className="text-amber-300 font-semibold mb-2">EPITAPH</div>
+            <div className="text-gray-200 text-sm leading-relaxed italic">
+              "{grave.eulogyText.length > 150 ? 
+                grave.eulogyText.substring(0, 150) + '...' : 
+                grave.eulogyText}"
+            </div>
+          </div>
+
+          {/* Community Response Stats */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-green-900/30 rounded-lg p-3 border border-green-600/50 text-center">
               <div className="text-2xl font-bold text-green-300">{grave.eulogyCount || 0}</div>
-              <div className="text-sm text-green-200">Eulogy Votes</div>
+              <div className="text-sm text-green-200">Sympathy Votes</div>
             </div>
             <div className="bg-red-900/30 rounded-lg p-3 border border-red-600/50 text-center">
               <div className="text-2xl font-bold text-red-300">{grave.roastCount || 0}</div>
@@ -298,8 +308,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
             <div className="flex-1">
               <div className="text-xs text-gray-400 leading-relaxed">
                 This certificate verifies the digital death and memorial of the above-named item. 
-                Controversy ratings reflect the ratio of roast votes to eulogy votes on the memorial's 
-                single eulogy, representing community sentiment toward the deceased item.
+                The controversy rating reflects the ratio of roast votes to sympathy votes on the 
+                epitaph above, representing community sentiment toward the deceased item.
               </div>
             </div>
             <div className="ml-4">
