@@ -303,7 +303,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
         quality: 1.0
       });
 
-      // Direct download without additional canvas processing
+      // Direct download of full certificate
       const link = document.createElement('a');
       link.download = `death-certificate-${grave.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.png`;
       link.href = dataUrl;
@@ -330,11 +330,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       {/* Certificate Preview */}
       <div 
         ref={certificateRef}
-        className="bg-gray-100 p-12 flex items-center justify-center"
+        className="bg-gradient-to-br from-gray-900 via-gray-800 to-black border-8 border-amber-600 rounded-lg p-8 text-white relative overflow-hidden"
         style={{ width: '800px', height: '900px' }}
-      >
-        {/* Actual Certificate Card */}
-        <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black border-4 border-amber-600 rounded-lg p-6 text-white relative overflow-hidden w-full max-w-lg shadow-2xl"
       >
         {/* Decorative Border */}
         <div className="absolute inset-2 border-2 border-amber-500 rounded opacity-50"></div>
@@ -354,30 +351,30 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
         </div>
 
         {/* Main Content */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {/* Deceased Information */}
-          <div className="bg-black/30 rounded-lg p-3 border border-amber-600/50">
-            <div className="grid grid-cols-2 gap-3">
+          <div className="bg-black/30 rounded-lg p-4 border border-amber-600/50">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <div className="text-amber-300 font-semibold text-sm">Deceased:</div>
-                <div className="text-lg font-bold">
-                  {grave.title} <span className="text-xs text-gray-400 font-normal">Age: {calculateAge()}</span>
+                <div className="text-amber-300 font-semibold">Deceased:</div>
+                <div className="text-xl font-bold">
+                  {grave.title} <span className="text-sm text-gray-400 font-normal">Age: {calculateAge()}</span>
                 </div>
               </div>
               <div>
-                <div className="text-amber-300 font-semibold text-sm">Category:</div>
-                <div className="text-base capitalize">{grave.category.replace(/_/g, ' ')}</div>
+                <div className="text-amber-300 font-semibold">Category:</div>
+                <div className="text-lg capitalize">{grave.category.replace(/_/g, ' ')}</div>
               </div>
             </div>
             
-            <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-2 gap-4">
               <div>
-                <div className="text-amber-300 font-semibold text-sm">Date of Passing:</div>
-                <div className="text-base">{formatDate(grave.createdAt)}</div>
+                <div className="text-amber-300 font-semibold">Date of Passing:</div>
+                <div className="text-lg">{formatDate(grave.createdAt)}</div>
               </div>
               <div>
-                <div className="text-amber-300 font-semibold text-sm">Cause of Death:</div>
-                <div className="text-base flex items-center gap-2">
+                <div className="text-amber-300 font-semibold">Cause of Death:</div>
+                <div className="text-lg flex items-center gap-2">
                   <span>{causeInfo.icon}</span>
                   <span>{causeInfo.cause}</span>
                 </div>
@@ -386,9 +383,9 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
           </div>
 
           {/* Roast Meter */}
-          <div className="bg-black/30 rounded-lg p-3 border border-amber-600/50">
-            <div className="text-amber-300 font-semibold mb-2 text-sm">ROAST METER — CONDOLENCES VS ROASTS</div>
-            <div className="space-y-2">
+          <div className="bg-black/30 rounded-lg p-4 border border-amber-600/50">
+            <div className="text-amber-300 font-semibold mb-3">ROAST METER — CONDOLENCES VS ROASTS</div>
+            <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-green-400">Condolences ({grave.eulogyCount || 0})</span>
                 <span className="text-red-400">Roasts ({grave.roastCount || 0})</span>
@@ -407,10 +404,10 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
               </div>
               
               <div className="text-center">
-                <div className="text-base font-bold" style={{ color: controversy.color }}>
+                <div className="text-lg font-bold" style={{ color: controversy.color }}>
                   {controversy.level}
                 </div>
-                <div className="text-xs text-gray-400">
+                <div className="text-sm text-gray-400">
                   {controversy.description}
                 </div>
               </div>
@@ -418,9 +415,9 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
           </div>
 
           {/* Epitaph Excerpt */}
-          <div className="bg-black/30 rounded-lg p-3 border border-amber-600/50">
-            <div className="text-amber-300 font-semibold mb-2 text-sm">Epitaph</div>
-            <div className="text-gray-200 text-xs leading-relaxed italic line-clamp-3">
+          <div className="bg-black/30 rounded-lg p-4 border border-amber-600/50">
+            <div className="text-amber-300 font-semibold mb-3">Epitaph</div>
+            <div className="text-gray-200 text-sm leading-relaxed italic line-clamp-4">
               "{grave.eulogyText}"
             </div>
           </div>
@@ -437,33 +434,32 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
           {/* QR Code and Footer */}
           <div className="flex justify-between items-end">
             <div className="flex-1">
-              <div className="text-xs text-gray-400 leading-tight">
+              <div className="text-sm text-gray-400 leading-relaxed">
                 This certificate verifies the digital death and memorial of the above-named item. 
                 The controversy rating reflects the ratio of roast votes to condolence votes on the 
                 epitaph above, representing community sentiment toward the deceased item.
               </div>
             </div>
-            <div className="ml-3">
+            <div className="ml-4">
               <img 
                 id="qr-code"
                 src="" 
                 alt="QR Code"
-                className="w-16 h-16 border border-amber-600/50 rounded"
+                className="w-20 h-20 border border-amber-600/50 rounded"
               />
               <div className="text-xs text-gray-400 text-center mt-1">Visit Memorial</div>
             </div>
           </div>
 
           {/* Signature Line */}
-          <div className="border-t border-amber-600/50 pt-2 text-center">
-            <div className="text-xs text-amber-300">
+          <div className="border-t border-amber-600/50 pt-4 text-center">
+            <div className="text-sm text-amber-300">
               Certified by RipStuff Virtual Graveyard Authority
             </div>
             <div className="text-xs text-gray-400 mt-1">
               Generated on {new Date().toLocaleDateString()}
             </div>
           </div>
-        </div>
         </div>
       </div>
 
