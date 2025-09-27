@@ -293,14 +293,25 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Convert Tailwind oklch colors to rgb() so dom-to-image can parse them
-      restoreColors = applyLegacyColorOverrides(certificateRef.current);
+      const node = certificateRef.current;
+      restoreColors = applyLegacyColorOverrides(node);
 
-      // Try dom-to-image first as it handles modern CSS better
-      const dataUrl = await domtoimage.toPng(certificateRef.current, {
-        width: 1600, // 2x scale for high resolution
-        height: 1800, // 2x scale for high resolution (900 * 2)
-        bgcolor: '#1a1a1a',
-        quality: 1.0
+      const width = node.offsetWidth;
+      const height = node.offsetHeight;
+      const scale = 2;
+
+      // High-res capture without extra canvas whitespace
+      const dataUrl = await domtoimage.toPng(node, {
+        width: width * scale,
+        height: height * scale,
+        quality: 1,
+        bgcolor: '#0b0d16',
+        style: {
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          width: `${width}px`,
+          height: `${height}px`,
+        },
       });
 
       // Direct download of full certificate
@@ -330,8 +341,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       {/* Certificate Preview */}
       <div 
         ref={certificateRef}
-        className="bg-gradient-to-br from-gray-900 via-gray-800 to-black border-8 border-amber-600 rounded-lg p-8 text-white relative overflow-hidden"
-        style={{ width: '800px', height: '900px' }}
+        className="bg-gradient-to-br from-gray-900 via-gray-800 to-black border-8 border-amber-600 rounded-lg p-8 text-white relative overflow-hidden mx-auto"
+        style={{ width: '100%', maxWidth: '800px', height: '900px' }}
       >
         {/* Decorative Border */}
         <div className="absolute inset-2 border-2 border-amber-500 rounded opacity-50"></div>
