@@ -204,8 +204,13 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       
       // Update QR code in the certificate
       const qrImg = certificateRef.current.querySelector('#qr-code') as HTMLImageElement;
-      if (qrImg && qrCodeDataUrl) {
-        qrImg.src = qrCodeDataUrl;
+      if (qrImg) {
+        if (qrCodeDataUrl) {
+          qrImg.src = qrCodeDataUrl;
+        } else {
+          // Hide QR code if generation failed
+          qrImg.style.display = 'none';
+        }
       }
 
       // Wait a moment for QR code to render
@@ -215,7 +220,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
         backgroundColor: '#1a1a1a',
         scale: 2,
         width: 800,
-        height: 600,
+        height: 700,
         useCORS: true,
         allowTaint: true,
       });
@@ -226,7 +231,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       link.click();
     } catch (error) {
       console.error('Certificate generation failed:', error);
-      alert('Failed to generate certificate. Please try again.');
+      alert(`Failed to generate certificate: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     } finally {
       setIsGenerating(false);
     }
