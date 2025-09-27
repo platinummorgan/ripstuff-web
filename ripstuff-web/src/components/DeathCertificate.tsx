@@ -311,7 +311,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
                   }}
                 ></div>
                 {/* 50% tick mark */}
-                <div className="absolute top-0 left-1/2 transform -translate-x-0.5 w-0.5 h-full bg-gray-400/50"></div>
+                <div className="absolute top-0 left-1/2 transform -translate-x-0.5 w-1 h-full bg-white/30 border-l border-white/50"></div>
               </div>
               
               <div className="text-center">
