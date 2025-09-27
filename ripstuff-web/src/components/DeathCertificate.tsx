@@ -46,7 +46,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       const months = Math.floor(totalDays / 30);
       const days = totalDays % 30;
       return days > 0 ? `${months}m ${days}d` : `${months}m`;
-    } else if (totalDays > 0) {
+    } else if (totalDays >= 1) {
       return `${totalDays}d`;
     } else {
       return "New";
@@ -81,7 +81,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
         return { icon: '🔋', cause: 'Hardware Malfunction' };
       }
       if (title.includes('headphone') || title.includes('airpod') || title.includes('earbud') || title.includes('pro (right ear)') || title.includes('pro (left ear)')) {
-        return { icon: '�', cause: 'Audio Driver Separation' };
+        return { icon: '🎵', cause: 'Audio Driver Separation' };
       }
       if (title.includes('cable') || title.includes('charger')) {
         return { icon: '⚡', cause: 'Connector Deterioration' };
@@ -91,6 +91,10 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
     
     if (category.includes('appliance')) {
       return { icon: '🔥', cause: 'Mechanical Breakdown' };
+    }
+    
+    if (category.includes('games') || title.includes('playstation') || title.includes('xbox') || title.includes('nintendo') || title.includes('console') || title.includes('ps4') || title.includes('ps5')) {
+      return { icon: '🎮', cause: 'System Overload Failure' };
     }
     
     if (category.includes('toy')) {
@@ -242,14 +246,14 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       <div 
         ref={certificateRef}
         className="bg-gradient-to-br from-gray-900 via-gray-800 to-black border-4 border-amber-600 rounded-lg p-8 text-white relative overflow-hidden"
-        style={{ width: '800px', height: '600px' }}
+        style={{ width: '800px', height: '700px' }}
       >
         {/* Decorative Border */}
         <div className="absolute inset-2 border-2 border-amber-500 rounded opacity-50"></div>
         <div className="absolute inset-4 border border-amber-400 rounded opacity-30"></div>
 
         {/* Header */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-4">
           <div className="text-3xl font-bold text-amber-300 mb-2">
             ⚰️ Official Death Certificate ⚰️
           </div>
@@ -262,7 +266,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
         </div>
 
         {/* Main Content */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Deceased Information */}
           <div className="bg-black/30 rounded-lg p-4 border border-amber-600/50">
             <div className="grid grid-cols-2 gap-4">
@@ -333,22 +337,12 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
             </div>
           </div>
 
-          {/* Optional Community Tiles */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-purple-900/30 rounded-lg p-3 border border-purple-600/50 text-center">
-              <div className="text-2xl font-bold text-purple-300">0</div>
-              <div className="text-sm text-purple-200">Memories</div>
-            </div>
-            <div className="bg-yellow-900/30 rounded-lg p-3 border border-yellow-600/50 text-center">
-              <div className="text-2xl font-bold text-yellow-300">{grave.candleCount || 0}</div>
-              <div className="text-sm text-yellow-200">Candles Lit</div>
-            </div>
-          </div>
+
 
           {/* Micro-CTA */}
-          <div className="text-center py-2 border-t border-amber-600/30">
+          <div className="text-center py-1 border-t border-amber-600/30">
             <div className="text-xs text-amber-400">
-              💭 Share your thoughts • Vote Condolences or Roasts
+              💭 Vote Condolences or Roasts
             </div>
           </div>
 
