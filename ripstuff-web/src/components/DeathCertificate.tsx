@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
+import domtoimage from 'dom-to-image';
 import QRCode from 'qrcode';
 
 interface DeathCertificateProps {
@@ -216,43 +217,32 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       // Wait a moment for QR code to render
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Clone the element to avoid modifying the original
-      const clonedElement = certificateRef.current.cloneNode(true) as HTMLElement;
-      document.body.appendChild(clonedElement);
-      
-      // Replace all CSS custom properties and oklch colors with hex equivalents
-      const allElements = clonedElement.querySelectorAll('*');
-      allElements.forEach((el) => {
-        if (el instanceof HTMLElement) {
-          // Force specific color replacements for common Tailwind classes
-          const classList = Array.from(el.classList);
-          classList.forEach((className) => {
-            if (className.includes('text-amber-300')) el.style.color = '#fcd34d';
-            if (className.includes('text-amber-400')) el.style.color = '#fbbf24';
-            if (className.includes('text-amber-600')) el.style.color = '#d97706';
-            if (className.includes('text-gray-300')) el.style.color = '#d1d5db';
-            if (className.includes('text-gray-400')) el.style.color = '#9ca3af';
-            if (className.includes('text-white')) el.style.color = '#ffffff';
-            if (className.includes('bg-black')) el.style.backgroundColor = '#000000';
-            if (className.includes('border-amber-600')) el.style.borderColor = '#d97706';
-            if (className.includes('border-amber-500')) el.style.borderColor = '#f59e0b';
-            if (className.includes('border-amber-400')) el.style.borderColor = '#fbbf24';
-          });
+      // Try dom-to-image first as it handles modern CSS better
+      const dataUrl = await domtoimage.toPng(certificateRef.current, {
+        width: 800,
+        height: 700,
+        bgcolor: '#1a1a1a',
+        style: {
+          transform: 'scale(2)',
+          transformOrigin: 'top left'
         }
       });
 
-      const canvas = await html2canvas(clonedElement, {
-        backgroundColor: '#1a1a1a',
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        imageTimeout: 0,
-        removeContainer: true,
+      // Convert dataUrl to canvas for consistent download handling
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = 1600; // 800 * 2 for scale
+      canvas.height = 1400; // 700 * 2 for scale
+      
+      await new Promise((resolve) => {
+        img.onload = () => {
+          ctx?.drawImage(img, 0, 0);
+          resolve(void 0);
+        };
+        img.src = dataUrl;
       });
-
-      // Remove the cloned element
-      document.body.removeChild(clonedElement);
 
       const link = document.createElement('a');
       link.download = `death-certificate-${grave.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.png`;
