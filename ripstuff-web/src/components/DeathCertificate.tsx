@@ -13,6 +13,7 @@ interface DeathCertificateProps {
     roastCount?: number;
     eulogyCount?: number; // Display as "Sympathy Votes" in UI  
     datesText?: string; // For cause of death extraction
+    candleCount?: number; // For candles lit display
   };
   graveUrl: string;
 }
@@ -252,9 +253,9 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
             </div>
           </div>
 
-          {/* Controversy Meter */}
+          {/* Roast Meter */}
           <div className="bg-black/30 rounded-lg p-4 border border-amber-600/50">
-            <div className="text-amber-300 font-semibold mb-3">CONTROVERSY RATING</div>
+            <div className="text-amber-300 font-semibold mb-3">ROAST METER — SYMPATHIES VS ROASTS</div>
             <div className="flex items-center gap-4">
               <div className="flex-1">
                 <div className="flex justify-between text-sm mb-2">
@@ -275,10 +276,12 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
                 <div className="text-2xl font-bold" style={{ color: controversy.color }}>
                   {controversy.score}%
                 </div>
-                <div className="text-sm text-gray-300">{controversy.level}</div>
+                <div className="text-sm text-gray-300">roasted</div>
               </div>
             </div>
-            <div className="mt-2 text-sm text-gray-400">{controversy.description}</div>
+            <div className="mt-2 text-sm text-gray-400 text-center">
+              Sympathies: {grave.eulogyCount || 0} • Roasts: {grave.roastCount || 0} → {controversy.score}% roasted
+            </div>
           </div>
 
           {/* Epitaph Excerpt */}
@@ -291,15 +294,15 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
             </div>
           </div>
 
-          {/* Community Response Stats */}
+          {/* Optional Community Tiles */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-green-900/30 rounded-lg p-3 border border-green-600/50 text-center">
-              <div className="text-2xl font-bold text-green-300">{grave.eulogyCount || 0}</div>
-              <div className="text-sm text-green-200">Sympathy Votes</div>
+            <div className="bg-purple-900/30 rounded-lg p-3 border border-purple-600/50 text-center">
+              <div className="text-2xl font-bold text-purple-300">0</div>
+              <div className="text-sm text-purple-200">Memories</div>
             </div>
-            <div className="bg-red-900/30 rounded-lg p-3 border border-red-600/50 text-center">
-              <div className="text-2xl font-bold text-red-300">{grave.roastCount || 0}</div>
-              <div className="text-sm text-red-200">Roast Votes</div>
+            <div className="bg-yellow-900/30 rounded-lg p-3 border border-yellow-600/50 text-center">
+              <div className="text-2xl font-bold text-yellow-300">{grave.candleCount || 0}</div>
+              <div className="text-sm text-yellow-200">Candles Lit</div>
             </div>
           </div>
 
