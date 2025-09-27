@@ -216,7 +216,32 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       // Wait a moment for QR code to render
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const canvas = await html2canvas(certificateRef.current, {
+      // Clone the element to avoid modifying the original
+      const clonedElement = certificateRef.current.cloneNode(true) as HTMLElement;
+      document.body.appendChild(clonedElement);
+      
+      // Replace all CSS custom properties and oklch colors with hex equivalents
+      const allElements = clonedElement.querySelectorAll('*');
+      allElements.forEach((el) => {
+        if (el instanceof HTMLElement) {
+          // Force specific color replacements for common Tailwind classes
+          const classList = Array.from(el.classList);
+          classList.forEach((className) => {
+            if (className.includes('text-amber-300')) el.style.color = '#fcd34d';
+            if (className.includes('text-amber-400')) el.style.color = '#fbbf24';
+            if (className.includes('text-amber-600')) el.style.color = '#d97706';
+            if (className.includes('text-gray-300')) el.style.color = '#d1d5db';
+            if (className.includes('text-gray-400')) el.style.color = '#9ca3af';
+            if (className.includes('text-white')) el.style.color = '#ffffff';
+            if (className.includes('bg-black')) el.style.backgroundColor = '#000000';
+            if (className.includes('border-amber-600')) el.style.borderColor = '#d97706';
+            if (className.includes('border-amber-500')) el.style.borderColor = '#f59e0b';
+            if (className.includes('border-amber-400')) el.style.borderColor = '#fbbf24';
+          });
+        }
+      });
+
+      const canvas = await html2canvas(clonedElement, {
         backgroundColor: '#1a1a1a',
         scale: 2,
         useCORS: true,
@@ -225,6 +250,9 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
         imageTimeout: 0,
         removeContainer: true,
       });
+
+      // Remove the cloned element
+      document.body.removeChild(clonedElement);
 
       const link = document.createElement('a');
       link.download = `death-certificate-${grave.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.png`;
