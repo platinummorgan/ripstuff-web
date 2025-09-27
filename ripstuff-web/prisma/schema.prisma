@@ -8,227 +8,226 @@ datasource db {
 }
 
 model BannedDevice {
-  device_hash String    @id @db.VarChar(128)
-  reason      String?   @db.VarChar(280)
-  banned_at   DateTime  @default(now())
-  banned_by   String    @db.VarChar(128)
-  expires_at  DateTime?
-  is_active   Boolean   @default(true)
-  created_at  DateTime  @default(now())
-  updated_at  DateTime
+  deviceHash String   @id @map("device_hash") @db.VarChar(128)
+  reason     String?  @db.VarChar(280)
+  bannedAt   DateTime @map("banned_at") @default(now())
+  bannedBy   String   @map("banned_by") @db.VarChar(128)
+  expiresAt  DateTime? @map("expires_at")
+  isActive   Boolean  @map("is_active") @default(true)
+  createdAt  DateTime @map("created_at") @default(now())
+  updatedAt  DateTime @map("updated_at") @updatedAt
 
   @@map("banned_devices")
-  @@index([is_active, banned_at], map: "idx_banned_device_active")
-  @@index([expires_at], map: "idx_banned_device_expires")
+  @@index([isActive, bannedAt], map: "idx_banned_device_active")
+  @@index([expiresAt], map: "idx_banned_device_expires")
 }
 
 model ContactMessage {
-  id                 String    @id @db.Uuid
-  sender_device_hash String    @db.VarChar(128)
-  subject            String    @db.VarChar(120)
-  message            String
-  status             String    @default("UNREAD") @db.VarChar(20)
-  created_at         DateTime  @default(now())
-  resolved_at        DateTime?
-  moderator_notes    String?
+  id               String   @id @default(uuid()) @db.Uuid
+  senderDeviceHash String   @map("sender_device_hash") @db.VarChar(128)
+  subject          String   @db.VarChar(120)
+  message          String
+  status           String   @default("UNREAD") @db.VarChar(20)
+  createdAt        DateTime @map("created_at") @default(now())
+  resolvedAt       DateTime? @map("resolved_at")
+  moderatorNotes   String?  @map("moderator_notes")
 
   @@map("contact_messages")
-  @@index([sender_device_hash, created_at], map: "idx_contact_messages_device_created_at")
-  @@index([status, created_at], map: "idx_contact_messages_status_created_at")
+  @@index([senderDeviceHash, createdAt], map: "idx_contact_messages_device_created_at")
+  @@index([status, createdAt], map: "idx_contact_messages_status_created_at")
 }
 
 model EulogyDraft {
-  id          String        @id @db.Uuid
-  device_hash String        @db.VarChar(128)
-  title       String        @db.VarChar(120)
-  years_text  String?       @db.VarChar(32)
-  backstory   String?       @db.VarChar(140)
-  category    GraveCategory
-  eulogy_text String
-  tokens_used Int
-  created_at  DateTime      @default(now())
-  expires_at  DateTime
-  emotion     String        @default("heartfelt") @db.VarChar(20)
+  id         String        @id @default(uuid()) @db.Uuid
+  deviceHash String        @map("device_hash") @db.VarChar(128)
+  title      String        @db.VarChar(120)
+  yearsText  String?       @map("years_text") @db.VarChar(32)
+  backstory  String?       @db.VarChar(140)
+  category   GraveCategory
+  eulogyText String        @map("eulogy_text")
+  tokensUsed Int           @map("tokens_used")
+  createdAt  DateTime      @map("created_at") @default(now())
+  expiresAt  DateTime      @map("expires_at")
+  emotion    String        @default("heartfelt") @db.VarChar(20)
 
   @@map("eulogy_drafts")
-  @@index([device_hash, created_at], map: "idx_eulogy_draft_device_created")
+  @@index([deviceHash, createdAt], map: "idx_eulogy_draft_device_created")
 }
 
 model Grave {
-  id                     String                   @id @db.Uuid
-  slug                   String                   @unique @db.VarChar(128)
-  title                  String                   @db.VarChar(120)
-  dates_text             String?                  @db.VarChar(64)
-  backstory              String?                  @db.VarChar(140)
-  photo_url              String?                  @db.VarChar(2048)
-  eulogy_text            String
-  category               GraveCategory
-  status                 GraveStatus              @default(PENDING)
-  heart_count            Int                      @default(0)
-  candle_count           Int                      @default(0)
-  rose_count             Int                      @default(0)
-  lol_count              Int                      @default(0)
-  featured               Boolean                  @default(false)
-  created_at             DateTime                 @default(now())
-  updated_at             DateTime
-  creator_device_hash    String?                  @db.VarChar(128)
-  map_x                  Int?
-  map_y                  Int?
-  eulogy_count           Int                      @default(0)
-  roast_count            Int                      @default(0)
-  moderation_actions     ModerationAction[]
-  reaction_events        ReactionEvent[]
-  reports                Report[]
-  roast_eulogy_reactions RoastEulogyReaction[]
-  sympathies             Sympathy[]
+  id                  String                 @id @default(uuid()) @db.Uuid
+  slug                String                 @unique @db.VarChar(128)
+  title               String                 @db.VarChar(120)
+  datesText           String?                @map("dates_text") @db.VarChar(64)
+  backstory           String?                @db.VarChar(140)
+  photoUrl            String?                @map("photo_url") @db.VarChar(2048)
+  eulogyText          String                 @map("eulogy_text")
+  category            GraveCategory
+  status              GraveStatus            @default(PENDING)
+  heartCount          Int                    @map("heart_count") @default(0)
+  candleCount         Int                    @map("candle_count") @default(0)
+  roseCount           Int                    @map("rose_count") @default(0)
+  lolCount            Int                    @map("lol_count") @default(0)
+  featured            Boolean                @default(false)
+  createdAt           DateTime               @map("created_at") @default(now())
+  updatedAt           DateTime               @map("updated_at") @updatedAt
+  creatorDeviceHash   String?                @map("creator_device_hash") @db.VarChar(128)
+  mapX                Int?                   @map("map_x")
+  mapY                Int?                   @map("map_y")
+  eulogyCount         Int                    @map("eulogy_count") @default(0)
+  roastCount          Int                    @map("roast_count") @default(0)
+  moderationTrail   ModerationAction[]
+  reactionEvents      ReactionEvent[]
+  reports             Report[]
+  roastEulogyReactions RoastEulogyReaction[]
+  sympathies          Sympathy[]
 
   @@map("graves")
-
-  @@index([created_at], map: "idx_graves_created_at")
-  @@index([creator_device_hash, created_at], map: "idx_graves_creator_created_at")
-  @@index([map_x, map_y, status], map: "idx_graves_map_coords_status")
-  @@index([status, featured, created_at], map: "idx_graves_status_featured_created_at")
+  @@index([createdAt], map: "idx_graves_created_at")
+  @@index([creatorDeviceHash, createdAt], map: "idx_graves_creator_created_at")
+  @@index([mapX, mapY, status], map: "idx_graves_map_coords_status")
+  @@index([status, featured, createdAt], map: "idx_graves_status_featured_created_at")
 }
 
 model ModerationAction {
-  id           String               @id @db.Uuid
-  grave_id     String               @db.Uuid
-  moderator_id String?              @db.VarChar(64)
-  action       ModerationActionType
-  reason       String?              @db.VarChar(280)
-  created_at   DateTime             @default(now())
-  grave        Grave                @relation(fields: [grave_id], references: [id], onDelete: Cascade)
+  id          String               @id @default(uuid()) @db.Uuid
+  graveId     String               @map("grave_id") @db.Uuid
+  moderatorId String?              @map("moderator_id") @db.VarChar(64)
+  action      ModerationActionType
+  reason      String?              @db.VarChar(280)
+  createdAt   DateTime             @map("created_at") @default(now())
+  grave       Grave                @relation(fields: [graveId], references: [id], onDelete: Cascade)
 
   @@map("moderation_actions")
-  @@index([grave_id, created_at], map: "idx_moderation_grave_created_at")
+  @@index([graveId, createdAt], map: "idx_moderation_grave_created_at")
 }
 
 model OAuthAccount {
-  id          String   @id @db.Uuid
-  user_id     String   @db.Uuid
-  provider    String   @db.VarChar(20)
-  provider_id String   @db.VarChar(100)
-  email       String?  @db.VarChar(255)
-  name        String?  @db.VarChar(100)
-  picture     String?  @db.VarChar(500)
-  created_at  DateTime @default(now())
-  updated_at  DateTime
-  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  provider   String   @db.VarChar(20)
+  providerId String   @map("provider_id") @db.VarChar(100)
+  email      String?  @db.VarChar(255)
+  name       String?  @db.VarChar(100)
+  picture    String?  @db.VarChar(500)
+  createdAt  DateTime @map("created_at") @default(now())
+  updatedAt  DateTime @map("updated_at") @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("oauth_accounts")
-  @@unique([provider, provider_id], map: "uq_oauth_accounts_provider_id")
+  @@unique([provider, providerId], map: "uq_oauth_accounts_provider_id")
   @@index([provider], map: "idx_oauth_accounts_provider")
-  @@index([user_id], map: "idx_oauth_accounts_user_id")
+  @@index([userId], map: "idx_oauth_accounts_user_id")
 }
 
 model RateLimit {
-  id           BigInt    @id @default(autoincrement())
-  device_hash  String    @db.VarChar(128)
-  scope        String    @db.VarChar(64)
-  window_start DateTime
-  count        Int       @default(0)
-  expires_at   DateTime?
+  id          BigInt   @id @default(autoincrement())
+  deviceHash  String   @map("device_hash") @db.VarChar(128)
+  scope       String   @db.VarChar(64)
+  windowStart DateTime @map("window_start")
+  count       Int      @default(0)
+  expiresAt   DateTime? @map("expires_at")
 
   @@map("rate_limits")
-  @@index([device_hash, scope, window_start], map: "idx_ratelimit_device_scope_window")
+  @@index([deviceHash, scope, windowStart], map: "idx_ratelimit_device_scope_window")
 }
 
 model ReactionEvent {
-  id            BigInt       @id @default(autoincrement())
-  grave_id      String       @db.Uuid
-  device_hash   String       @db.VarChar(128)
-  reaction_type ReactionType
-  created_at    DateTime     @default(now())
-  grave         Grave        @relation(fields: [grave_id], references: [id], onDelete: Cascade)
+  id           BigInt       @id @default(autoincrement())
+  graveId      String       @map("grave_id") @db.Uuid
+  deviceHash   String       @map("device_hash") @db.VarChar(128)
+  type       ReactionType @map("reaction_type")
+  createdAt    DateTime     @map("created_at") @default(now())
+  grave        Grave        @relation(fields: [graveId], references: [id], onDelete: Cascade)
 
   @@map("reaction_events")
-  @@unique([grave_id, device_hash, reaction_type], map: "uq_reaction_grave_device_type")
-  @@index([grave_id, created_at], map: "idx_reaction_grave_created_at")
+  @@unique([graveId, deviceHash, type], map: "uq_reaction_grave_device_type")
+  @@index([graveId, createdAt], map: "idx_reaction_grave_created_at")
 }
 
 model Report {
-  id          String    @id @db.Uuid
-  grave_id    String    @db.Uuid
-  device_hash String    @db.VarChar(128)
-  reason      String?   @db.VarChar(280)
-  created_at  DateTime  @default(now())
-  resolved_at DateTime?
-  grave       Grave     @relation(fields: [grave_id], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid()) @db.Uuid
+  graveId    String   @map("grave_id") @db.Uuid
+  deviceHash String   @map("device_hash") @db.VarChar(128)
+  reason     String?  @db.VarChar(280)
+  createdAt  DateTime @map("created_at") @default(now())
+  resolvedAt DateTime? @map("resolved_at")
+  grave      Grave    @relation(fields: [graveId], references: [id], onDelete: Cascade)
 
   @@map("reports")
-  @@unique([grave_id, device_hash], map: "uq_report_grave_device")
-  @@index([grave_id, created_at], map: "idx_report_grave_created_at")
+  @@unique([graveId, deviceHash], map: "uq_report_grave_device")
+  @@index([graveId, createdAt], map: "idx_report_grave_created_at")
 }
 
 model RoastEulogyReaction {
-  id          String          @id @db.Uuid
-  grave_id    String          @db.Uuid
-  device_hash String          @db.VarChar(128)
-  type        RoastEulogyType
-  created_at  DateTime        @default(now())
-  grave       Grave           @relation(fields: [grave_id], references: [id], onDelete: Cascade)
+  id         String          @id @default(uuid()) @db.Uuid
+  graveId    String          @map("grave_id") @db.Uuid
+  deviceHash String          @map("device_hash") @db.VarChar(128)
+  type       RoastEulogyType
+  createdAt  DateTime        @map("created_at") @default(now())
+  grave      Grave           @relation(fields: [graveId], references: [id], onDelete: Cascade)
 
   @@map("roast_eulogy_reactions")
-  @@unique([grave_id, device_hash], map: "uq_roast_eulogy_grave_device")
-  @@index([grave_id, created_at], map: "idx_roast_eulogy_grave_created_at")
+  @@unique([graveId, deviceHash], map: "uq_roast_eulogy_grave_device")
+  @@index([graveId, createdAt], map: "idx_roast_eulogy_grave_created_at")
 }
 
 model Sympathy {
-  id          String    @id @db.Uuid
-  grave_id    String    @db.Uuid
-  device_hash String    @db.VarChar(128)
-  body        String    @db.VarChar(140)
-  created_at  DateTime  @default(now())
-  deleted_at  DateTime?
-  grave       Grave     @relation(fields: [grave_id], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid()) @db.Uuid
+  graveId    String   @map("grave_id") @db.Uuid
+  deviceHash String   @map("device_hash") @db.VarChar(128)
+  body       String   @db.VarChar(140)
+  createdAt  DateTime @map("created_at") @default(now())
+  deletedAt  DateTime? @map("deleted_at")
+  grave      Grave    @relation(fields: [graveId], references: [id], onDelete: Cascade)
 
   @@map("sympathies")
-  @@index([device_hash, created_at], map: "idx_sympathy_device_created_at")
-  @@index([grave_id, created_at], map: "idx_sympathy_grave_created_at")
+  @@index([deviceHash, createdAt], map: "idx_sympathy_device_created_at")
+  @@index([graveId, createdAt], map: "idx_sympathy_grave_created_at")
 }
 
 model UserModerationAction {
-  id                 String               @id @db.Uuid
-  target_user_id     String?              @db.Uuid
-  target_device_hash String?              @db.VarChar(128)
-  moderator_id       String?              @db.VarChar(64)
-  action             ModerationActionType
-  reason             String?              @db.VarChar(280)
-  expires_at         DateTime?
-  metadata           String?
-  created_at         DateTime             @default(now())
+  id               String               @id @default(uuid()) @db.Uuid
+  targetUserId     String?              @map("target_user_id") @db.Uuid
+  targetDeviceHash String?              @map("target_device_hash") @db.VarChar(128)
+  moderatorId      String?              @map("moderator_id") @db.VarChar(64)
+  action           ModerationActionType
+  reason           String?              @db.VarChar(280)
+  expiresAt        DateTime?            @map("expires_at")
+  metadata         String?
+  createdAt        DateTime             @map("created_at") @default(now())
 
   @@map("user_moderation_actions")
-  @@index([action, created_at], map: "idx_user_moderation_action_created_at")
-  @@index([target_device_hash, created_at], map: "idx_user_moderation_device_created_at")
-  @@index([target_user_id, created_at], map: "idx_user_moderation_user_created_at")
+  @@index([action, createdAt], map: "idx_user_moderation_action_created_at")
+  @@index([targetDeviceHash, createdAt], map: "idx_user_moderation_device_created_at")
+  @@index([targetUserId, createdAt], map: "idx_user_moderation_user_created_at")
 }
 
 model User {
-  id              String         @id @db.Uuid
-  device_hash     String?        @db.VarChar(128)
-  created_at      DateTime       @default(now())
-  updated_at      DateTime
-  email           String         @unique @db.VarChar(255)
-  name            String?        @db.VarChar(100)
-  picture         String?        @db.VarChar(500)
-  provider        String         @db.VarChar(20)
-  provider_id     String         @db.VarChar(100)
-  is_moderator    Boolean        @default(false)
-  ban_expires_at  DateTime?
-  ban_reason      String?        @db.VarChar(280)
-  banned_at       DateTime?
-  banned_by       String?        @db.VarChar(128)
-  is_banned       Boolean        @default(false)
-  suspended_until DateTime?
-  oauth_accounts  OAuthAccount[]
+  id             String         @id @default(uuid()) @db.Uuid
+  deviceHash     String?        @map("device_hash") @db.VarChar(128)
+  createdAt      DateTime       @map("created_at") @default(now())
+  updatedAt      DateTime       @map("updated_at") @updatedAt
+  email          String         @unique @db.VarChar(255)
+  name           String?        @db.VarChar(100)
+  picture        String?        @db.VarChar(500)
+  provider       String         @db.VarChar(20)
+  providerId     String         @map("provider_id") @db.VarChar(100)
+  isModerator    Boolean        @map("is_moderator") @default(false)
+  banExpiresAt   DateTime?      @map("ban_expires_at")
+  banReason      String?        @map("ban_reason") @db.VarChar(280)
+  bannedAt       DateTime?      @map("banned_at")
+  bannedBy       String?        @map("banned_by") @db.VarChar(128)
+  isBanned       Boolean        @map("is_banned") @default(false)
+  suspendedUntil DateTime?      @map("suspended_until")
+  oauthAccounts  OAuthAccount[]
 
   @@map("users")
-  @@unique([provider, provider_id], map: "uq_user_provider_id")
-  @@index([is_banned, banned_at], map: "idx_user_banned")
-  @@index([device_hash], map: "idx_user_device_hash")
+  @@unique([provider, providerId], map: "uq_user_provider_id")
+  @@index([isBanned, bannedAt], map: "idx_user_banned")
+  @@index([deviceHash], map: "idx_user_device_hash")
   @@index([email], map: "idx_user_email")
-  @@index([suspended_until], map: "idx_user_suspended")
+  @@index([suspendedUntil], map: "idx_user_suspended")
 }
 
 enum GraveCategory {

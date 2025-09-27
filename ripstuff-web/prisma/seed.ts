@@ -76,18 +76,31 @@ async function main() {
   ];
 
   for (const grave of sampleGraves) {
-    await prisma.grave.upsert({
+    const existingGrave = await prisma.grave.findUnique({
       where: { slug: grave.slug },
-      update: grave,
-      create: {
-        ...grave,
-        creatorDeviceHash: "seed-script",
-        heartCount: Math.floor(Math.random() * 50),
-        candleCount: Math.floor(Math.random() * 30),
-        roseCount: Math.floor(Math.random() * 20),
-        lolCount: Math.floor(Math.random() * 10),
-      }
     });
+    
+    if (!existingGrave) {
+      await prisma.grave.create({
+        data: {
+          title: grave.title,
+          slug: grave.slug,
+          datesText: grave.datesText,
+          backstory: grave.backstory,
+          eulogyText: grave.eulogyText,
+          category: grave.category,
+          status: grave.status,
+          photoUrl: grave.photoUrl,
+          creatorDeviceHash: "seed-script",
+          heartCount: Math.floor(Math.random() * 50),
+          candleCount: Math.floor(Math.random() * 30),
+          roseCount: Math.floor(Math.random() * 20),
+          lolCount: Math.floor(Math.random() * 10),
+          mapX: Math.floor(Math.random() * 16),
+          mapY: Math.floor(Math.random() * 16),
+        }
+      });
+    }
   }
 
   console.log('Sample graves created successfully!');

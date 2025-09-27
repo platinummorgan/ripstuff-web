@@ -1,134 +1,15 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
-import { prisma } from "@/lib/prisma";
+import { getAnalyticsData } from "@/lib/analytics-data";
 
 export const metadata: Metadata = {
   title: "Analytics Dashboard - Ripstuff",
   description: "Track viral growth and sharing statistics for your memorials",
 };
 
-async function getAnalytics() {
-  try {
-    // Get total counts
-    const totalGraves = await prisma.grave.count();
-    const totalReactions = await prisma.grave.aggregate({
-      _sum: {
-        heartCount: true,
-        candleCount: true,
-        roseCount: true,
-        lolCount: true,
-      },
-    });
-
-    // Get graves by category for top categories
-    const categoryStats = await prisma.grave.groupBy({
-      by: ['category'],
-      _count: {
-        category: true,
-      },
-      orderBy: {
-        _count: {
-          category: 'desc',
-        },
-      },
-      take: 5,
-    });
-
-    // Get viral content (graves with most reactions) - calculate total reactions
-    const viralContent = await prisma.grave.findMany({
-      select: {
-        id: true,
-        title: true,
-        heartCount: true,
-        candleCount: true,
-        roseCount: true,
-        lolCount: true,
-        category: true,
-        createdAt: true,
-      },
-      orderBy: [
-        { heartCount: 'desc' },
-        { candleCount: 'desc' },
-        { roseCount: 'desc' },
-        { lolCount: 'desc' },
-      ],
-      take: 5,
-    });
-
-    // Get recent graves for "recent shares" simulation
-    const recentGraves = await prisma.grave.findMany({
-      select: {
-        id: true,
-        title: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: 10,
-    });
-
-    const platforms = ['Twitter', 'Facebook', 'Instagram', 'TikTok', 'Reddit'];
-    const totalShares = (totalReactions._sum?.heartCount || 0) +
-                       (totalReactions._sum?.candleCount || 0) +
-                       (totalReactions._sum?.roseCount || 0) +
-                       (totalReactions._sum?.lolCount || 0);
-    
-    return {
-      totalShares,
-      totalViews: totalGraves * 23, // Simulate views based on graves
-      totalGraves,
-      gravesToday: await prisma.grave.count({
-        where: {
-          createdAt: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          },
-        },
-      }),
-      topPlatforms: platforms.slice(0, 3).map((platform, index) => {
-        const shares = Math.floor(totalShares * (0.4 - index * 0.1));
-        return {
-          platform,
-          shares,
-          percentage: totalShares > 0 ? Math.round((shares / totalShares) * 100) : 0,
-        };
-      }),
-      viralContent: viralContent.map(grave => {
-        const totalReactions = (grave.heartCount || 0) + (grave.candleCount || 0) + 
-                              (grave.roseCount || 0) + (grave.lolCount || 0);
-        return {
-          id: grave.id,
-          title: grave.title,
-          category: grave.category,
-          shares: totalReactions,
-          views: totalReactions * 15, // Simulate views
-          createdAt: grave.createdAt.toISOString(),
-        };
-      }),
-      recentShares: recentGraves.slice(0, 5).map((grave, index) => ({
-        id: grave.id,
-        graveTitle: grave.title,
-        platform: platforms[index % platforms.length],
-        timestamp: `${Math.floor(Math.random() * 60)} minutes ago`,
-      })),
-    };
-  } catch (error) {
-    console.error('Error fetching analytics:', error);
-    return {
-      totalShares: 0,
-      totalViews: 0,
-      totalGraves: 0,
-      gravesToday: 0,
-      topPlatforms: [],
-      viralContent: [],
-      recentShares: [],
-    };
-  }
-}
-
 export default async function AnalyticsPage() {
-  const analytics = await getAnalytics();
+  const analytics = await getAnalyticsData();
   return (
     <div className="space-y-12 pb-16">
       <PageHero
@@ -163,7 +44,7 @@ export default async function AnalyticsPage() {
       <section className="rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
         <SectionHeader title="Platform Performance" description="Which platforms are driving the most shares?" />
         <div className="mt-6 space-y-4">
-          {analytics.topPlatforms.map((platform) => (
+          {analytics.topPlatforms.map((platform: any) => (
             <div key={platform.platform} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="text-sm font-medium text-white">{platform.platform}</div>
@@ -188,7 +69,7 @@ export default async function AnalyticsPage() {
       <section className="rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
         <SectionHeader title="Viral Hall of Fame" description="Top performing memorials that went viral" />
         <div className="mt-6 space-y-4">
-          {analytics.viralContent.map((content, index) => (
+          {analytics.viralContent.map((content: any, index: number) => (
             <div key={content.id} className="flex items-center justify-between p-4 rounded-xl bg-[rgba(255,255,255,0.02)]">
               <div className="flex items-center gap-4">
                 <div className="text-lg font-bold text-[var(--accent)]">#{index + 1}</div>
@@ -210,7 +91,7 @@ export default async function AnalyticsPage() {
       <section className="rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
         <SectionHeader title="Recent Shares" description="Latest sharing activity across all platforms" />
         <div className="mt-6 space-y-3">
-          {analytics.recentShares.map((share) => (
+          {analytics.recentShares.map((share: any) => (
             <div key={share.id} className="flex items-center justify-between p-3 rounded-lg bg-[rgba(255,255,255,0.02)]">
               <div className="flex items-center gap-3">
                 <div className="text-sm font-medium text-white">{share.graveTitle}</div>
