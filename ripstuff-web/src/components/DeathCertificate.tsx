@@ -298,7 +298,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       // Try dom-to-image first as it handles modern CSS better
       const dataUrl = await domtoimage.toPng(certificateRef.current, {
         width: 1600, // 2x scale for high resolution
-        height: 1400, // 2x scale for high resolution
+        height: 1800, // 2x scale for high resolution (900 * 2)
         bgcolor: '#1a1a1a',
         quality: 1.0
       });
@@ -331,7 +331,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       <div 
         ref={certificateRef}
         className="bg-gradient-to-br from-gray-900 via-gray-800 to-black border-4 border-amber-600 rounded-lg p-8 text-white relative overflow-hidden"
-        style={{ width: '800px', height: '700px' }}
+        style={{ width: '800px', height: '900px' }}
       >
         {/* Decorative Border */}
         <div className="absolute inset-2 border-2 border-amber-500 rounded opacity-50"></div>
