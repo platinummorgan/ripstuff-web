@@ -14,7 +14,8 @@ export function generateMapCoordinates(deviceHash: string, gridSize: number = 16
   }
   
   // Add some time-based variation to prevent all graves from same user going to same district
-  const timeVariation = Math.floor(Date.now() / (1000 * 60 * 60)); // Changes hourly
+  const fixedDate = new Date('2025-09-27T00:00:00Z').getTime();
+  const timeVariation = Math.floor(fixedDate / (1000 * 60 * 60)); // Fixed timestamp for SSR consistency
   hash = hash ^ timeVariation;
   
   // Generate coordinates
