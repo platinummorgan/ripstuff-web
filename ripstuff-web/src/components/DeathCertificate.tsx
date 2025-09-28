@@ -329,7 +329,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
 
       const dataUrl = await domtoimage.toPng(clone, {
         width: 400, // Force exact width regardless of measured size
-        height: 500, // Force reasonable height
+        height: 650, // Increased height to fit all certificate content
         quality: 0.8, // Further reduce quality for smaller file
         bgcolor: '#0b0d16',
       });
