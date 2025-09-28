@@ -64,14 +64,30 @@ export async function POST(req: NextRequest, context: RouteContext) {
 				deviceHash,
 				body: parsed.data.body,
 			},
-			select: { id: true, body: true, createdAt: true },
+			select: { id: true, body: true, createdAt: true, deviceHash: true },
 		});
+
+		// Get creator info for the current user
+		let creatorInfo = null;
+		if (deviceHash) {
+			const user = await prisma.user.findFirst({
+				where: { deviceHash },
+				select: { name: true, picture: true },
+			});
+			if (user) {
+				creatorInfo = {
+					name: user.name,
+					picture: user.picture,
+				};
+			}
+		}
 
 		return json(
 			{
 				id: created.id,
 				body: created.body,
 				createdAt: created.createdAt.toISOString(),
+				creatorInfo,
 			},
 			201,
 		);

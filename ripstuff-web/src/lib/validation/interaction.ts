@@ -22,6 +22,10 @@ export const sympathyDto = z.object({
   id: z.string().uuid(),
   body: z.string(),
   createdAt: z.string().datetime(),
+  creatorInfo: z.object({
+    name: z.string().nullable(),
+    picture: z.string().nullable(),
+  }).nullable(),
 });
 
 export const reportInput = z.object({

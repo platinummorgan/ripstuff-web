@@ -33,9 +33,24 @@ export async function GET(_req: NextRequest, context: RouteContext) {
             createdAt: "desc",
           },
           take: SYMPATHY_LIMIT,
+          select: {
+            id: true,
+            body: true,
+            createdAt: true,
+            deviceHash: true,
+          },
         },
       },
     });
+
+    // Get additional grave data that include can't access
+    const graveCounts = grave ? await prisma.grave.findUnique({
+      where: { id: grave.id },
+      select: {
+        roastCount: true,
+        eulogyCount: true,
+      },
+    }) : null;
 
     // Get creator info if available
     let creatorInfo = null;
@@ -51,6 +66,22 @@ export async function GET(_req: NextRequest, context: RouteContext) {
         };
       }
     }
+
+    // Get creator info for all sympathies
+    const sympathyDeviceHashes = grave?.sympathies
+      ?.map(s => s.deviceHash)
+      .filter((hash): hash is string => hash !== null) || [];
+    
+    const sympathyCreators = sympathyDeviceHashes.length > 0 
+      ? await prisma.user.findMany({
+          where: { deviceHash: { in: sympathyDeviceHashes } },
+          select: { deviceHash: true, name: true, picture: true },
+        })
+      : [];
+    
+    const sympathyCreatorMap = new Map(
+      sympathyCreators.map(creator => [creator.deviceHash, creator])
+    );
 
     if (!grave || grave.status === "HIDDEN") {
       return notFound("Grave not found");
@@ -69,19 +100,29 @@ export async function GET(_req: NextRequest, context: RouteContext) {
         rose: grave.roseCount,
         lol: grave.lolCount,
       },
-      roastCount: grave.roastCount || 0,
-      eulogyCount: grave.eulogyCount || 0,
+      roastCount: (graveCounts as any)?.roastCount || 0,
+      eulogyCount: (graveCounts as any)?.eulogyCount || 0,
       createdAt: grave.createdAt.toISOString(),
       featured: grave.featured,
       eulogyText: grave.eulogyText,
       datesText: grave.datesText ?? null,
       backstory: grave.backstory ?? null,
       creatorInfo,
-      sympathies: grave.sympathies.map((sympathy) => ({
-        id: sympathy.id,
-        body: sympathy.body,
-        createdAt: sympathy.createdAt.toISOString(),
-      })),
+      sympathies: grave.sympathies.map((sympathy) => {
+        const creator = sympathy.deviceHash 
+          ? sympathyCreatorMap.get(sympathy.deviceHash) 
+          : null;
+        
+        return {
+          id: sympathy.id,
+          body: sympathy.body,
+          createdAt: sympathy.createdAt.toISOString(),
+          creatorInfo: creator ? {
+            name: creator.name,
+            picture: creator.picture,
+          } : null,
+        };
+      }),
       status: grave.status,
     });
 
