@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 
 import { resolveDeviceHash } from "@/lib/device";
 import { internalError, json, notFound, validationError } from "@/lib/http";
+import { ManualNotificationService } from "@/lib/manual-notification-service";
 import prisma from "@/lib/prisma";
 import { reactionInput } from "@/lib/validation";
 
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
 
 	try {
 		if (parsed.data.action === "ADD") {
+			let isNewReaction = false;
 			try {
 				await prisma.$transaction([
 					prisma.reactionEvent.create({
@@ -67,6 +69,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
 						},
 					}),
 				]);
+				isNewReaction = true;
 			} catch (error) {
 				if (
 					error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -75,6 +78,58 @@ export async function POST(req: NextRequest, context: RouteContext) {
 					// Duplicate reaction — ignore and return current counts
 				} else {
 					throw error;
+				}
+			}
+
+			// Trigger reaction notification
+			if (isNewReaction) {
+				try {
+					// Get grave owner info for notification
+					const graveWithOwner = await prisma.grave.findUnique({
+						where: { id: grave.id },
+						select: {
+							title: true,
+							slug: true,
+							creatorDeviceHash: true
+						}
+					});
+
+					if (graveWithOwner?.creatorDeviceHash) {
+						// Find the user who created this grave
+						const graveOwner = await prisma.user.findFirst({
+							where: { deviceHash: graveWithOwner.creatorDeviceHash },
+							select: { id: true, email: true }
+						});
+
+						if (graveOwner?.email) {
+							// Get reactor info for notification
+							let reactorName = "Anonymous Mourner";
+							const reactor = await prisma.user.findFirst({
+								where: { deviceHash },
+								select: { name: true }
+							});
+							if (reactor?.name) {
+								reactorName = reactor.name;
+							}
+
+							// Queue reaction notification
+							await ManualNotificationService.queueFirstReactionNotification(
+								graveOwner.id,
+								graveOwner.email,
+								grave.id,
+								{
+									graveName: graveWithOwner.title,
+									graveSlug: graveWithOwner.slug,
+									reactorName,
+									reactionType: parsed.data.type.toLowerCase(),
+									graveUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://ripstuff.net'}/grave/${graveWithOwner.slug}`
+								}
+							);
+						}
+					}
+				} catch (notificationError) {
+					// Don't fail the reaction if notification fails
+					console.error('Failed to queue reaction notification:', notificationError);
 				}
 			}
 		} else {

@@ -604,4 +604,159 @@ src/lib/validation/            # Updated schemas with creatorInfo
 
 **Status:** Production-ready user attribution system fully operational. All user-generated content now properly attributed to creators while respecting privacy for anonymous users. OAuth system repaired to prevent future attribution issues.
 
-Last updated: September 28, 2025 – after comprehensive user attribution system implementation and OAuth deviceHash linking fixes.
+## 🔔 COMPREHENSIVE NOTIFICATION SYSTEM - September 28, 2025 ✅
+**Advanced notification infrastructure with email/SMS capabilities, user preferences, and quiet hours support.**
+
+### Core System Architecture ✅
+#### Database Schema - 5 New Models ✅
+```prisma
+model NotificationPreference {
+  id                    String   @id @default(uuid()) @db.Uuid
+  userId                String   @unique @map("user_id") @db.Uuid
+  emailOnNewSympathy    Boolean  @default(true) @map("email_on_new_sympathy")
+  emailOnFirstReaction  Boolean  @default(true) @map("email_on_first_reaction") 
+  emailDailyDigest      Boolean  @default(false) @map("email_daily_digest")
+  smsEnabled            Boolean  @default(false) @map("sms_enabled")
+  smsOnNewSympathy      Boolean  @default(false) @map("sms_on_new_sympathy")
+  smsOnFirstReaction    Boolean  @default(false) @map("sms_on_first_reaction")
+  phoneNumber           String   @default("") @map("phone_number")
+  quietHoursStart       Int      @default(21) @map("quiet_hours_start")
+  quietHoursEnd         Int      @default(8) @map("quiet_hours_end")
+  timezone              String   @default("UTC")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+}
+
+model GraveSubscription {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  graveId   String   @map("grave_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  @@unique([userId, graveId])
+}
+
+model NotificationHistory {
+  id           String             @id @default(uuid()) @db.Uuid
+  userId       String             @map("user_id") @db.Uuid
+  graveId      String             @map("grave_id") @db.Uuid
+  type         NotificationType
+  method       NotificationMethod
+  sentAt       DateTime           @default(now()) @map("sent_at")
+  success      Boolean            @default(true)
+  errorMessage String?            @map("error_message")
+  metadata     String?            // JSON for additional data
+}
+
+model DailyActivityTracker {
+  id             String   @id @default(uuid()) @db.Uuid
+  graveId        String   @map("grave_id") @db.Uuid
+  date           DateTime @map("date") @db.Date
+  sympathyCount  Int      @default(0) @map("sympathy_count")
+  reactionCount  Int      @default(0) @map("reaction_count")
+  uniqueVisitors Int      @default(0) @map("unique_visitors")
+  
+  @@unique([graveId, date])
+}
+
+enum NotificationType {
+  NEW_SYMPATHY
+  FIRST_DAILY_REACTION
+  DAILY_DIGEST
+}
+
+enum NotificationMethod {
+  EMAIL
+  SMS
+}
+```
+
+### User Preferences Interface ✅
+#### NotificationPreferencesSection Component ✅
+- **Email Settings:** Checkboxes for new sympathies, first reactions, daily digest
+- **SMS Configuration:** Opt-in SMS with phone number validation and daily limits
+- **Quiet Hours:** Configurable start/end times (default 9PM-8AM) with timezone selection
+- **Professional UI:** Clean form design with clear descriptions and error handling
+- **API Integration:** Full CRUD operations via `/api/notifications/preferences` endpoint
+
+#### Key Features ✅
+- **Timezone Support:** 9 major timezone options (ET, CT, MT, PT, UTC, London, Paris, Tokyo, Sydney)
+- **Phone Validation:** Required phone number with country code when SMS enabled
+- **Smart Defaults:** Email notifications enabled, SMS opt-in only, quiet hours respected
+- **Real-time Feedback:** Success/error messages with professional styling
+
+### Email Service Integration ✅
+#### NotificationEmailService ✅
+- **Resend Integration:** Professional email delivery with error handling and logging
+- **Quiet Hours Logic:** Timezone-aware delivery scheduling with automatic queuing
+- **Template System:** Rich HTML/text templates for all notification types
+- **Duplicate Prevention:** Smart filtering to prevent spam (one first reaction per grave per day)
+
+#### Email Templates ✅
+```typescript
+// Comprehensive template system with professional styling
+1. New Sympathy Email:
+   - Shows sympathy author name and message
+   - Direct link to memorial page
+   - Professional Virtual Graveyard branding
+
+2. First Daily Reaction Email:  
+   - Reaction type and user who reacted
+   - First unique reaction notification per day
+   - Engagement encouragement
+
+3. Daily Digest Email:
+   - Activity summary with stats
+   - List of new sympathies with authors
+   - Popular reactions breakdown
+   - Professional newsletter format
+```
+
+#### Notification Logic ✅
+- **Quiet Hours Respect:** Checks user timezone (21:00-08:00 default) before sending
+- **Smart Scheduling:** Emails during quiet hours logged for morning delivery
+- **Error Handling:** Comprehensive error logging with retry capability
+- **Database Logging:** All attempts tracked in NotificationHistory table
+
+### API Endpoints ✅
+#### `/api/notifications/preferences` ✅
+- **GET:** Retrieve user preferences (creates defaults if none exist)
+- **PUT:** Update preferences with validation and error handling
+- **Authentication:** Protected by OAuth user session validation
+- **Validation:** Phone number required when SMS enabled, quiet hours range validation
+
+### Technical Implementation ✅
+#### Core Services ✅
+```typescript
+// Key files and their functionality:
+src/lib/notification-service.ts    # Email delivery with quiet hours
+src/lib/email-templates.ts         # Professional HTML/text templates  
+src/components/NotificationPreferencesSection.tsx  # User preferences UI
+src/app/api/notifications/preferences/route.ts     # API CRUD operations
+```
+
+#### Integration Points Ready ✅
+- **Sympathy APIs:** Ready to integrate with `NotificationEmailService.sendNewSympathyNotification()`
+- **Reaction APIs:** Ready to integrate with `NotificationEmailService.sendFirstReactionNotification()`  
+- **Daily Jobs:** Framework ready for `NotificationEmailService.sendDailyDigestNotification()`
+
+### Deployment Status ✅
+- ✅ **Database Migration:** All 5 models applied to production Neon database
+- ✅ **Prisma Client:** Generated and deployed with new notification models
+- ✅ **UI Components:** Notification preferences section live in profile page
+- ✅ **API Endpoints:** Preferences CRUD endpoints operational
+- ✅ **Email Service:** Resend package installed and configured
+- ✅ **Templates:** Professional email templates ready for production use
+
+### Next Implementation Phases 🔄
+1. **SMS Integration:** Twilio service for text notifications (in progress)
+2. **Trigger System:** Connect notification service to sympathy/reaction APIs
+3. **Background Jobs:** Daily digest automation with cleanup routines
+
+### User Experience Impact ✅
+- **Comprehensive Control:** Users can configure all notification preferences from profile page
+- **Respect Privacy:** Quiet hours and opt-in SMS prevent notification fatigue
+- **Professional Communication:** Rich email templates maintain platform quality
+- **Smart Notifications:** Duplicate prevention and timezone awareness for better UX
+
+Last updated: September 28, 2025 – after comprehensive notification system implementation with email service integration deployed to production.

@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 
 import { Button } from "@/components/Button";
 import { ModerationTableRow } from "@/components/moderation/ModerationTableRow";
+import { NotificationManager } from "@/components/moderation/NotificationManager";
 import { SectionHeader } from "@/components/SectionHeader";
 import { moderationQueueResponse } from "@/lib/validation";
 
@@ -149,6 +150,9 @@ export function ModerationContent({ searchParams }: ModerationContentProps) {
 
   return (
     <div className="space-y-10 pb-16">
+      {/* Notification Management */}
+      <NotificationManager className="space-y-4" />
+
       <div className="flex items-start justify-between gap-4">
         <SectionHeader
           eyebrow="Moderator"

@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { requireNotBanned, handleBanError } from "@/lib/ban-enforcement";
 import { resolveDeviceHash } from "@/lib/device";
 import { forbidden, internalError, json, notFound, rateLimitError, validationError } from "@/lib/http";
+import { ManualNotificationService } from "@/lib/manual-notification-service";
 import prisma from "@/lib/prisma";
 import { checkRateLimit, rateLimitRetrySeconds } from "@/lib/rate-limit";
 import { sympathyInput } from "@/lib/validation";
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
 
 		// Get creator info for the current user
 		let creatorInfo = null;
+		let sympathyAuthor = "Anonymous Mourner";
 		if (deviceHash) {
 			const user = await prisma.user.findFirst({
 				where: { deviceHash },
@@ -79,7 +81,48 @@ export async function POST(req: NextRequest, context: RouteContext) {
 					name: user.name,
 					picture: user.picture,
 				};
+				sympathyAuthor = user.name || "Anonymous Mourner";
 			}
+		}
+
+		// Trigger notification for grave owner
+		try {
+			// Get grave owner info
+			const graveWithOwner = await prisma.grave.findUnique({
+				where: { id: grave.id },
+				select: {
+					title: true,
+					slug: true,
+					creatorDeviceHash: true
+				}
+			});
+
+			if (graveWithOwner?.creatorDeviceHash) {
+				// Find the user who created this grave
+				const graveOwner = await prisma.user.findFirst({
+					where: { deviceHash: graveWithOwner.creatorDeviceHash },
+					select: { id: true, email: true }
+				});
+
+				if (graveOwner?.email) {
+					// Queue new sympathy notification
+					await ManualNotificationService.queueNewSympathyNotification(
+						graveOwner.id,
+						graveOwner.email,
+						grave.id,
+						{
+							graveName: graveWithOwner.title,
+							graveSlug: graveWithOwner.slug,
+							sympathyAuthor,
+							sympathyMessage: parsed.data.body,
+							graveUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://ripstuff.net'}/grave/${graveWithOwner.slug}`
+						}
+					);
+				}
+			}
+		} catch (notificationError) {
+			// Don't fail the sympathy creation if notification fails
+			console.error('Failed to queue sympathy notification:', notificationError);
 		}
 
 		return json(
