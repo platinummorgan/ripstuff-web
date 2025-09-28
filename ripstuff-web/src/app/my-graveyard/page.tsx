@@ -66,13 +66,51 @@ export default function MyGraveyardPage() {
           ) : (
             <>
               <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold mb-2">Your Graves on the Overworld</h3>
-                <p className="text-sm text-[var(--muted)]">Click any location to explore that district in detail</p>
+                <h3 className="text-lg font-semibold mb-2">Your Personal Cemetery</h3>
+                <p className="text-sm text-[var(--muted)]">Click any grave to view its memorial page</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {items.map((grave) => (
-                  <GraveLocationCard key={grave.id} grave={grave} />
-                ))}
+              <div className="bg-[#0B1123] border border-[rgba(255,255,255,0.08)] rounded-xl p-8">
+                <CemeteryCanvas variant="cemetery" intensity="normal">
+                  <div className="cemetery-layout" style={{ width: '1400px', height: '1000px', position: 'relative' }}>
+                    {items.map((grave, index) => {
+                      // Create a nice grid layout for personal cemetery
+                      const cols = Math.ceil(Math.sqrt(items.length));
+                      const row = Math.floor(index / cols);
+                      const col = index % cols;
+                      const x = 100 + col * 280; // Much more spacing for bigger graves
+                      const y = 100 + row * 250; // Much more spacing for bigger graves
+                      
+                      return (
+                        <div
+                          key={grave.id}
+                          style={{
+                            position: 'absolute',
+                            left: `${x}px`,
+                            top: `${y}px`,
+                            transform: 'scale(2.2)', // Much bigger graves for better visibility
+                            transformOrigin: 'center',
+                            zIndex: 10,
+                            cursor: 'pointer'
+                          }}
+                          className="hover:scale-125 transition-all duration-300 hover:z-20"
+                        >
+                          <HeadstoneCard grave={grave} />
+                        </div>
+                      );
+                    })}
+                    
+                    {/* Cemetery background elements */}
+                    <div 
+                      className="absolute inset-0 opacity-20"
+                      style={{
+                        backgroundImage: 'url(/backgrounds/fantasy_world_1.jpeg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        filter: 'sepia(30%) hue-rotate(200deg) brightness(0.3)'
+                      }}
+                    />
+                  </div>
+                </CemeteryCanvas>
               </div>
             </>
           )}
