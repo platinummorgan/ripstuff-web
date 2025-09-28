@@ -328,8 +328,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       cleanupCloneColors = applyLegacyColorOverrides(clone);
 
       const dataUrl = await domtoimage.toPng(clone, {
-        width: 400, // Force exact width regardless of measured size
-        height: 650, // Increased height to fit all certificate content
+        width: 500, // Increased width to prevent text wrapping and give more space
+        height: 650, // Keep height for all content
         quality: 0.8, // Further reduce quality for smaller file
         bgcolor: '#0b0d16',
       });
