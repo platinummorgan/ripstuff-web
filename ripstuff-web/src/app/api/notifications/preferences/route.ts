@@ -124,8 +124,19 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error updating notification preferences:', error);
+    
+    // Provide more detailed error information for debugging
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorDetails = error instanceof Error && 'code' in error ? error.code : 'No code';
+    
+    console.error('Detailed error:', { errorMessage, errorDetails });
+    
     return NextResponse.json(
-      { error: 'Failed to update preferences' },
+      { 
+        error: 'Failed to update preferences',
+        details: errorMessage,
+        code: errorDetails
+      },
       { status: 500 }
     );
   }
