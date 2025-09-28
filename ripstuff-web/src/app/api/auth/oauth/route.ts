@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveDeviceHash } from '@/lib/device';
+import prisma from '@/lib/prisma';
 
 // Simple JWT decode function (without external dependencies)
 function decodeJWT(token: string) {
@@ -94,43 +95,44 @@ export async function POST(request: NextRequest) {
 
     const deviceHash = resolveDeviceHash();
 
-    // TODO: Uncomment when Prisma client is regenerated
-    // // Check if user already exists
-    // let existingUser = await prisma.user.findUnique({
-    //   where: { 
-    //     provider_providerId: {
-    //       provider: userInfo.provider,
-    //       providerId: userInfo.providerId
-    //     }
-    //   }
-    // });
+    // Check if user already exists
+    let existingUser = await prisma.user.findUnique({
+      where: { 
+        provider_providerId: {
+          provider: userInfo.provider,
+          providerId: userInfo.providerId
+        }
+      }
+    });
 
-    // // If user doesn't exist, create them
-    // if (!existingUser) {
-    //   existingUser = await prisma.user.create({
-    //     data: {
-    //       email: userInfo.email,
-    //       name: userInfo.name,
-    //       picture: userInfo.picture,
-    //       provider: userInfo.provider,
-    //       providerId: userInfo.providerId,
-    //       deviceHash
-    //     }
-    //   });
-    // } else {
-    //   // Update device hash for existing user
-    //   existingUser = await prisma.user.update({
-    //     where: { id: existingUser.id },
-    //     data: { deviceHash }
-    //   });
-    // }
+    // If user doesn't exist, create them
+    if (!existingUser) {
+      existingUser = await prisma.user.create({
+        data: {
+          email: userInfo.email,
+          name: userInfo.name,
+          picture: userInfo.picture,
+          provider: userInfo.provider,
+          providerId: userInfo.providerId,
+          deviceHash
+        }
+      });
+    } else {
+      // Update device hash for existing user if it's different
+      if (existingUser.deviceHash !== deviceHash) {
+        existingUser = await prisma.user.update({
+          where: { id: existingUser.id },
+          data: { deviceHash }
+        });
+      }
+    }
 
-    // Temporary response for development
+    // Use the actual user from database
     const user = {
-      id: 'temp-oauth-id',
-      email: userInfo.email,
-      name: userInfo.name,
-      picture: userInfo.picture
+      id: existingUser.id,
+      email: existingUser.email,
+      name: existingUser.name,
+      picture: existingUser.picture
     };
 
     // Set session cookie
