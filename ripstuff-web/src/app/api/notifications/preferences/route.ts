@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
           smsOnNewSympathy: false,
           smsOnFirstReaction: false,
           phoneNumber: '',
+          quietHoursEnabled: false, // Disable by default for easier testing
           quietHoursStart: 21, // 9 PM
           quietHoursEnd: 8,    // 8 AM
           timezone: 'UTC'
@@ -59,6 +60,7 @@ export async function PUT(request: NextRequest) {
       smsOnNewSympathy,
       smsOnFirstReaction,
       phoneNumber,
+      quietHoursEnabled,
       quietHoursStart,
       quietHoursEnd,
       timezone
@@ -93,6 +95,7 @@ export async function PUT(request: NextRequest) {
         smsOnNewSympathy: Boolean(smsOnNewSympathy),
         smsOnFirstReaction: Boolean(smsOnFirstReaction),
         phoneNumber: cleanPhoneNumber,
+        quietHoursEnabled: Boolean(quietHoursEnabled),
         quietHoursStart: Number(quietHoursStart),
         quietHoursEnd: Number(quietHoursEnd),
         timezone: String(timezone),
@@ -107,6 +110,7 @@ export async function PUT(request: NextRequest) {
         smsOnNewSympathy: Boolean(smsOnNewSympathy),
         smsOnFirstReaction: Boolean(smsOnFirstReaction),
         phoneNumber: cleanPhoneNumber,
+        quietHoursEnabled: Boolean(quietHoursEnabled),
         quietHoursStart: Number(quietHoursStart),
         quietHoursEnd: Number(quietHoursEnd),
         timezone: String(timezone)
