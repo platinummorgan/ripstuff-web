@@ -69,16 +69,89 @@ export default function MyGraveyardPage() {
                 <h3 className="text-lg font-semibold mb-2">Your Personal Cemetery</h3>
                 <p className="text-sm text-[var(--muted)]">Click any grave to view its memorial page</p>
               </div>
-              <div className="bg-[#0B1123] border border-[rgba(255,255,255,0.08)] rounded-xl p-8">
+              <div className="relative rounded-xl overflow-hidden shadow-2xl">
+                {/* Atmospheric Cemetery Background */}
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+                  {/* Background cemetery image with overlay */}
+                  <div 
+                    className="absolute inset-0 opacity-30"
+                    style={{
+                      backgroundImage: 'url(/backgrounds/fantasy_world_1.jpeg)',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      filter: 'sepia(20%) hue-rotate(200deg) brightness(0.4) contrast(1.2)'
+                    }}
+                  />
+                  
+                  {/* Atmospheric fog layers */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-slate-800/40" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-900/30 via-transparent to-slate-900/30" />
+                  
+                  {/* Subtle noise texture for depth */}
+                  <div 
+                    className="absolute inset-0 opacity-[0.02]"
+                    style={{
+                      backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 1px, transparent 1px)',
+                      backgroundSize: '50px 50px'
+                    }}
+                  />
+                </div>
+
                 <CemeteryCanvas variant="cemetery" intensity="normal">
-                  <div className="cemetery-layout" style={{ width: '1400px', height: '1000px', position: 'relative' }}>
+                  <div className="cemetery-layout relative" style={{ width: '1400px', height: '1000px', position: 'relative' }}>
+                    {/* Cemetery ground elements */}
+                    <div className="absolute inset-0">
+                      {/* Misty ground fog */}
+                      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/5 to-transparent opacity-40" />
+                      
+                      {/* Scattered cemetery pathways */}
+                      <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 1 }}>
+                        <defs>
+                          <pattern id="cobblestone" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <rect width="20" height="20" fill="rgba(100,100,120,0.1)" />
+                            <circle cx="10" cy="10" r="2" fill="rgba(150,150,170,0.15)" />
+                          </pattern>
+                        </defs>
+                        
+                        {/* Curved cemetery path */}
+                        <path 
+                          d="M 100 800 Q 400 600 700 750 T 1300 650" 
+                          stroke="url(#cobblestone)" 
+                          strokeWidth="80" 
+                          fill="none"
+                          opacity="0.3"
+                        />
+                        
+                        {/* Secondary pathways */}
+                        <path 
+                          d="M 200 200 Q 500 400 800 300 T 1200 400" 
+                          stroke="rgba(120,130,150,0.1)" 
+                          strokeWidth="40" 
+                          fill="none"
+                        />
+                      </svg>
+                    </div>
                     {items.map((grave, index) => {
-                      // Create a nice grid layout for personal cemetery
-                      const cols = Math.ceil(Math.sqrt(items.length));
-                      const row = Math.floor(index / cols);
-                      const col = index % cols;
-                      const x = 120 + col * 240; // Appropriate spacing for moderately sized graves
-                      const y = 120 + row * 220; // Appropriate spacing for moderately sized graves
+                      // Create organic cemetery layout following paths
+                      const totalGraves = items.length;
+                      const gravesPerRow = Math.ceil(Math.sqrt(totalGraves));
+                      const row = Math.floor(index / gravesPerRow);
+                      const col = index % gravesPerRow;
+                      
+                      // Add organic offset and spacing variation
+                      let seed = grave.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                      const randomOffset = (seed % 40) - 20; // -20 to +20 offset
+                      const randomYOffset = ((seed * 7) % 30) - 15; // -15 to +15 offset
+                      
+                      // Follow curved cemetery paths with organic spacing
+                      const baseX = 150 + col * 220;
+                      const baseY = 160 + row * 200;
+                      
+                      // Add curve following the cemetery path
+                      const pathCurve = Math.sin((col / gravesPerRow) * Math.PI) * 30;
+                      
+                      const x = baseX + randomOffset + pathCurve;
+                      const y = baseY + randomYOffset + (row % 2 === 0 ? 0 : 30); // Stagger alternate rows
                       
                       return (
                         <div
@@ -94,21 +167,58 @@ export default function MyGraveyardPage() {
                           }}
                           className="hover:scale-125 transition-all duration-300 hover:z-20"
                         >
+                          {/* Ambient grave lighting */}
+                          <div className="absolute -inset-8 -z-10">
+                            {/* Soft glow around each grave */}
+                            <div 
+                              className="absolute inset-0 rounded-full opacity-20 blur-xl"
+                              style={{
+                                background: `radial-gradient(circle, rgba(154,230,180,0.2) 0%, transparent 70%)`
+                              }}
+                            />
+                            
+                            {/* Subtle ground shadow */}
+                            <div 
+                              className="absolute bottom-2 left-1/2 w-16 h-6 -translate-x-1/2 blur-md opacity-30"
+                              style={{
+                                background: 'radial-gradient(ellipse, rgba(0,0,0,0.6) 0%, transparent 100%)'
+                              }}
+                            />
+                          </div>
+                          
                           <HeadstoneCard grave={grave} />
                         </div>
                       );
                     })}
                     
-                    {/* Cemetery background elements */}
-                    <div 
-                      className="absolute inset-0 opacity-20"
-                      style={{
-                        backgroundImage: 'url(/backgrounds/fantasy_world_1.jpeg)',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        filter: 'sepia(30%) hue-rotate(200deg) brightness(0.3)'
-                      }}
-                    />
+                    {/* Floating ambient particles */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      {Array.from({ length: 12 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="absolute w-1 h-1 bg-white/20 rounded-full animate-pulse"
+                          style={{
+                            left: `${20 + (i * 7) % 80}%`,
+                            top: `${30 + (i * 11) % 60}%`,
+                            animationDelay: `${i * 0.5}s`,
+                            animationDuration: `${3 + (i % 3)}s`
+                          }}
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* Distant cemetery elements for depth */}
+                    <div className="absolute inset-0 opacity-15 pointer-events-none">
+                      {/* Distant trees silhouettes */}
+                      <div className="absolute top-10 left-10 w-8 h-16 bg-gradient-to-t from-slate-800 to-slate-700 opacity-60" 
+                           style={{ clipPath: 'polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)' }} />
+                      <div className="absolute top-20 right-20 w-6 h-12 bg-gradient-to-t from-slate-800 to-slate-700 opacity-40"
+                           style={{ clipPath: 'polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%)' }} />
+                      
+                      {/* Distant mausoleums */}
+                      <div className="absolute top-32 left-1/4 w-12 h-8 bg-slate-700/30 opacity-50" />
+                      <div className="absolute top-28 right-1/3 w-8 h-6 bg-slate-700/25 opacity-40" />
+                    </div>
                   </div>
                 </CemeteryCanvas>
               </div>

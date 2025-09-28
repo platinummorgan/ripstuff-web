@@ -44,11 +44,67 @@ function getCauseIcon(title: string, eulogy: string): string {
   return '💀'; // Default death icon
 }
 
+function getTombstoneVariation(grave: FeedItem): {
+  shape: 'classic' | 'ornate' | 'modern' | 'weathered';
+  material: 'marble' | 'granite' | 'stone' | 'aged';
+  decoration: 'none' | 'flowers' | 'candles' | 'wreath';
+} {
+  // Create deterministic variations based on grave properties
+  let seed = grave.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  // Age-based variations
+  const ageInDays = (Date.now() - new Date(grave.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+  
+  // Popular graves get more ornate styles
+  const totalReactions = grave.reactions.heart + grave.reactions.candle + grave.reactions.rose;
+  
+  // Determine shape based on reactions and age
+  let shape: 'classic' | 'ornate' | 'modern' | 'weathered';
+  if (totalReactions > 10) {
+    shape = 'ornate';
+  } else if (ageInDays < 7) {
+    shape = 'modern';
+  } else if (ageInDays > 30) {
+    shape = 'weathered';
+  } else {
+    shape = 'classic';
+  }
+  
+  // Material based on category and age
+  let material: 'marble' | 'granite' | 'stone' | 'aged';
+  if (grave.category === 'TECH_GADGETS' && ageInDays < 14) {
+    material = 'granite';
+  } else if (totalReactions > 5) {
+    material = 'marble';
+  } else if (ageInDays > 21) {
+    material = 'aged';
+  } else {
+    material = 'stone';
+  }
+  
+  // Decorations based on reactions
+  let decoration: 'none' | 'flowers' | 'candles' | 'wreath';
+  if (grave.reactions.rose > 2) {
+    decoration = 'flowers';
+  } else if (grave.reactions.candle > 3) {
+    decoration = 'candles';
+  } else if (totalReactions > 8) {
+    decoration = 'wreath';
+  } else {
+    decoration = 'none';
+  }
+  
+  return { shape, material, decoration };
+}
+
 export function HeadstoneCard({ grave }: { grave: FeedItem }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const video = isVideoUrl(grave.photoUrl);
+  
+  // Get tombstone variation based on grave characteristics
+  const variation = getTombstoneVariation(grave);
 
   function togglePlay(e: React.MouseEvent) {
     if (!videoRef.current) return;
@@ -72,9 +128,25 @@ export function HeadstoneCard({ grave }: { grave: FeedItem }) {
       <Link href={`/grave/${grave.slug}`} className="block transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-xl">
         <div className="relative mx-auto w-[120px] sm:w-[140px]">
           {/* Stone shadow glow - enhanced on hover */}
-          <div className="absolute inset-0 rounded-t-[26px] bg-[rgba(255,255,255,0.06)] blur-[2px] transition-all duration-300 group-hover:bg-[rgba(154,230,180,0.15)] group-hover:blur-[4px] group-hover:scale-110" />
-          {/* Stone body */}
-          <div className="relative rounded-t-[26px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(200,203,210,0.35),rgba(120,130,150,0.35))] p-2 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2)] transition-all duration-300 group-hover:border-[rgba(154,230,180,0.4)] group-hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),0_4px_12px_rgba(0,0,0,0.3)]">
+          <div className={`absolute inset-0 blur-[2px] transition-all duration-300 group-hover:blur-[4px] group-hover:scale-110 ${
+            variation.shape === 'ornate' ? 'rounded-t-[30px] bg-[rgba(255,215,0,0.08)]' :
+            variation.shape === 'modern' ? 'rounded-t-[16px] bg-[rgba(200,200,255,0.06)]' :
+            variation.shape === 'weathered' ? 'rounded-t-[24px] bg-[rgba(139,125,107,0.08)]' :
+            'rounded-t-[26px] bg-[rgba(255,255,255,0.06)]'
+          } group-hover:bg-[rgba(154,230,180,0.15)]`} />
+          
+          {/* Stone body with material variations */}
+          <div className={`relative border p-2 transition-all duration-300 group-hover:border-[rgba(154,230,180,0.4)] ${
+            variation.shape === 'ornate' ? 'rounded-t-[30px]' :
+            variation.shape === 'modern' ? 'rounded-t-[16px]' :
+            variation.shape === 'weathered' ? 'rounded-t-[24px]' :
+            'rounded-t-[26px]'
+          } ${
+            variation.material === 'marble' ? 'border-slate-300/20 bg-[linear-gradient(180deg,rgba(240,240,250,0.4),rgba(200,200,220,0.35))] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3)]' :
+            variation.material === 'granite' ? 'border-slate-400/25 bg-[linear-gradient(180deg,rgba(100,120,140,0.45),rgba(80,100,120,0.4))] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15)]' :
+            variation.material === 'aged' ? 'border-yellow-900/30 bg-[linear-gradient(180deg,rgba(139,125,107,0.4),rgba(101,87,74,0.45))] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]' :
+            'border-[var(--border)] bg-[linear-gradient(180deg,rgba(200,203,210,0.35),rgba(120,130,150,0.35))] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2)]'
+          } group-hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),0_4px_12px_rgba(0,0,0,0.3)]`}>
             {/* Cap ridge */}
             <div className="mx-auto h-[6px] w-[70%] rounded-t-full bg-white/10" />
             {/* Face window for media */}
@@ -129,9 +201,35 @@ export function HeadstoneCard({ grave }: { grave: FeedItem }) {
               {grave.title}
             </h3>
           </div>
-          {/* Pedestal and mound */}
-          <div className="mx-auto h-2 w-[88%] rounded-b-[10px] bg-[rgba(110,120,135,0.6)]" />
+          {/* Pedestal and mound with material variations */}
+          <div className={`mx-auto h-2 w-[88%] rounded-b-[10px] ${
+            variation.material === 'marble' ? 'bg-[rgba(200,200,220,0.7)]' :
+            variation.material === 'granite' ? 'bg-[rgba(90,110,130,0.8)]' :
+            variation.material === 'aged' ? 'bg-[rgba(101,87,74,0.7)]' :
+            'bg-[rgba(110,120,135,0.6)]'
+          }`} />
           <div className="mx-auto mt-0.5 h-1.5 w-[92%] rounded-full bg-[rgba(60,160,90,0.55)]" />
+          
+          {/* Decorative elements based on grave popularity/reactions */}
+          {variation.decoration !== 'none' && (
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+              {variation.decoration === 'flowers' && (
+                <div className="flex gap-1">
+                  <span className="text-xs">🌹</span>
+                  <span className="text-xs">🌸</span>
+                </div>
+              )}
+              {variation.decoration === 'candles' && (
+                <div className="flex gap-1">
+                  <span className="text-xs animate-pulse">🕯️</span>
+                  <span className="text-xs animate-pulse" style={{ animationDelay: '0.5s' }}>🕯️</span>
+                </div>
+              )}
+              {variation.decoration === 'wreath' && (
+                <span className="text-sm">🎄</span>
+              )}
+            </div>
+          )}
         </div>
       </Link>
 
