@@ -295,7 +295,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
 
       const node = certificateRef.current;
       const measuredRect = node.getBoundingClientRect();
-      const maxExportWidth = 800;
+      const maxExportWidth = 600; // Reduced from 800 to 600 for smaller file size
       const targetWidth = Math.min(maxExportWidth, Math.ceil(measuredRect.width));
 
       const clone = node.cloneNode(true) as HTMLElement;
@@ -330,7 +330,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       const dataUrl = await domtoimage.toPng(clone, {
         width: exportWidth,
         height: exportHeight,
-        quality: 1,
+        quality: 0.9, // Slightly reduce quality to decrease file size
         bgcolor: '#0b0d16',
       });
 
