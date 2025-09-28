@@ -76,10 +76,14 @@ model Grave {
   mapY              Int?               @map("map_y")
   eulogyCount       Int                @default(0) @map("eulogy_count")
   roastCount        Int                @default(0) @map("roast_count")
-  moderationTrail   ModerationAction[]
-  reactionEvents    ReactionEvent[]
-  reports           Report[]
-  sympathies        Sympathy[]
+  moderationTrail        ModerationAction[]
+  reactionEvents         ReactionEvent[]
+  reports                Report[]
+  sympathies             Sympathy[]
+  roastEulogyReactions   RoastEulogyReaction[]
+  graveSubscriptions     GraveSubscription[]
+  notificationHistory    NotificationHistory[]
+  dailyActivityTracker   DailyActivityTracker[]
 
   @@index([createdAt], map: "idx_graves_created_at")
   @@index([creatorDeviceHash, createdAt], map: "idx_graves_creator_created_at")
@@ -164,6 +168,8 @@ model RoastEulogyReaction {
   deviceHash String          @map("device_hash") @db.VarChar(128)
   type       RoastEulogyType
   createdAt  DateTime        @default(now()) @map("created_at")
+  
+  grave Grave @relation(fields: [graveId], references: [id], onDelete: Cascade)
 
   @@unique([graveId, deviceHash], map: "uq_roast_eulogy_grave_device")
   @@index([graveId, type], map: "idx_roast_eulogy_grave_type")
@@ -202,23 +208,26 @@ model UserModerationAction {
 }
 
 model User {
-  id             String         @id @default(uuid()) @db.Uuid
-  deviceHash     String?        @map("device_hash") @db.VarChar(128)
-  createdAt      DateTime       @default(now()) @map("created_at")
-  updatedAt      DateTime       @updatedAt @map("updated_at")
-  email          String         @unique @db.VarChar(255)
-  name           String?        @db.VarChar(100)
-  picture        String?        @db.VarChar(500)
-  provider       String         @db.VarChar(20)
-  providerId     String         @map("provider_id") @db.VarChar(100)
-  isModerator    Boolean        @default(false) @map("is_moderator")
-  banExpiresAt   DateTime?      @map("ban_expires_at")
-  banReason      String?        @map("ban_reason") @db.VarChar(280)
-  bannedAt       DateTime?      @map("banned_at")
-  bannedBy       String?        @map("banned_by") @db.VarChar(128)
-  isBanned       Boolean        @default(false) @map("is_banned")
-  suspendedUntil DateTime?      @map("suspended_until")
-  oauthAccounts  OAuthAccount[]
+  id                    String                  @id @default(uuid()) @db.Uuid
+  deviceHash            String?                 @map("device_hash") @db.VarChar(128)
+  createdAt             DateTime                @default(now()) @map("created_at")
+  updatedAt             DateTime                @updatedAt @map("updated_at")
+  email                 String                  @unique @db.VarChar(255)
+  name                  String?                 @db.VarChar(100)
+  picture               String?                 @db.VarChar(500)
+  provider              String                  @db.VarChar(20)
+  providerId            String                  @map("provider_id") @db.VarChar(100)
+  isModerator           Boolean                 @default(false) @map("is_moderator")
+  banExpiresAt          DateTime?               @map("ban_expires_at")
+  banReason             String?                 @map("ban_reason") @db.VarChar(280)
+  bannedAt              DateTime?               @map("banned_at")
+  bannedBy              String?                 @map("banned_by") @db.VarChar(128)
+  isBanned              Boolean                 @default(false) @map("is_banned")
+  suspendedUntil        DateTime?               @map("suspended_until")
+  oauthAccounts         OAuthAccount[]
+  notificationPreference NotificationPreference?
+  graveSubscriptions    GraveSubscription[]
+  notificationHistory   NotificationHistory[]
 
   @@unique([provider, providerId], map: "uq_user_provider_id")
   @@index([isBanned, bannedAt], map: "idx_user_banned")
@@ -226,6 +235,87 @@ model User {
   @@index([email], map: "idx_user_email")
   @@index([suspendedUntil], map: "idx_user_suspended")
   @@map("users")
+}
+
+model NotificationPreference {
+  id                      String   @id @default(uuid()) @db.Uuid
+  userId                  String   @unique @map("user_id") @db.Uuid
+  emailOnNewSympathy      Boolean  @default(true) @map("email_on_new_sympathy")
+  emailOnFirstReaction    Boolean  @default(true) @map("email_on_first_reaction")
+  emailDailyDigest        Boolean  @default(false) @map("email_daily_digest")
+  smsEnabled              Boolean  @default(false) @map("sms_enabled")
+  smsOnNewSympathy        Boolean  @default(false) @map("sms_on_new_sympathy")
+  smsOnFirstReaction      Boolean  @default(false) @map("sms_on_first_reaction")
+  phoneNumber            String?   @map("phone_number") @db.VarChar(20)
+  quietHoursStart        Int       @default(21) @map("quiet_hours_start") // 9 PM
+  quietHoursEnd          Int       @default(8) @map("quiet_hours_end")   // 8 AM
+  timezone               String    @default("UTC") @db.VarChar(50)
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("notification_preferences")
+}
+
+model GraveSubscription {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  graveId   String   @map("grave_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  grave Grave @relation(fields: [graveId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, graveId])
+  @@index([graveId, createdAt], map: "idx_grave_subscription_grave_created")
+  @@index([userId, createdAt], map: "idx_grave_subscription_user_created")
+  @@map("grave_subscriptions")
+}
+
+model NotificationHistory {
+  id                String             @id @default(uuid()) @db.Uuid
+  userId            String             @map("user_id") @db.Uuid
+  graveId           String             @map("grave_id") @db.Uuid
+  type              NotificationType
+  method            NotificationMethod
+  sentAt            DateTime           @default(now()) @map("sent_at")
+  success           Boolean            @default(true)
+  errorMessage      String?            @map("error_message")
+  metadata          String?            // JSON for additional data
+  
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  grave Grave @relation(fields: [graveId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, type, sentAt], map: "idx_notification_history_user_type_sent")
+  @@index([graveId, type, sentAt], map: "idx_notification_history_grave_type_sent")
+  @@map("notification_history")
+}
+
+model DailyActivityTracker {
+  id                    String   @id @default(uuid()) @db.Uuid
+  graveId               String   @map("grave_id") @db.Uuid
+  date                  DateTime @db.Date
+  uniqueReactorDevices  String[] @map("unique_reactor_devices")
+  sympathyCount         Int      @default(0) @map("sympathy_count")
+  reactionCount         Int      @default(0) @map("reaction_count")
+  
+  grave Grave @relation(fields: [graveId], references: [id], onDelete: Cascade)
+  
+  @@unique([graveId, date])
+  @@index([date], map: "idx_daily_activity_date")
+  @@map("daily_activity_tracker")
+}
+
+enum NotificationType {
+  NEW_SYMPATHY
+  FIRST_DAILY_REACTION
+  DAILY_DIGEST
+}
+
+enum NotificationMethod {
+  EMAIL
+  SMS
 }
 
 model anniversary_reminders {

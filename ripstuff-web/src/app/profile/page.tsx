@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@/components/UserContext';
 import { Button } from '@/components/Button';
+import { NotificationPreferencesSection } from '@/components/NotificationPreferencesSection';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface LinkedAccount {
@@ -397,6 +398,9 @@ export default function ProfilePage() {
 
           {/* Account Linking Section */}
           <AccountLinkingSection user={user} />
+
+          {/* Notification Preferences Section */}
+          <NotificationPreferencesSection />
         </div>
       </div>
     </div>
