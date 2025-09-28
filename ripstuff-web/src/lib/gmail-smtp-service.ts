@@ -114,6 +114,12 @@ export class GmailNotificationService {
         }
       }
 
+      // Ensure preferences is not null before proceeding
+      if (!preferences) {
+        console.error(`❌ Unable to create or fetch notification preferences for user ${userId}`);
+        return;
+      }
+
       // Check quiet hours (only if enabled, default to true for backward compatibility)
       const quietHoursEnabled = preferences.quietHoursEnabled !== false; // null or true = enabled
       const isQuietTime = quietHoursEnabled && this.isWithinQuietHours(
@@ -143,41 +149,42 @@ export class GmailNotificationService {
         throw new Error('Gmail SMTP: No message ID returned');
       }
 
-      // Log successful delivery
-      await this.logNotification(userId, graveId, type, true);
-      console.log(`Gmail email sent to ${to}: ${result.messageId}`);
+      // Log successful delivery (commented out until NotificationHistory model is available)
+      // await this.logNotification(userId, graveId, type, true);
+      console.log(`✅ Gmail email sent to ${to}: ${result.messageId}`);
       
     } catch (error) {
-      console.error('Error sending Gmail email:', error);
-      await this.logNotification(userId, graveId, type, false, String(error));
+      console.error('❌ Error sending Gmail email:', error);
+      // await this.logNotification(userId, graveId, type, false, String(error));
     }
   }
 
   /**
-   * Log notification to history
+   * Log notification to history - TEMPORARILY DISABLED
+   * (Waiting for NotificationHistory model to be added to Prisma schema)
    */
-  private static async logNotification(
-    userId: string,
-    graveId: string,
-    type: 'NEW_SYMPATHY' | 'FIRST_DAILY_REACTION' | 'DAILY_DIGEST',
-    success: boolean,
-    errorMessage?: string
-  ): Promise<void> {
-    try {
-      await prisma.notificationHistory.create({
-        data: {
-          userId,
-          graveId,
-          type,
-          method: 'EMAIL',
-          success,
-          errorMessage: success ? null : errorMessage
-        }
-      });
-    } catch (error) {
-      console.error('Error logging notification history:', error);
-    }
-  }
+  // private static async logNotification(
+  //   userId: string,
+  //   graveId: string,
+  //   type: 'NEW_SYMPATHY' | 'FIRST_DAILY_REACTION' | 'DAILY_DIGEST',
+  //   success: boolean,
+  //   errorMessage?: string
+  // ): Promise<void> {
+  //   try {
+  //     await prisma.notificationHistory.create({
+  //       data: {
+  //         userId,
+  //         graveId,
+  //         type,
+  //         method: 'EMAIL',
+  //         success,
+  //         errorMessage: success ? null : errorMessage
+  //       }
+  //     });
+  //   } catch (error) {
+  //     console.error('Error logging notification history:', error);
+  //   }
+  // }
 
   /**
    * Send new sympathy notification
@@ -210,23 +217,24 @@ export class GmailNotificationService {
     data: FirstReactionEmailData
   ): Promise<void> {
     // Check if we already sent a first reaction notification for this grave today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const existingNotification = await prisma.notificationHistory.findFirst({
-      where: {
-        userId,
-        graveId,
-        type: 'FIRST_DAILY_REACTION',
-        sentAt: { gte: today },
-        success: true
-      }
-    });
-
-    if (existingNotification) {
-      console.log(`First reaction notification already sent today for grave ${graveId}`);
-      return;
-    }
+    // (Temporarily disabled until NotificationHistory model is available)
+    // const today = new Date();
+    // today.setHours(0, 0, 0, 0);
+    // 
+    // const existingNotification = await prisma.notificationHistory.findFirst({
+    //   where: {
+    //     userId,
+    //     graveId,
+    //     type: 'FIRST_DAILY_REACTION',
+    //     sentAt: { gte: today },
+    //     success: true
+    //   }
+    // });
+    //
+    // if (existingNotification) {
+    //   console.log(`First reaction notification already sent today for grave ${graveId}`);
+    //   return;
+    // }
 
     const template = generateFirstReactionEmail(data);
     await this.sendEmailWithQuietHoursCheck(
