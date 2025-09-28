@@ -1,5 +1,12 @@
 # AI Assistant Context
 
+## Production Issue Mitigation - Error digest 4201767273
+- Identified Vercel production crash on `/my-graveyard` caused by passing an `onError` handler directly to `next/image` inside the client `GraveCard`.
+- Refactored `GraveCard` to use a forwarded ref with an effect-based error listener so we can hide broken images without serializing event handlers.
+- Removed the server-incompatible prop usage; `next/image` now renders without triggering digest 4201767273.
+- Verification: `pnpm exec tsc --noEmit`.
+- Follow-up: deploy and retest `/my-graveyard` once changes are live.
+
 ## 🚀 Deployment & Infrastructure
 - **Platform:** Vercel (production at ripstuff.net)
 - **Framework:** Next.js 14 App Router

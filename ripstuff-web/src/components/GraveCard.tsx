@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 import { SocialShare } from "@/components/SocialShare";
 import { MemorialBadges, calculateBadges } from "@/components/MemorialBadges";
@@ -21,6 +22,29 @@ export interface GraveCardProps {
 }
 
 export function GraveCard({ grave }: GraveCardProps) {
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const [imageErrored, setImageErrored] = useState(false);
+
+  useEffect(() => {
+    setImageErrored(false);
+  }, [grave.photoUrl, grave.slug]);
+
+  useEffect(() => {
+    const node = imageRef.current;
+    if (!node) return;
+
+    const handleError = (event: Event) => {
+      console.error('Image failed to load:', grave.photoUrl, event);
+      setImageErrored(true);
+    };
+
+    node.addEventListener('error', handleError);
+
+    return () => {
+      node.removeEventListener('error', handleError);
+    };
+  }, [grave.photoUrl, grave.slug]);
+
   // Calculate mock badges for demo - in production, this data would come from analytics
   const totalReactions = Object.values(grave.reactions).reduce((sum, count) => sum + count, 0);
   const mockViews = totalReactions * 15; // Estimate views from reactions
@@ -69,21 +93,16 @@ export function GraveCard({ grave }: GraveCardProps) {
         </div>
       </div>
       <Link href={`/grave/${grave.slug}`} className="block">
-        {grave.photoUrl && (
+        {grave.photoUrl && !imageErrored && (
           <div className="mt-4 overflow-hidden rounded-2xl">
             <div className="relative h-40 w-full">
               <Image
+                ref={imageRef}
                 src={grave.photoUrl}
                 alt={grave.title}
                 fill
                 sizes="(min-width: 640px) 50vw, 100vw"
                 className="object-cover transition duration-500 group-hover:scale-105"
-                onError={(e) => {
-                  console.error('Image failed to load:', grave.photoUrl, e);
-                  // Hide the image container on error
-                  const container = e.currentTarget.closest('.mt-4') as HTMLElement;
-                  if (container) container.style.display = 'none';
-                }}
                 unoptimized={grave.photoUrl.includes('.blob.vercel-storage.com')}
               />
             </div>
