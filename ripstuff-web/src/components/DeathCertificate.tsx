@@ -295,9 +295,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
 
       const node = certificateRef.current;
       const measuredRect = node.getBoundingClientRect();
-      // Scale down the actual certificate size by 60% for sharing
-      const scale = 0.6;
-      const targetWidth = Math.ceil(measuredRect.width * scale);
+      // Use much larger width to prevent text wrapping and match browser layout
+      const targetWidth = 700; // Wide enough to prevent "Audio Driver Separation" from wrapping
 
       const clone = node.cloneNode(true) as HTMLElement;
       clone.style.margin = '0';
@@ -308,12 +307,14 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
 
       const wrapper = document.createElement('div');
       wrapper.style.position = 'fixed';
-      wrapper.style.top = '0';
-      wrapper.style.left = '0';
+      wrapper.style.top = '-9999px'; // Move far off-screen instead of visible position
+      wrapper.style.left = '-9999px'; // Move far off-screen instead of visible position
       wrapper.style.padding = '0';
       wrapper.style.margin = '0';
-      wrapper.style.zIndex = '-1';
+      wrapper.style.zIndex = '-1000';
       wrapper.style.pointerEvents = 'none';
+      wrapper.style.visibility = 'hidden'; // Make completely invisible
+      wrapper.style.opacity = '0'; // Additional invisibility
       wrapper.style.background = '#0b0d16';
       wrapper.appendChild(clone);
       document.body.appendChild(wrapper);
