@@ -296,7 +296,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       const node = certificateRef.current;
       const measuredRect = node.getBoundingClientRect();
       // Use the actual certificate width but ensure minimum width to prevent wrapping
-      const minWidth = 675; // Increased width to accommodate full epitaph text
+      const minWidth = 725; // Increased width to accommodate full epitaph text
       const targetWidth = Math.max(minWidth, Math.ceil(measuredRect.width * 0.85));
 
       const clone = node.cloneNode(true) as HTMLElement;
