@@ -84,8 +84,9 @@ export class GmailNotificationService {
         return;
       }
 
-      // Check quiet hours
-      const isQuietTime = this.isWithinQuietHours(
+      // Check quiet hours (only if enabled, default to true for backward compatibility)
+      const quietHoursEnabled = preferences.quietHoursEnabled !== false; // null or true = enabled
+      const isQuietTime = quietHoursEnabled && this.isWithinQuietHours(
         preferences.quietHoursStart,
         preferences.quietHoursEnd,
         preferences.timezone

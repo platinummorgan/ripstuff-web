@@ -247,6 +247,7 @@ model NotificationPreference {
   smsOnNewSympathy        Boolean  @default(false) @map("sms_on_new_sympathy")
   smsOnFirstReaction      Boolean  @default(false) @map("sms_on_first_reaction")
   phoneNumber            String?   @map("phone_number") @db.VarChar(20)
+  quietHoursEnabled      Boolean? @map("quiet_hours_enabled") // Optional for backward compatibility
   quietHoursStart        Int       @default(21) @map("quiet_hours_start") // 9 PM
   quietHoursEnd          Int       @default(8) @map("quiet_hours_end")   // 8 AM
   timezone               String    @default("UTC") @db.VarChar(50)

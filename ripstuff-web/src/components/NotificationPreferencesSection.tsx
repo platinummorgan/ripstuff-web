@@ -11,6 +11,7 @@ interface NotificationPreferences {
   smsOnNewSympathy: boolean;
   smsOnFirstReaction: boolean;
   phoneNumber: string;
+  quietHoursEnabled: boolean;
   quietHoursStart: number;
   quietHoursEnd: number;
   timezone: string;
@@ -44,6 +45,7 @@ export function NotificationPreferencesSection() {
     smsOnNewSympathy: false,
     smsOnFirstReaction: false,
     phoneNumber: '',
+    quietHoursEnabled: true,
     quietHoursStart: 21, // 9 PM
     quietHoursEnd: 8,    // 8 AM
     timezone: 'UTC',
@@ -168,7 +170,8 @@ export function NotificationPreferencesSection() {
           </div>
         </div>
 
-        {/* SMS Notifications */}
+        {/* SMS Notifications - Temporarily Disabled */}
+        {/*
         <div className="space-y-4">
           <h4 className="text-lg font-medium text-white">SMS Notifications</h4>
           
@@ -232,67 +235,86 @@ export function NotificationPreferencesSection() {
             </div>
           )}
         </div>
+        */}
 
         {/* Quiet Hours */}
         <div className="space-y-4">
           <h4 className="text-lg font-medium text-white">Quiet Hours</h4>
-          <p className="text-gray-400 text-sm">
-            Notifications during these hours will be delayed until the morning.
-          </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              checked={preferences.quietHoursEnabled}
+              onChange={(e) => updatePreference('quietHoursEnabled', e.target.checked)}
+              className="mt-1 w-4 h-4 rounded border-gray-600 bg-black/20 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+            />
             <div>
-              <label htmlFor="quietStart" className="block text-sm font-medium text-white mb-2">
-                Start Time
-              </label>
-              <select
-                id="quietStart"
-                value={preferences.quietHoursStart}
-                onChange={(e) => updatePreference('quietHoursStart', parseInt(e.target.value))}
-                className="w-full px-3 py-2 bg-black/20 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400"
-              >
-                {Array.from({ length: 24 }, (_, i) => (
-                  <option key={i} value={i}>{formatHour(i)}</option>
-                ))}
-              </select>
+              <div className="text-white text-sm font-medium">Enable quiet hours</div>
+              <div className="text-gray-400 text-xs">Delay notifications during specified hours - they'll be sent when quiet hours end</div>
             </div>
+          </label>
 
-            <div>
-              <label htmlFor="quietEnd" className="block text-sm font-medium text-white mb-2">
-                End Time
-              </label>
-              <select
-                id="quietEnd"
-                value={preferences.quietHoursEnd}
-                onChange={(e) => updatePreference('quietHoursEnd', parseInt(e.target.value))}
-                className="w-full px-3 py-2 bg-black/20 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400"
-              >
-                {Array.from({ length: 24 }, (_, i) => (
-                  <option key={i} value={i}>{formatHour(i)}</option>
-                ))}
-              </select>
-            </div>
+          {preferences.quietHoursEnabled && (
+            <>
+              <p className="text-gray-400 text-sm ml-7">
+                Notifications during these hours will be delayed until the morning.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ml-7">
+                <div>
+                  <label htmlFor="quietStart" className="block text-sm font-medium text-white mb-2">
+                    Start Time
+                  </label>
+                  <select
+                    id="quietStart"
+                    value={preferences.quietHoursStart}
+                    onChange={(e) => updatePreference('quietHoursStart', parseInt(e.target.value))}
+                    className="w-full px-3 py-2 bg-black/20 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400"
+                  >
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <option key={i} value={i}>{formatHour(i)}</option>
+                    ))}
+                  </select>
+                </div>
 
-            <div>
-              <label htmlFor="timezone" className="block text-sm font-medium text-white mb-2">
-                Timezone
-              </label>
-              <select
-                id="timezone"
-                value={preferences.timezone}
-                onChange={(e) => updatePreference('timezone', e.target.value)}
-                className="w-full px-3 py-2 bg-black/20 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400"
-              >
-                {TIMEZONES.map(tz => (
-                  <option key={tz.value} value={tz.value}>{tz.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+                <div>
+                  <label htmlFor="quietEnd" className="block text-sm font-medium text-white mb-2">
+                    End Time
+                  </label>
+                  <select
+                    id="quietEnd"
+                    value={preferences.quietHoursEnd}
+                    onChange={(e) => updatePreference('quietHoursEnd', parseInt(e.target.value))}
+                    className="w-full px-3 py-2 bg-black/20 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400"
+                  >
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <option key={i} value={i}>{formatHour(i)}</option>
+                    ))}
+                  </select>
+                </div>
 
-          <div className="text-sm text-gray-400">
-            Quiet hours: {formatHour(preferences.quietHoursStart)} - {formatHour(preferences.quietHoursEnd)}
-          </div>
+                <div>
+                  <label htmlFor="timezone" className="block text-sm font-medium text-white mb-2">
+                    Timezone
+                  </label>
+                  <select
+                    id="timezone"
+                    value={preferences.timezone}
+                    onChange={(e) => updatePreference('timezone', e.target.value)}
+                    className="w-full px-3 py-2 bg-black/20 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400"
+                  >
+                    {TIMEZONES.map(tz => (
+                      <option key={tz.value} value={tz.value}>{tz.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="text-sm text-gray-400 ml-7">
+                Quiet hours: {formatHour(preferences.quietHoursStart)} - {formatHour(preferences.quietHoursEnd)}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Save Button */}
