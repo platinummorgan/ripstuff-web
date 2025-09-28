@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Image from "next/image";
+import { SafeImage } from "@/components/SafeImage";
 
 import { Button } from "@/components/Button";
 import { ReactionsBar } from "@/components/ReactionsBar";
@@ -135,31 +135,18 @@ export default async function GravePage({ params }: { params: { slug: string } }
         </div>
         {grave.photoUrl ? (
           <div className="relative h-full w-full">
-            <Image
+            <SafeImage
               src={grave.photoUrl}
               alt={grave.title}
               fill
               sizes="(min-width: 640px) 50vw, 100vw"
               className="rounded-2xl object-cover"
-              onError={(e) => {
-                console.error('Image failed to load:', grave.photoUrl, e);
-                // Show fallback tombstone icon
-                const container = e.currentTarget.closest('header') as HTMLElement;
-                if (container) {
-                  const img = container.querySelector('img');
-                  if (img) {
-                    img.style.display = 'none';
-                    const fallback = container.querySelector('.fallback-tombstone');
-                    if (!fallback) {
-                      const div = document.createElement('div');
-                      div.className = 'fallback-tombstone flex h-full w-full items-center justify-center rounded-2xl bg-[rgba(255,255,255,0.03)] text-4xl';
-                      div.textContent = '🪦';
-                      container.appendChild(div);
-                    }
-                  }
-                }
-              }}
               unoptimized={grave.photoUrl.includes('.blob.vercel-storage.com')}
+              fallback={
+                <div className="fallback-tombstone flex h-full w-full items-center justify-center rounded-2xl bg-[rgba(255,255,255,0.03)] text-4xl">
+                  🪦
+                </div>
+              }
             />
           </div>
         ) : (

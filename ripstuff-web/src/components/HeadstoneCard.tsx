@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
+
+import { SafeImage } from "@/components/SafeImage";
 import Link from "next/link";
 import type { FeedItem } from "@/lib/validation";
 
@@ -152,28 +153,29 @@ export function HeadstoneCard({ grave }: { grave: FeedItem }) {
             <div className="mx-auto h-[6px] w-[70%] rounded-t-full bg-white/10" />
             {/* Face window for media */}
             <div className="mt-2 h-[72px] w-full overflow-hidden rounded-[10px] bg-black/25">
-              {grave.photoUrl && !video && (
-                <Image
+              {grave.photoUrl && !video ? (
+                <SafeImage
                   src={grave.photoUrl}
                   alt={grave.title}
                   width={220}
                   height={140}
                   className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                  onError={(e) => {
-                    console.error('Headstone image failed to load:', grave.photoUrl, e);
-                    // Hide the image and show a fallback
-                    const img = e.currentTarget;
-                    img.style.display = 'none';
-                    const container = img.parentElement;
-                    if (container && !container.querySelector('.headstone-fallback')) {
-                      const fallback = document.createElement('div');
-                      fallback.className = 'headstone-fallback flex h-full w-full items-center justify-center text-2xl';
-                      fallback.textContent = '🪦';
-                      container.appendChild(fallback);
-                    }
-                  }}
                   unoptimized={grave.photoUrl.includes('.blob.vercel-storage.com')}
+                  fallback={
+                    <div className="headstone-fallback flex h-full w-full items-center justify-center text-2xl">
+                      ??
+                    </div>
+                  }
+                  onImageError={(event) => {
+                    console.error('Headstone image failed to load:', grave.photoUrl, event);
+                  }}
                 />
+              ) : (
+                !video && (
+                  <div className="headstone-fallback flex h-full w-full items-center justify-center text-2xl">
+                    ??
+                  </div>
+                )
               )}
               {grave.photoUrl && video && (
                 <div className="relative h-full w-full">

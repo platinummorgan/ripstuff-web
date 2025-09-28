@@ -1,6 +1,8 @@
 # AI Assistant Context
 
 ## Production Issue Mitigation - Error digest 4201767273
+- Added `SafeImage` (`src/components/SafeImage.tsx`) to handle image fallbacks with ref-based listeners instead of serialised handlers.
+- Updated `HeadstoneCard` and `app/grave/[slug]/page.tsx` to consume `SafeImage`, preserving styled emoji fallbacks without hitting Next.js serialization guards.
 - Identified Vercel production crash on `/my-graveyard` caused by passing an `onError` handler directly to `next/image` inside the client `GraveCard`.
 - Refactored `GraveCard` to use a forwarded ref with an effect-based error listener so we can hide broken images without serializing event handlers.
 - Removed the server-incompatible prop usage; `next/image` now renders without triggering digest 4201767273.
