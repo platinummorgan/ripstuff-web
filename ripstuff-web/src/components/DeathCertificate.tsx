@@ -294,16 +294,15 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       const node = certificateRef.current;
-      const rect = node.getBoundingClientRect();
-      const width = Math.ceil(rect.width);
-      const height = Math.ceil(rect.height);
-      const scale = 2;
+      const measuredRect = node.getBoundingClientRect();
+      const maxExportWidth = 800;
+      const targetWidth = Math.min(maxExportWidth, Math.ceil(measuredRect.width));
 
       const clone = node.cloneNode(true) as HTMLElement;
       clone.style.margin = '0';
-      clone.style.width = `${width}px`;
+      clone.style.width = `${targetWidth}px`;
       clone.style.maxWidth = 'none';
-      clone.style.height = `${height}px`;
+      clone.style.height = 'auto';
       clone.style.boxSizing = 'border-box';
 
       const wrapper = document.createElement('div');
@@ -321,20 +320,18 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
         document.body.removeChild(wrapper);
       };
 
+      // Allow layout to settle at the new width before measuring for export
+      const cloneRect = clone.getBoundingClientRect();
+      const exportWidth = Math.ceil(cloneRect.width);
+      const exportHeight = Math.ceil(cloneRect.height);
+
       cleanupCloneColors = applyLegacyColorOverrides(clone);
 
-      // High-res capture without extra canvas whitespace
       const dataUrl = await domtoimage.toPng(clone, {
-        width: Math.ceil(width * scale),
-        height: Math.ceil(height * scale),
+        width: exportWidth,
+        height: exportHeight,
         quality: 1,
         bgcolor: '#0b0d16',
-        style: {
-          transform: `scale(${scale})`,
-          transformOrigin: 'top left',
-          width: `${width}px`,
-          height: `${height}px`,
-        },
       });
 
       // Direct download of full certificate
