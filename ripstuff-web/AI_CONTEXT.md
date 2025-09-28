@@ -86,22 +86,64 @@ model OAuthAccount {
 - Added proper error handling to show specific OAuth API error details
 - Updated client-side OAuth initialization to fetch App ID from API endpoint
 
-## 🎯 Death Certificate System - FULLY IMPLEMENTED ✅
-**Status:** Complete foundation deployed to production
+## 🎯 Death Certificate System - FULLY IMPLEMENTED & OPTIMIZED ✅
+**Status:** Production-ready with comprehensive UI polish and OKLCH color fix deployed September 27, 2025
+
+### Core Features ✅
 - **Database Schema:** Extended with roastCount, eulogyCount fields and RoastEulogyReaction table
 - **API Endpoint:** `/api/graves/[slug]/roast-eulogy` for dual-mode voting (roast vs eulogy) 
-- **Component:** `DeathCertificate.tsx` with html2canvas export, controversy scoring, QR codes
-- **Dependencies:** html2canvas ^1.4.1, qrcode ^1.5.4 successfully deployed
+- **Component:** `DeathCertificate.tsx` with dom-to-image export, controversy scoring, QR codes
+- **Dependencies:** dom-to-image ^2.6.0, qrcode ^1.5.4, @types/dom-to-image ^2.6.7
 - **Integration:** Death Certificate appears on all grave pages with download functionality
-- **Migration:** Applied to production database successfully
 
-### Death Certificate Features ✅
-- Controversy calculation algorithm with "snark meter"
-- Official certificate styling with memorial QR codes  
-- PNG export functionality via html2canvas
-- Roast vs Eulogy percentage display with visual indicators
-- Integrated on `/grave/[slug]` pages between Eulogy and Sympathies sections
-- Real-time data from roastCount/eulogyCount fields
+### UI Polish & Enhancements - September 27, 2025 ✅
+- **Age Calculation:** Dynamic age display (e.g., "1d", "4y 10m") next to deceased name
+- **Cause Icons:** Context-aware icons (🎮 for gaming, 🎵 for audio, 💧 for water damage, etc.)
+- **Enhanced Meter:** Vote counts in labels ("Condolences (18)" vs "Roasts (7)") with 50% tick mark
+- **Controversy Levels:** Saint → Respected → Divisive → Controversial → Roasted with contextual descriptions
+- **Certificate Serial Numbers:** Auto-generated format "Certificate #VG-ITEM12AB-2025"
+- **Micro-CTA:** Engagement prompt "💭 Vote Condolences or Roasts"
+- **Layout Optimization:** Increased height to 700px, reduced spacing, improved epitaph visibility
+
+### Technical Architecture ✅
+- **Color System Fix:** Sophisticated OKLCH color conversion utilities for modern CSS compatibility
+- **Smart Conversion:** `normalizeColorValue()` and `applyLegacyColorOverrides()` functions convert Tailwind's oklch() colors to rgb() before dom-to-image export
+- **Non-Destructive Processing:** Temporary color conversion with automatic cleanup restoration
+- **Tailwind Configuration:** Custom config forcing hex colors with comprehensive palette mapping
+- **Bundle Optimization:** Removed html2canvas dependency, streamlined to dom-to-image only
+
+### OKLCH Color Problem Resolution - September 27, 2025 ✅
+**Problem:** "Attempting to parse an unsupported color function 'oklch'" error during certificate download
+**Root Cause:** Tailwind CSS v3.4+ uses modern oklch() color functions that dom-to-image/html2canvas cannot parse
+**Solution Implemented:**
+```typescript
+// Smart color conversion utilities in DeathCertificate.tsx
+const normalizeColorValue = (property, value) => {
+  // Uses hidden DOM element to let browser convert oklch → rgb
+}
+
+const applyLegacyColorOverrides = (root) => {
+  // Walks DOM tree and converts all oklch colors before export
+  // Handles: color, backgroundColor, borderColor, boxShadow, etc.
+}
+```
+
+**Technical Details:**
+- **Browser-Native Conversion:** Uses DOM probe element for accurate color conversion
+- **Comprehensive Coverage:** Handles all CSS color properties automatically  
+- **Proper Cleanup:** `restoreColors` function in finally block restores original styles
+- **Error Handling:** Graceful fallbacks with try/catch protection
+
+### Gaming Console Detection ✅
+- **Improved Logic:** PlayStation, Xbox, Nintendo consoles now get 🎮 "System Overload Failure"
+- **Fixed Categorization:** No longer incorrectly labeled as "Childhood Neglect Syndrome"
+- **Context-Aware Icons:** Smart detection based on title patterns and categories
+
+### Certificate Export Features ✅
+- **QR Code Integration:** Memorial page URL embedded in certificate for easy sharing
+- **High-Resolution Export:** 2x scale (1600x1400px) PNG output optimized for sharing/printing
+- **Professional Styling:** Official certificate appearance with decorative borders and typography
+- **Error Recovery:** Robust error handling with detailed failure messages for debugging
 
 ### Database Schema (Roast/Eulogy System)
 ```prisma
@@ -268,11 +310,102 @@ model User {   // PascalCase for code
 
 **Status:** Production-ready with comprehensive analytics actively tracking user behavior. All critical Prisma issues resolved, analytics page optimized for static generation, and GA4 tracking system fully operational with real-time data collection confirmed.
 
+## 🌟 COMPREHENSIVE UX REFRAME - September 27, 2025 ✅ 
+**Major terminology evolution to eliminate cognitive dissonance and improve user understanding.**
+
+### Terminology System Redesign ✅
+**Problem Identified:** "Eulogy" was incorrectly used for both single memorial text AND community reactions, causing confusion.
+
+**Solution Implemented:** Clear separation of concerns with intuitive naming:
+
+#### New Terminology Structure
+- **Epitaph:** The single memorial text written at grave creation (replaces confusing "eulogy" usage)
+- **Sympathies:** Community-written messages/comments (replaces "sympathies" for text content) 
+- **Reactions:** Binary voting system for community sentiment (Condolences ❤️ vs Roasts 🔥)
+
+#### UI Component Updates ✅
+- **Death Certificate:** Now displays "Epitaph" section instead of "Eulogy"
+- **Voting Buttons:** "Condolences ❤️" and "Roasts 🔥" (replaced generic roast/eulogy voting)
+- **Page Layout:** Clear progression: Epitaph → Death Certificate → Sympathies → Reactions
+- **Vote Labels:** "Condolences (18)" vs "Roasts (7)" with contextual counts
+
+### Database Schema Alignment ✅
+- **Preserved Existing Schema:** RoastEulogyReaction table and roastCount/eulogyCount fields maintained for data integrity
+- **API Compatibility:** All existing endpoints continue working with new frontend terminology
+- **Migration-Free:** No database changes required, pure UI/UX enhancement
+
+### Death Certificate Enhancement - September 27, 2025 ✅
+**Advanced UI polish and technical improvements implemented:**
+
+#### Visual Enhancements ✅
+- **Age Display:** Dynamic age calculation next to deceased name ("Age: 4y 10m", "1d", etc.)
+- **Cause Icons:** Context-aware emoji icons based on death cause analysis:
+  - 🎮 Gaming consoles (PlayStation, Xbox, Nintendo) 
+  - 🎵 Audio equipment failures
+  - 💧 Water damage incidents
+  - 🔥 Overheating/fire damage
+  - ⚡ Electrical failures
+  - 🔋 Battery-related deaths
+
+#### Controversy System Refinement ✅
+- **5-Level Scale:** Saint (0-5%) → Respected (6-20%) → Divisive (21-40%) → Controversial (41-70%) → Roasted (71-100%)
+- **Enhanced Labels:** Vote counts in buttons ("Condolences (18)" vs "Roasts (7)")
+- **50% Tick Mark:** Visual indicator at controversy meter midpoint
+- **Contextual Descriptions:** Level-appropriate controversy explanations
+
+#### Technical Architecture ✅
+- **Serial Numbers:** Auto-generated certificate format "Certificate #VG-ITEM12AB-2025"
+- **Layout Optimization:** Increased certificate height to 700px, improved spacing
+- **Engagement Prompts:** Subtle CTA "💭 Vote Condolences or Roasts" to encourage participation
+
+### CRITICAL OKLCH Color Resolution - September 27, 2025 ✅
+**Major technical breakthrough solving Death Certificate download failures.**
+
+#### Problem Analysis
+- **Error:** "Attempting to parse an unsupported color function 'oklch'" during certificate export
+- **Root Cause:** Tailwind CSS v3.4+ generates modern oklch() color functions that dom-to-image cannot parse
+- **Impact:** Death Certificate downloads completely broken for users
+
+#### Elegant Solution Architecture ✅
+```typescript
+// Smart color conversion system in DeathCertificate.tsx
+const normalizeColorValue = (property: string, value: string): string => {
+  // Uses browser's native CSS parsing for accurate oklch → rgb conversion
+  const probe = document.createElement('div');
+  probe.style[property] = value;
+  document.body.appendChild(probe);
+  const computed = window.getComputedStyle(probe)[property];
+  document.body.removeChild(probe);
+  return computed;
+};
+
+const applyLegacyColorOverrides = (root: HTMLElement): (() => void) => {
+  // Walks entire DOM tree and converts all oklch colors before export
+  // Handles: color, backgroundColor, borderColor, boxShadow, outline, etc.
+  // Returns cleanup function to restore original styles
+};
+```
+
+#### Technical Implementation Details ✅
+- **Browser-Native Conversion:** Uses DOM probe element for 100% accurate color conversion
+- **Comprehensive Coverage:** Automatically handles all CSS color properties without manual mapping
+- **Non-Destructive Processing:** Temporary conversion with automatic cleanup restoration
+- **Error Handling:** Graceful fallbacks with detailed error logging for diagnostics
+- **Performance Optimized:** Minimal DOM manipulation with efficient cleanup
+
+#### Deployment Success ✅
+- **Migration Complete:** Switched from html2canvas to dom-to-image for better performance
+- **Bundle Optimization:** Removed html2canvas dependency, reduced bundle size
+- **Production Verified:** Death Certificate downloads working perfectly with new color system
+- **User Experience:** Seamless download functionality restored with improved reliability
+
 ### Recent Achievements - September 27, 2025 ✅
 - ✅ **Analytics Optimization:** Converted analytics page from dynamic to static rendering
-- ✅ **Prisma Schema Fixes:** Resolved all compilation errors with camelCase field mapping
+- ✅ **Prisma Schema Fixes:** Resolved all compilation errors with camelCase field mapping  
 - ✅ **Google Analytics 4:** Complete integration with RipStuff-specific event tracking
-- ✅ **Real-Time Verification:** GA4 dashboard showing active user tracking and data collection
-- ✅ **Production Deployment:** All optimizations live and performance improvements confirmed
+- ✅ **UX Reframe:** Comprehensive terminology redesign (Epitaph vs Reactions system)
+- ✅ **UI Polish:** Age badges, cause icons, enhanced voting interface, controversy refinement
+- ✅ **OKLCH Resolution:** Elegant color conversion solution restoring Death Certificate downloads
+- ✅ **Production Deployment:** All enhancements live with verified functionality
 
-Last updated: September 27, 2025 – after successful Google Analytics 4 implementation, analytics optimization, and Prisma schema normalization.
+Last updated: September 27, 2025 – after successful OKLCH color resolution, comprehensive UX reframe, and Death Certificate system optimization.

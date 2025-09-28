@@ -272,7 +272,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
 
     setIsGenerating(true);
 
-    let restoreColors: (() => void) | null = null;
+    let cleanupCloneColors: (() => void) | null = null;
+    let removeCloneFromDom: (() => void) | null = null;
 
     try {
       // Generate QR code
@@ -292,18 +293,40 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       // Wait a moment for QR code to render
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Convert Tailwind oklch colors to rgb() so dom-to-image can parse them
       const node = certificateRef.current;
-      restoreColors = applyLegacyColorOverrides(node);
-
-      const width = node.offsetWidth;
-      const height = node.offsetHeight;
+      const rect = node.getBoundingClientRect();
+      const width = Math.ceil(rect.width);
+      const height = Math.ceil(rect.height);
       const scale = 2;
 
+      const clone = node.cloneNode(true) as HTMLElement;
+      clone.style.margin = '0';
+      clone.style.width = `${width}px`;
+      clone.style.maxWidth = 'none';
+      clone.style.height = `${height}px`;
+      clone.style.boxSizing = 'border-box';
+
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'fixed';
+      wrapper.style.top = '0';
+      wrapper.style.left = '0';
+      wrapper.style.padding = '0';
+      wrapper.style.margin = '0';
+      wrapper.style.zIndex = '-1';
+      wrapper.style.pointerEvents = 'none';
+      wrapper.style.background = '#0b0d16';
+      wrapper.appendChild(clone);
+      document.body.appendChild(wrapper);
+      removeCloneFromDom = () => {
+        document.body.removeChild(wrapper);
+      };
+
+      cleanupCloneColors = applyLegacyColorOverrides(clone);
+
       // High-res capture without extra canvas whitespace
-      const dataUrl = await domtoimage.toPng(node, {
-        width: width * scale,
-        height: height * scale,
+      const dataUrl = await domtoimage.toPng(clone, {
+        width: Math.ceil(width * scale),
+        height: Math.ceil(height * scale),
         quality: 1,
         bgcolor: '#0b0d16',
         style: {
@@ -323,7 +346,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       console.error('Certificate generation failed:', error);
       alert(`Failed to generate certificate: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     } finally {
-      restoreColors?.();
+      cleanupCloneColors?.();
+      removeCloneFromDom?.();
       setIsGenerating(false);
     }
   };
@@ -342,7 +366,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       <div 
         ref={certificateRef}
         className="bg-gradient-to-br from-gray-900 via-gray-800 to-black border-8 border-amber-600 rounded-lg p-8 text-white relative overflow-hidden mx-auto"
-        style={{ width: '100%', maxWidth: '800px', height: '900px' }}
+        style={{ width: '100%', maxWidth: '800px' }}
       >
         {/* Decorative Border */}
         <div className="absolute inset-2 border-2 border-amber-500 rounded opacity-50"></div>
