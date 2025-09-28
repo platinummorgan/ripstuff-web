@@ -4,6 +4,41 @@ import { useState, useEffect, useRef } from "react";
 import { getBiomeForCoordinate } from '@/lib/biome-config';
 import { getCemeteryBackground } from '@/lib/biome-detector';
 
+// Utility functions for rich hover previews
+function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor(diff / (1000 * 60));
+  
+  if (days > 0) return `${days}d ago`;
+  if (hours > 0) return `${hours}h ago`;
+  if (minutes > 0) return `${minutes}m ago`;
+  return 'Just now';
+}
+
+function getCauseIcon(title: string, eulogy: string): string {
+  const text = `${title} ${eulogy}`.toLowerCase();
+  
+  // Gaming consoles and devices
+  if (/(playstation|xbox|nintendo|ps[0-9]|switch|gaming|console)/i.test(text)) return '🎮';
+  // Audio equipment
+  if (/(speaker|headphone|audio|sound|music|amp)/i.test(text)) return '🎵';
+  // Water damage
+  if (/(water|wet|flood|rain|spill|liquid)/i.test(text)) return '💧';
+  // Fire/overheating
+  if (/(fire|burn|heat|overheat|hot|flame)/i.test(text)) return '🔥';
+  // Electrical
+  if (/(electric|shock|power|volt|wire|short)/i.test(text)) return '⚡';
+  // Battery
+  if (/(battery|charge|power|dead)/i.test(text)) return '🔋';
+  
+  return '💀'; // Default death icon
+}
+
 interface District {
   x: number;
   y: number;
@@ -525,9 +560,17 @@ function DistrictGraveView({ x, y, graveCount }: DistrictGraveViewProps) {
     const containerElement = svgRef.current?.parentElement;
     if (!containerElement) return;
 
-    // Clear any existing tombstone overlays
+    // Clear any existing tombstone overlays and their tooltips
     const existingTombstones = containerElement.querySelectorAll('.perspective-tombstone');
-    existingTombstones.forEach(tomb => tomb.remove());
+    existingTombstones.forEach(tomb => {
+      // Trigger cleanup event for tooltips
+      tomb.dispatchEvent(new CustomEvent('cleanup'));
+      tomb.remove();
+    });
+    
+    // Also clean up any orphaned tooltips
+    const existingTooltips = document.querySelectorAll('.tombstone-tooltip');
+    existingTooltips.forEach(tooltip => tooltip.remove());
 
     // Seeded random number generator for consistent layouts
     let seed = (x * 73856093 ^ y * 19349663) >>> 0;
@@ -549,7 +592,7 @@ function DistrictGraveView({ x, y, graveCount }: DistrictGraveViewProps) {
       // Objects higher in image (lower ty value) appear further away
       // Normalize depth within ground plane range (40% to 90%)
       const depthFactor = (90 - ty) / 50; // 0 to 1.0 within ground plane
-      const scale = 1.0 - (depthFactor * 0.5); // Scale from 1.0 (closest) to 0.5 (furthest)
+      const scale = 1.2 - (depthFactor * 0.6); // Scale from 1.2 (closest) to 0.6 (furthest) - larger overall
       
       // Create perspective tombstone element
       const tombstoneEl = document.createElement('div');
@@ -566,29 +609,101 @@ function DistrictGraveView({ x, y, graveCount }: DistrictGraveViewProps) {
       const tombImg = document.createElement('img');
       tombImg.src = getRandomTombstone(grave.id);
       tombImg.alt = grave.title;
-      tombImg.style.width = '40px'; // Base size - will be scaled by perspective
+      tombImg.style.width = '120px'; // Much larger base size - will be scaled by perspective
       tombImg.style.height = 'auto';
       tombImg.style.filter = `brightness(${0.8 + (scale * 0.4)})`; // Darker = further away
       tombImg.style.opacity = String(0.7 + (scale * 0.3)); // More transparent = further away
       
-      // Add hover effects
-      tombstoneEl.addEventListener('mouseenter', () => {
+      // Create rich hover tooltip
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tombstone-tooltip';
+      tooltip.style.position = 'fixed';
+      tooltip.style.zIndex = '1000';
+      tooltip.style.display = 'none';
+      tooltip.style.width = '320px';
+      tooltip.style.backgroundColor = '#0B1123';
+      tooltip.style.border = '1px solid rgba(255,255,255,0.2)';
+      tooltip.style.borderRadius = '8px';
+      tooltip.style.padding = '16px';
+      tooltip.style.boxShadow = '0 20px 60px rgba(0,0,0,0.45)';
+      tooltip.style.backdropFilter = 'blur(8px)';
+      tooltip.style.pointerEvents = 'none';
+      tooltip.style.transform = 'translateY(-100%)';
+      tooltip.style.marginTop = '-8px';
+      
+      // Tooltip content
+      tooltip.innerHTML = `
+        <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px;">
+          <span style="font-size: 24px;" title="Cause of death">
+            ${getCauseIcon(grave.title, grave.eulogyPreview || '')}
+          </span>
+          <div style="flex: 1;">
+            <h4 style="font-weight: 600; color: white; font-size: 14px; line-height: 1.3; margin: 0 0 4px 0;">
+              ${grave.title}
+            </h4>
+            <p style="color: rgba(255,255,255,0.6); font-size: 12px; margin: 0;">
+              ${formatTimeAgo(grave.createdAt)}
+            </p>
+          </div>
+        </div>
+        ${grave.eulogyPreview ? `
+          <div style="margin-bottom: 12px;">
+            <p style="color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 500; margin: 0 0 4px 0;">Epitaph:</p>
+            <p style="color: rgba(255,255,255,0.9); font-size: 14px; line-height: 1.4; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+              "${grave.eulogyPreview}"
+            </p>
+          </div>
+        ` : ''}
+        <div style="display: flex; align-items: center; justify-between; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+          <div style="display: flex; gap: 16px;">
+            <span style="display: flex; align-items: center; gap: 4px; color: rgba(255,255,255,0.6);">
+              ❤️ ${grave.reactions?.heart || 0}
+            </span>
+            <span style="display: flex; align-items: center; gap: 4px; color: rgba(255,255,255,0.6);">
+              🕯️ ${grave.reactions?.candle || 0}
+            </span>
+            <span style="display: flex; align-items: center; gap: 4px; color: rgba(255,255,255,0.6);">
+              🌹 ${grave.reactions?.rose || 0}
+            </span>
+          </div>
+          <span style="color: rgb(154,230,180); font-weight: 500;">
+            Click to view →
+          </span>
+        </div>
+      `;
+      
+      document.body.appendChild(tooltip);
+
+      // Add hover effects with rich tooltip
+      tombstoneEl.addEventListener('mouseenter', (e) => {
         tombstoneEl.style.transform = `translate(-50%, -50%) scale(${scale * 1.1})`;
         tombImg.style.filter = 'brightness(1.2) drop-shadow(0 0 10px rgba(255,255,255,0.8))';
+        
+        // Position and show tooltip
+        const rect = tombstoneEl.getBoundingClientRect();
+        tooltip.style.left = `${rect.left + rect.width / 2}px`;
+        tooltip.style.top = `${rect.top}px`;
+        tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
+        tooltip.style.display = 'block';
       });
       
       tombstoneEl.addEventListener('mouseleave', () => {
         tombstoneEl.style.transform = `translate(-50%, -50%) scale(${scale})`;
         tombImg.style.filter = `brightness(${0.8 + (scale * 0.4)})`;
+        tooltip.style.display = 'none';
+      });
+
+      // Clean up tooltip when tombstone is removed
+      tombstoneEl.addEventListener('cleanup', () => {
+        if (tooltip.parentNode) {
+          tooltip.parentNode.removeChild(tooltip);
+        }
       });
 
       // Add click handler to navigate to grave
       tombstoneEl.addEventListener('click', () => {
         window.open(`/grave/${grave.slug}`, '_blank');
       });
-
-      // Add tooltip
-      tombstoneEl.title = grave.title;
       
       tombstoneEl.appendChild(tombImg);
       containerElement.appendChild(tombstoneEl);

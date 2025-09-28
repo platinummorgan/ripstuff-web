@@ -137,7 +137,7 @@ export function HeadstoneCard({ grave }: { grave: FeedItem }) {
 
       {/* Rich Hover Preview Tooltip */}
       {showPreview && (
-        <div className="absolute -top-2 left-1/2 z-50 w-80 -translate-x-1/2 -translate-y-full transform animate-in fade-in-0 zoom-in-95 duration-200">
+        <div className="absolute -top-2 left-1/2 z-50 w-80 -translate-x-1/2 -translate-y-full transform animate-in fade-in-0 zoom-in-95 duration-200 pointer-events-none">
           <div className="rounded-lg border border-[rgba(255,255,255,0.2)] bg-[#0B1123] bg-opacity-95 p-4 shadow-xl backdrop-blur-sm ring-1 ring-[rgba(154,230,180,0.2)]">
             {/* Arrow pointing to grave */}
             <div className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 transform border-b border-r border-[rgba(255,255,255,0.2)] bg-[#0B1123]"></div>

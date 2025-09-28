@@ -77,8 +77,8 @@ export default function MyGraveyardPage() {
                       const cols = Math.ceil(Math.sqrt(items.length));
                       const row = Math.floor(index / cols);
                       const col = index % cols;
-                      const x = 100 + col * 280; // Much more spacing for bigger graves
-                      const y = 100 + row * 250; // Much more spacing for bigger graves
+                      const x = 120 + col * 240; // Appropriate spacing for moderately sized graves
+                      const y = 120 + row * 220; // Appropriate spacing for moderately sized graves
                       
                       return (
                         <div
@@ -87,7 +87,7 @@ export default function MyGraveyardPage() {
                             position: 'absolute',
                             left: `${x}px`,
                             top: `${y}px`,
-                            transform: 'scale(2.2)', // Much bigger graves for better visibility
+                            transform: 'scale(1.6)', // Appropriate size - not too big, not too small
                             transformOrigin: 'center',
                             zIndex: 10,
                             cursor: 'pointer'
