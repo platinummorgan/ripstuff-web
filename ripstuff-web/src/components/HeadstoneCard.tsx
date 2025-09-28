@@ -52,8 +52,9 @@ function getTombstoneVariation(grave: FeedItem): {
   // Create deterministic variations based on grave properties
   let seed = grave.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   
-  // Age-based variations
-  const ageInDays = (Date.now() - new Date(grave.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+  // Age-based variations using a fixed reference date to avoid SSR hydration issues
+  const referenceDate = new Date('2025-09-27').getTime(); // Fixed reference date
+  const ageInDays = (referenceDate - new Date(grave.createdAt).getTime()) / (1000 * 60 * 60 * 24);
   
   // Popular graves get more ornate styles
   const totalReactions = grave.reactions.heart + grave.reactions.candle + grave.reactions.rose;
