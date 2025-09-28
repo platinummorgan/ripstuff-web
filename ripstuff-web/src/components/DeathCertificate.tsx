@@ -295,8 +295,9 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
 
       const node = certificateRef.current;
       const measuredRect = node.getBoundingClientRect();
-      // Use much larger width to prevent text wrapping and match browser layout
-      const targetWidth = 700; // Wide enough to prevent "Audio Driver Separation" from wrapping
+      // Use the actual certificate width but ensure minimum width to prevent wrapping
+      const minWidth = 600; // Minimum width to prevent text wrapping
+      const targetWidth = Math.max(minWidth, Math.ceil(measuredRect.width * 0.8));
 
       const clone = node.cloneNode(true) as HTMLElement;
       clone.style.margin = '0';
@@ -307,14 +308,12 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
 
       const wrapper = document.createElement('div');
       wrapper.style.position = 'fixed';
-      wrapper.style.top = '-9999px'; // Move far off-screen instead of visible position
-      wrapper.style.left = '-9999px'; // Move far off-screen instead of visible position
+      wrapper.style.top = '-9999px'; // Move off-screen to prevent flash
+      wrapper.style.left = '-9999px'; // Move off-screen to prevent flash
       wrapper.style.padding = '0';
       wrapper.style.margin = '0';
-      wrapper.style.zIndex = '-1000';
+      wrapper.style.zIndex = '-1';
       wrapper.style.pointerEvents = 'none';
-      wrapper.style.visibility = 'hidden'; // Make completely invisible
-      wrapper.style.opacity = '0'; // Additional invisibility
       wrapper.style.background = '#0b0d16';
       wrapper.appendChild(clone);
       document.body.appendChild(wrapper);
