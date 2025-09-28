@@ -476,4 +476,132 @@ const applyLegacyColorOverrides = (root: HTMLElement): (() => void) => {
 - ✅ **Cemetery Enhancement:** Rich hover previews and 2.2x larger graves in My Graveyard
 - ✅ **Production Deployment:** All enhancements live with verified functionality
 
-Last updated: September 27, 2025 – after cemetery experience enhancement with rich hover previews and improved grave interaction system.
+## 👤 USER ATTRIBUTION SYSTEM - September 28, 2025 ✅
+**Comprehensive user identity and creator attribution system implemented across all user-generated content.**
+
+### Core Features Implemented ✅
+- **Creator Attribution:** Users can see their names on memorials they create across all views
+- **Sympathy Attribution:** User names and profile pictures displayed on all sympathy messages
+- **Real-time Updates:** VotingContext provides instant Death Certificate updates when voting
+- **Cemetery Tooltips:** Enhanced visibility with creator info in cemetery hover previews
+- **OAuth Profile Integration:** Names and profile pictures from Google/Facebook accounts
+
+### Technical Architecture ✅
+#### Database Integration
+- **Device Hash Mapping:** Links anonymous device sessions to authenticated User accounts
+- **Efficient Queries:** Batched creator lookups to prevent N+1 query problems
+- **Privacy Respectful:** Shows "Anonymous Mourner" for users without OAuth profiles
+
+#### API Enhancements ✅
+- **Enhanced Endpoints:** `/api/graves/[slug]` and `/api/feed` include creator information
+- **Sympathy APIs:** Both GET and POST endpoints return creator attribution data
+- **Validation Schemas:** Updated Zod schemas with creatorInfo objects containing name/picture fields
+
+#### UI Components Updated ✅
+- **GraveCard.tsx:** Creator attribution section with name and profile picture
+- **HeadstoneCard.tsx:** Cemetery tooltip enhanced with creator info display  
+- **SympathyList.tsx:** Each sympathy shows creator name and profile picture
+- **Individual Grave Pages:** "Epitaph by [Creator Name]" instead of "Anonymous Mourner"
+
+### VotingContext System ✅
+**Real-time state management for Death Certificate controversy scores:**
+- **Shared State:** React Context API manages voting state between components
+- **Instant Updates:** Death Certificate updates immediately when users vote on Roasts/Condolences
+- **Component Integration:** RoastEulogyVoting and DeathCertificate components synchronized
+
+### Cemetery View Improvements ✅
+**Enhanced tooltip visibility and user experience:**
+- **Positioning Fix:** Changed SimplePanZoom overflow from hidden to visible for proper tooltip display
+- **Increased Padding:** Cemetery container height increased for better tooltip positioning  
+- **Creator Attribution:** Tooltips now show creator names and profile pictures where available
+
+### OAuth DeviceHash Linking Fix ✅
+**Critical system repair for proper user attribution:**
+
+#### Root Cause Identified
+- **Problem:** OAuth users had `deviceHash: null` in User records despite being authenticated
+- **Impact:** Created content showed "Anonymous Mourner" instead of user names
+- **Discovered:** Sympathy messages linked to deviceHash but User records weren't linked
+
+#### Solution Implemented ✅
+- **OAuth Route Fix:** Uncommented and repaired `/api/auth/oauth/route.ts` user creation code
+- **Proper Linking:** OAuth flow now sets deviceHash when users authenticate
+- **Update Mechanism:** Existing users get deviceHash updated when they sign in again
+- **Database Repair:** Fixed existing User records to link proper deviceHashes
+
+#### Technical Details
+```typescript
+// Fixed OAuth user creation in /api/auth/oauth/route.ts
+const deviceHash = resolveDeviceHash();
+
+let existingUser = await prisma.user.findUnique({
+  where: { 
+    provider_providerId: {
+      provider: userInfo.provider,
+      providerId: userInfo.providerId
+    }
+  }
+});
+
+if (!existingUser) {
+  existingUser = await prisma.user.create({
+    data: {
+      email: userInfo.email,
+      name: userInfo.name, 
+      picture: userInfo.picture,
+      provider: userInfo.provider,
+      providerId: userInfo.providerId,
+      deviceHash  // Critical: Now properly set
+    }
+  });
+} else {
+  // Update deviceHash for existing users
+  if (existingUser.deviceHash !== deviceHash) {
+    existingUser = await prisma.user.update({
+      where: { id: existingUser.id },
+      data: { deviceHash }
+    });
+  }
+}
+```
+
+### Deployment Success ✅
+- ✅ **Code Changes:** All attribution components and APIs updated
+- ✅ **Schema Updates:** Validation schemas support creatorInfo objects  
+- ✅ **OAuth System:** Repaired deviceHash linking for future users
+- ✅ **Database Fix:** Existing users manually linked for immediate attribution
+- ✅ **Vercel Deployment:** All changes pushed to production successfully
+
+### User Experience Impact ✅
+- **Memorial Creators:** Users like "Michael" now see their names on graves they created
+- **Sympathy Authors:** All sympathy messages show creator names and profile pictures
+- **Real-time Feedback:** Death Certificate controversy scores update instantly
+- **Enhanced Privacy:** Anonymous users still protected, only OAuth users get attribution
+- **Cross-Platform:** Works consistently across individual pages, feeds, and cemetery views
+
+### Components Modified ✅
+```
+src/components/
+├── DeathCertificate.tsx      # Real-time voting integration
+├── RoastEulogyVoting.tsx     # VotingContext integration  
+├── GraveCard.tsx             # Creator attribution display
+├── HeadstoneCard.tsx         # Cemetery tooltip enhancement
+├── SympathyList.tsx          # Sympathy creator attribution
+├── SympathySection.tsx       # Enhanced sympathy posting
+└── VotingContext.tsx         # NEW: Shared voting state
+
+src/app/grave/[slug]/page.tsx  # "Epitaph by [Name]" display
+src/lib/validation/            # Updated schemas with creatorInfo
+```
+
+### API Endpoints Enhanced ✅
+```
+/api/graves/[slug]/           # GET: Returns creator info for grave and sympathies
+/api/graves/[slug]/sympathies # POST: Returns creator info with new sympathy  
+/api/feed/                    # GET: Includes creator info for all feed items
+/api/auth/oauth/              # POST: Fixed to properly set deviceHash
+```
+
+**Status:** Production-ready user attribution system fully operational. All user-generated content now properly attributed to creators while respecting privacy for anonymous users. OAuth system repaired to prevent future attribution issues.
+
+Last updated: September 28, 2025 – after comprehensive user attribution system implementation and OAuth deviceHash linking fixes.
