@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 
 import { resolveDeviceHash } from "@/lib/device";
 import { internalError, json, notFound, validationError } from "@/lib/http";
-import { ManualNotificationService } from "@/lib/manual-notification-service";
+import { GmailNotificationService } from "@/lib/gmail-smtp-service";
 import prisma from "@/lib/prisma";
 import { reactionInput } from "@/lib/validation";
 
@@ -112,8 +112,8 @@ export async function POST(req: NextRequest, context: RouteContext) {
 								reactorName = reactor.name;
 							}
 
-							// Queue reaction notification
-							await ManualNotificationService.queueFirstReactionNotification(
+							// Send automated reaction notification
+							await GmailNotificationService.sendFirstReactionNotification(
 								graveOwner.id,
 								graveOwner.email,
 								grave.id,

@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { requireNotBanned, handleBanError } from "@/lib/ban-enforcement";
 import { resolveDeviceHash } from "@/lib/device";
 import { forbidden, internalError, json, notFound, rateLimitError, validationError } from "@/lib/http";
-import { ManualNotificationService } from "@/lib/manual-notification-service";
+import { GmailNotificationService } from "@/lib/gmail-smtp-service";
 import prisma from "@/lib/prisma";
 import { checkRateLimit, rateLimitRetrySeconds } from "@/lib/rate-limit";
 import { sympathyInput } from "@/lib/validation";
@@ -105,8 +105,8 @@ export async function POST(req: NextRequest, context: RouteContext) {
 				});
 
 				if (graveOwner?.email) {
-					// Queue new sympathy notification
-					await ManualNotificationService.queueNewSympathyNotification(
+					// Send automated sympathy notification
+					await GmailNotificationService.sendNewSympathyNotification(
 						graveOwner.id,
 						graveOwner.email,
 						grave.id,
