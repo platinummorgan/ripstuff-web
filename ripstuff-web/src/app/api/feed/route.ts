@@ -73,8 +73,25 @@ export async function GET(req: NextRequest) {
         lolCount: true,
         createdAt: true,
         featured: true,
+        creatorDeviceHash: true,
       },
     });
+
+    // Get creator info for all graves
+    const deviceHashes = graves
+      .map(g => g.creatorDeviceHash)
+      .filter((hash): hash is string => hash !== null);
+    
+    const creators = deviceHashes.length > 0 
+      ? await prisma.user.findMany({
+          where: { deviceHash: { in: deviceHashes } },
+          select: { deviceHash: true, name: true, picture: true },
+        })
+      : [];
+    
+    const creatorMap = new Map(
+      creators.map(creator => [creator.deviceHash, creator])
+    );
     console.log('[API/feed] Graves found:', graves.length);
 
     let nextCursor: string | null = null;
@@ -85,22 +102,32 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const items = graves.map((grave) => ({
-      id: grave.id,
-      slug: grave.slug,
-      title: grave.title,
-      category: grave.category,
-      eulogyPreview: createEulogyPreview(grave.eulogyText),
-      photoUrl: grave.photoUrl ?? null,
-      reactions: {
-        heart: grave.heartCount,
-        candle: grave.candleCount,
-        rose: grave.roseCount,
-        lol: grave.lolCount,
-      },
-      createdAt: grave.createdAt.toISOString(),
-      featured: grave.featured,
-    }));
+    const items = graves.map((grave) => {
+      const creator = grave.creatorDeviceHash 
+        ? creatorMap.get(grave.creatorDeviceHash) 
+        : null;
+      
+      return {
+        id: grave.id,
+        slug: grave.slug,
+        title: grave.title,
+        category: grave.category,
+        eulogyPreview: createEulogyPreview(grave.eulogyText),
+        photoUrl: grave.photoUrl ?? null,
+        reactions: {
+          heart: grave.heartCount,
+          candle: grave.candleCount,
+          rose: grave.roseCount,
+          lol: grave.lolCount,
+        },
+        createdAt: grave.createdAt.toISOString(),
+        featured: grave.featured,
+        creatorInfo: creator ? {
+          name: creator.name,
+          picture: creator.picture,
+        } : null,
+      };
+    });
     console.log('[API/feed] Returning items:', items.length);
 
     const payload = feedResponse.parse({

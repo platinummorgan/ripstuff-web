@@ -272,8 +272,27 @@ export function HeadstoneCard({ grave }: { grave: FeedItem }) {
               </div>
             )}
 
+            {/* Creator Info */}
+            {grave.creatorInfo && (
+              <div className="border-t border-[rgba(255,255,255,0.1)] pt-2 mt-2">
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-[var(--muted)]">Created by</span>
+                  {grave.creatorInfo.picture && (
+                    <img 
+                      src={grave.creatorInfo.picture} 
+                      alt={grave.creatorInfo.name || 'Creator'} 
+                      className="w-4 h-4 rounded-full"
+                    />
+                  )}
+                  <span className="text-white font-medium">
+                    {grave.creatorInfo.name || 'Anonymous'}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Stats Row */}
-            <div className="flex items-center justify-between text-xs border-t border-[rgba(255,255,255,0.1)] pt-3">
+            <div className="flex items-center justify-between text-xs border-t border-[rgba(255,255,255,0.1)] pt-3 mt-2">
               <div className="flex gap-4">
                 <span className="flex items-center gap-1 text-[var(--muted)]">
                   ❤️ {grave.reactions.heart}

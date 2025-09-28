@@ -71,6 +71,10 @@ export const feedItem = z.object({
   featured: z.boolean(),
   mapX: z.number().int().nullable().optional(),
   mapY: z.number().int().nullable().optional(),
+  creatorInfo: z.object({
+    name: z.string().nullable(),
+    picture: z.string().nullable(),
+  }).nullable(),
 });
 
 export const feedResponse = z.object({
@@ -86,6 +90,10 @@ export const graveDetailResponse = feedItem.extend({
   eulogyCount: z.number().int().nonnegative(),
   sympathies: z.array(sympathyDto),
   status: z.nativeEnum(GraveStatus),
+  creatorInfo: z.object({
+    name: z.string().nullable(),
+    picture: z.string().nullable(),
+  }).nullable(),
 });
 
 export const feedQuery = z.object({

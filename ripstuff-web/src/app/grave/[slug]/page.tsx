@@ -162,8 +162,24 @@ export default async function GravePage({ params }: { params: { slug: string } }
         <article className="mt-6 space-y-4 whitespace-pre-line text-base leading-7 text-[var(--foreground)]">
           {grave.eulogyText}
         </article>
-        <div className="mt-4 text-sm text-gray-400 italic">
-          Epitaph by Anonymous Mourner
+        <div className="mt-4 text-sm text-gray-400 italic flex items-center gap-2">
+          <span>Epitaph by</span>
+          {grave.creatorInfo ? (
+            <div className="flex items-center gap-2">
+              {grave.creatorInfo.picture && (
+                <img 
+                  src={grave.creatorInfo.picture} 
+                  alt={grave.creatorInfo.name || 'Creator'} 
+                  className="w-5 h-5 rounded-full"
+                />
+              )}
+              <span className="text-[var(--accent)] font-medium">
+                {grave.creatorInfo.name || 'Anonymous Mourner'}
+              </span>
+            </div>
+          ) : (
+            <span>Anonymous Mourner</span>
+          )}
         </div>
         
       </section>

@@ -37,6 +37,21 @@ export async function GET(_req: NextRequest, context: RouteContext) {
       },
     });
 
+    // Get creator info if available
+    let creatorInfo = null;
+    if (grave?.creatorDeviceHash) {
+      const user = await prisma.user.findFirst({
+        where: { deviceHash: grave.creatorDeviceHash },
+        select: { name: true, picture: true },
+      });
+      if (user) {
+        creatorInfo = {
+          name: user.name,
+          picture: user.picture,
+        };
+      }
+    }
+
     if (!grave || grave.status === "HIDDEN") {
       return notFound("Grave not found");
     }
@@ -54,13 +69,14 @@ export async function GET(_req: NextRequest, context: RouteContext) {
         rose: grave.roseCount,
         lol: grave.lolCount,
       },
-      roastCount: grave.roastCount,
-      eulogyCount: grave.eulogyCount,
+      roastCount: grave.roastCount || 0,
+      eulogyCount: grave.eulogyCount || 0,
       createdAt: grave.createdAt.toISOString(),
       featured: grave.featured,
       eulogyText: grave.eulogyText,
       datesText: grave.datesText ?? null,
       backstory: grave.backstory ?? null,
+      creatorInfo,
       sympathies: grave.sympathies.map((sympathy) => ({
         id: sympathy.id,
         body: sympathy.body,

@@ -111,6 +111,23 @@ export function GraveCard({ grave }: GraveCardProps) {
         <p className="mt-4 text-sm leading-6 text-[var(--muted)] break-words overflow-hidden">{grave.eulogyPreview}</p>
       </Link>
       
+      {/* Creator Attribution */}
+      {grave.creatorInfo && (
+        <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted)]">
+          <span>by</span>
+          {grave.creatorInfo.picture && (
+            <img 
+              src={grave.creatorInfo.picture} 
+              alt={grave.creatorInfo.name || 'Creator'} 
+              className="w-4 h-4 rounded-full"
+            />
+          )}
+          <span className="text-[var(--accent)]">
+            {grave.creatorInfo.name || 'Anonymous'}
+          </span>
+        </div>
+      )}
+      
       <div className="mt-5 flex items-center justify-between">
         <div className="flex items-center gap-4 text-xs text-[var(--muted)]">
           <ReactionBadge emoji="❤️" count={grave.reactions.heart} />
