@@ -295,8 +295,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
 
       const node = certificateRef.current;
       const measuredRect = node.getBoundingClientRect();
-      const maxExportWidth = 600; // Reduced from 800 to 600 for smaller file size
-      const targetWidth = Math.min(maxExportWidth, Math.ceil(measuredRect.width));
+      const maxExportWidth = 400; // Much smaller - this should be the actual exported width
+      const targetWidth = maxExportWidth; // Force it to exactly 400px
 
       const clone = node.cloneNode(true) as HTMLElement;
       clone.style.margin = '0';
@@ -328,9 +328,9 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       cleanupCloneColors = applyLegacyColorOverrides(clone);
 
       const dataUrl = await domtoimage.toPng(clone, {
-        width: exportWidth,
-        height: exportHeight,
-        quality: 0.9, // Slightly reduce quality to decrease file size
+        width: 400, // Force exact width regardless of measured size
+        height: 500, // Force reasonable height
+        quality: 0.8, // Further reduce quality for smaller file
         bgcolor: '#0b0d16',
       });
 
