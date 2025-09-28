@@ -7,7 +7,14 @@ import { SocialShare } from "@/components/SocialShare";
 import { MemorialBadges, calculateBadges } from "@/components/MemorialBadges";
 import type { FeedItem } from "@/lib/validation";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
+// Use window.location.origin for client-side URL construction to avoid env issues
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://ripstuff.net";
+};
+const baseUrl = getBaseUrl();
 
 export interface GraveCardProps {
   grave: FeedItem;

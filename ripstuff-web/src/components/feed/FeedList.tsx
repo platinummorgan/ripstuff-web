@@ -12,7 +12,7 @@ interface FeedResponse {
   nextCursor: string | null;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "";
+// Use relative URLs for API calls to avoid client-side env variable issues
 
 interface FeedListProps {
   featured?: boolean;
@@ -38,7 +38,7 @@ export function FeedList({ featured }: FeedListProps = {}) {
         params.set("featured", featured.toString());
       }
 
-      const url = `${baseUrl}/api/feed?${params.toString()}`;
+      const url = `/api/feed?${params.toString()}`;
       console.log('[FeedList] Fetching:', url);
       const res = await fetch(url);
       const data = (await res.json()) as FeedResponse;

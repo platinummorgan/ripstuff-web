@@ -12,7 +12,14 @@ interface ListResponse {
   nextCursor: string | null;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "";
+// Use relative URLs for API calls to avoid env variable issues on client-side
+const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    return ''; // Use relative URLs in browser
+  }
+  return process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "";
+};
+const baseUrl = getApiBaseUrl();
 
 export function MyGraveyardList() {
   const [items, setItems] = useState<FeedItem[]>([]);
@@ -29,7 +36,7 @@ export function MyGraveyardList() {
       try {
         const params = new URLSearchParams({ limit: "8", mine: "1" });
         if (!initial && cursor) params.set("cursor", cursor);
-        const res = await fetch(`${baseUrl}/api/graves?${params.toString()}`);
+        const res = await fetch(`/api/graves?${params.toString()}`);
         const data = (await res.json()) as ListResponse;
         if (!res.ok) throw new Error("Unable to load your graves");
 
