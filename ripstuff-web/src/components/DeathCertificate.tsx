@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import domtoimage from 'dom-to-image';
 import QRCode from 'qrcode';
+import { useVoting } from "@/components/VotingContext";
 
 interface DeathCertificateProps {
   grave: {
@@ -28,6 +29,7 @@ interface ControversyScore {
 export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const certificateRef = useRef<HTMLDivElement>(null);
+  const { votingState } = useVoting();
 
   const calculateAge = (): string => {
     const createdDate = new Date(grave.createdAt);
@@ -121,8 +123,9 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
   };
 
   const calculateControversy = (): ControversyScore => {
-    const roasts = grave.roastCount || 0;
-    const eulogies = grave.eulogyCount || 0;
+    // Use live voting state instead of static props for real-time updates
+    const roasts = votingState.roastCount;
+    const eulogies = votingState.eulogyCount;
     const total = roasts + eulogies;
 
     if (total === 0) {
@@ -420,8 +423,8 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
             <div className="text-amber-300 font-semibold mb-3">ROAST METER — CONDOLENCES VS ROASTS</div>
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-green-400">Condolences ({grave.eulogyCount || 0})</span>
-                <span className="text-red-400">Roasts ({grave.roastCount || 0})</span>
+                <span className="text-green-400">Condolences ({votingState.eulogyCount})</span>
+                <span className="text-red-400">Roasts ({votingState.roastCount})</span>
               </div>
               
               <div className="relative h-6 bg-gray-700 rounded-full overflow-hidden">

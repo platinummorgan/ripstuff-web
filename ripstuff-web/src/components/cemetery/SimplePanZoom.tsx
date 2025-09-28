@@ -352,8 +352,8 @@ export function SimplePanZoom({
   return (
     <div 
       ref={viewportRef} 
-      className="relative h-[70vh] w-full overflow-hidden rounded-3xl border border-[var(--border)] bg-[rgba(4,7,15,0.6)]"
-      style={{ position: 'relative' }}
+      className="relative h-[70vh] w-full rounded-3xl border border-[var(--border)] bg-[rgba(4,7,15,0.6)]"
+      style={{ position: 'relative', overflow: 'visible' }}
     >
       {/* Background effects */}
       {variant === "cemetery" ? (

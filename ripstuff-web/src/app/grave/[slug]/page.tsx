@@ -12,6 +12,7 @@ import { MemorialBadges, calculateBadges } from "@/components/MemorialBadges";
 import { DeathCertificate } from "@/components/DeathCertificate";
 import { GraveViewTracker } from "@/components/GraveViewTracker";
 import { RoastEulogyVoting } from "@/components/RoastEulogyVoting";
+import { VotingProvider } from "@/components/VotingContext";
 import type { GraveDetailResponse } from "@/lib/validation";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
@@ -165,32 +166,38 @@ export default async function GravePage({ params }: { params: { slug: string } }
           Epitaph by Anonymous Mourner
         </div>
         
-        {/* Community Response Voting */}
-        <div className="mt-8 pt-6 border-t border-[rgba(255,255,255,0.05)]">
-          <div className="text-center mb-4">
+      </section>
+
+      <VotingProvider 
+        initialRoastCount={grave.roastCount || 0}
+        initialEulogyCount={grave.eulogyCount || 0}
+      >
+        <section className="rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
+          {/* Community Response Voting */}
+          <div className="text-center mb-6">
             <h3 className="text-lg font-semibold text-white mb-1">Community Response</h3>
             <p className="text-sm text-gray-400">How does this epitaph make you feel?</p>
           </div>
           <RoastEulogyVoting graveId={grave.id} graveSlug={grave.slug} />
-        </div>
-      </section>
+        </section>
 
-      <section className="space-y-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
-        <SectionHeader title="Death Certificate" description="Official documentation of this memorial's legacy and controversy rating." />
-        <DeathCertificate 
-          grave={{
-            title: grave.title,
-            category: grave.category,
-            eulogyText: grave.eulogyText,
-            createdAt: grave.createdAt,
-            roastCount: grave.roastCount || 0,
-            eulogyCount: grave.eulogyCount || 0,
-            candleCount: grave.reactions.candle || 0,
-            datesText: grave.datesText || undefined,
-          }}
-          graveUrl={`${baseUrl}/grave/${grave.slug}`}
-        />
-      </section>
+        <section className="space-y-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
+          <SectionHeader title="Death Certificate" description="Official documentation of this memorial's legacy and controversy rating." />
+          <DeathCertificate 
+            grave={{
+              title: grave.title,
+              category: grave.category,
+              eulogyText: grave.eulogyText,
+              createdAt: grave.createdAt,
+              roastCount: grave.roastCount || 0,
+              eulogyCount: grave.eulogyCount || 0,
+              candleCount: grave.reactions.candle || 0,
+              datesText: grave.datesText || undefined,
+            }}
+            graveUrl={`${baseUrl}/grave/${grave.slug}`}
+          />
+        </section>
+      </VotingProvider>
 
       <section className="space-y-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
         <SectionHeader title="Sympathies" description="Leave a kind note for fellow mourners." />

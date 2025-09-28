@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { analytics } from "@/lib/analytics";
+import { useVoting } from "@/components/VotingContext";
 
 interface RoastEulogyVotingProps {
   graveId: string;
@@ -17,9 +18,10 @@ interface VotingState {
 }
 
 export function RoastEulogyVoting({ graveId, graveSlug }: RoastEulogyVotingProps) {
+  const { votingState, updateVotingState } = useVoting();
   const [state, setState] = useState<VotingState>({
-    sympathyCount: 0,
-    roastCount: 0,
+    sympathyCount: votingState.eulogyCount,
+    roastCount: votingState.roastCount,
     userVote: null,
     loading: true,
     error: null,
@@ -65,6 +67,12 @@ export function RoastEulogyVoting({ graveId, graveSlug }: RoastEulogyVotingProps
 
       if (response.ok) {
         const data = await response.json();
+        const newVotingState = {
+          roastCount: data.roastCount || 0,
+          eulogyCount: data.eulogyCount || 0,
+        };
+        
+        // Update both local state and global voting context
         setState(prev => ({
           ...prev,
           sympathyCount: data.eulogyCount || 0, // Map eulogyCount to sympathy display
@@ -72,6 +80,9 @@ export function RoastEulogyVoting({ graveId, graveSlug }: RoastEulogyVotingProps
           userVote: isCurrentVote ? null : type,
           loading: false,
         }));
+        
+        // Update the shared voting state so Death Certificate updates immediately
+        updateVotingState(newVotingState);
 
         // Track analytics
         analytics.trackRoastEulogyVote(graveId, type === 'EULOGY' ? 'eulogy' : 'roast');

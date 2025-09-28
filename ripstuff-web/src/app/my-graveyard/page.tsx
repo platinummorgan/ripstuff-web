@@ -69,7 +69,7 @@ export default function MyGraveyardPage() {
                 <h3 className="text-lg font-semibold mb-2">Your Personal Cemetery</h3>
                 <p className="text-sm text-[var(--muted)]">Click any grave to view its memorial page</p>
               </div>
-              <div className="relative rounded-xl overflow-hidden shadow-2xl">
+              <div className="relative rounded-xl shadow-2xl" style={{ padding: '120px 40px 40px 40px' }}>
                 {/* Atmospheric Cemetery Background */}
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
                   {/* Background cemetery image with overlay */}
@@ -98,7 +98,7 @@ export default function MyGraveyardPage() {
                 </div>
 
                 <CemeteryCanvas variant="cemetery" intensity="normal">
-                  <div className="cemetery-layout relative" style={{ width: '1400px', height: '1000px', position: 'relative' }}>
+                  <div className="cemetery-layout relative" style={{ width: '1400px', height: '1200px', position: 'relative', paddingTop: '120px' }}>
                     {/* Cemetery ground elements */}
                     <div className="absolute inset-0">
                       {/* Misty ground fog */}
@@ -143,9 +143,9 @@ export default function MyGraveyardPage() {
                       const randomOffset = (seed % 40) - 20; // -20 to +20 offset
                       const randomYOffset = ((seed * 7) % 30) - 15; // -15 to +15 offset
                       
-                      // Follow curved cemetery paths with organic spacing
+                      // Follow curved cemetery paths with organic spacing - leave more room at top for tooltips
                       const baseX = 150 + col * 220;
-                      const baseY = 160 + row * 200;
+                      const baseY = 240 + row * 200;
                       
                       // Add curve following the cemetery path
                       const pathCurve = Math.sin((col / gravesPerRow) * Math.PI) * 30;
