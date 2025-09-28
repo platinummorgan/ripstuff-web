@@ -366,7 +366,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
         style={{ width: '100%', maxWidth: '800px' }}
       >
         {/* Decorative Border */}
-        <div className="absolute inset-2 border-2 border-amber-500 rounded opacity-50"></div>
+        <div className="absolute inset-2 border-4 border-amber-500 rounded opacity-50"></div>
         <div className="absolute inset-4 border border-amber-400 rounded opacity-30"></div>
 
         {/* Header */}
