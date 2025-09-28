@@ -75,13 +75,43 @@ export class GmailNotificationService {
   ): Promise<void> {
     try {
       // Get user's notification preferences
-      const preferences = await prisma.notificationPreference.findUnique({
+      let preferences = await prisma.notificationPreference.findUnique({
         where: { userId }
       });
 
       if (!preferences) {
-        console.log(`No notification preferences found for user ${userId}`);
-        return;
+        console.log(`No notification preferences found for user ${userId} - creating defaults to ensure delivery`);
+        // CRITICAL FIX: Create default preferences instead of silently failing
+        try {
+          preferences = await prisma.notificationPreference.create({
+            data: {
+              userId,
+              emailOnNewSympathy: true,
+              emailOnFirstReaction: true,
+              emailDailyDigest: false,
+              smsEnabled: false,
+              smsOnNewSympathy: false,
+              smsOnFirstReaction: false,
+              phoneNumber: '',
+              quietHoursEnabled: false, // Default off to ensure immediate delivery
+              quietHoursStart: 21,
+              quietHoursEnd: 8,
+              timezone: 'UTC'
+            }
+          });
+          console.log(`✅ Created default notification preferences for user ${userId}`);
+        } catch (createError) {
+          console.error('Failed to create default preferences:', createError);
+          // Continue with basic defaults in memory
+          preferences = {
+            emailOnNewSympathy: true,
+            emailOnFirstReaction: true,
+            quietHoursEnabled: false,
+            quietHoursStart: 21,
+            quietHoursEnd: 8,
+            timezone: 'UTC'
+          } as any;
+        }
       }
 
       // Check quiet hours (only if enabled, default to true for backward compatibility)
@@ -93,10 +123,9 @@ export class GmailNotificationService {
       );
 
       if (isQuietTime) {
-        // For now, just log that it would be queued
-        // In production, implement proper queueing
-        console.log(`Email for ${to} queued due to quiet hours (${preferences.quietHoursStart}-${preferences.quietHoursEnd})`);
-        return;
+        // CRITICAL FIX: Send immediately to prevent email loss until queue system is implemented
+        console.log(`⚠️  Quiet hours active (${preferences.quietHoursStart}-${preferences.quietHoursEnd}) but sending immediately to prevent lost notifications`);
+        // Continue to send email instead of silently discarding
       }
 
       // Send immediately via Gmail SMTP
