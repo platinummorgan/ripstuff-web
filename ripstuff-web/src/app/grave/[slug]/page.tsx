@@ -187,6 +187,12 @@ export default async function GravePage({ params }: { params: { slug: string } }
         
       </section>
 
+      {/* Sympathies Section - Moved up for better engagement */}
+      <section className="space-y-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
+        <SectionHeader title="Sympathies" description="Leave a kind note for fellow mourners." />
+        <SympathySection graveId={grave.id} initialSympathies={grave.sympathies} />
+      </section>
+
       <VotingProvider 
         initialRoastCount={grave.roastCount || 0}
         initialEulogyCount={grave.eulogyCount || 0}
@@ -261,11 +267,6 @@ export default async function GravePage({ params }: { params: { slug: string } }
           }}
           graveUrl={`${baseUrl}/grave/${grave.slug}`}
         />
-      </section>
-
-      <section className="space-y-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
-        <SectionHeader title="Sympathies" description="Leave a kind note for fellow mourners." />
-        <SympathySection graveId={grave.id} initialSympathies={grave.sympathies} />
       </section>
     </div>
   );
