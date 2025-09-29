@@ -5,9 +5,13 @@ import {
   generateNewSympathyEmail,
   generateFirstReactionEmail,
   generateDailyDigestEmail,
+  generateNewFollowerEmail,
+  generateFollowerMemorialEmail,
   NewSympathyEmailData,
   FirstReactionEmailData,
-  DailyDigestEmailData
+  DailyDigestEmailData,
+  NewFollowerEmailData,
+  FollowerMemorialEmailData
 } from './email-templates';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -56,7 +60,7 @@ export class NotificationEmailService {
     text: string,
     userId: string,
     graveId: string,
-    type: 'NEW_SYMPATHY' | 'FIRST_DAILY_REACTION' | 'DAILY_DIGEST'
+    type: 'NEW_SYMPATHY' | 'FIRST_DAILY_REACTION' | 'DAILY_DIGEST' | 'NEW_FOLLOWER' | 'FOLLOWER_NEW_MEMORIAL'
   ): Promise<void> {
     try {
       // Get user's notification preferences
@@ -112,7 +116,7 @@ export class NotificationEmailService {
   private static async logNotification(
     userId: string,
     graveId: string,
-    type: 'NEW_SYMPATHY' | 'FIRST_DAILY_REACTION' | 'DAILY_DIGEST',
+    type: 'NEW_SYMPATHY' | 'FIRST_DAILY_REACTION' | 'DAILY_DIGEST' | 'NEW_FOLLOWER' | 'FOLLOWER_NEW_MEMORIAL',
     success: boolean,
     errorMessage?: string
   ): Promise<void> {
@@ -211,6 +215,47 @@ export class NotificationEmailService {
       userId,
       graveId,
       'DAILY_DIGEST'
+    );
+  }
+
+  /**
+   * Send new follower notification
+   */
+  static async sendNewFollowerNotification(
+    userId: string,
+    userEmail: string,
+    data: NewFollowerEmailData
+  ): Promise<void> {
+    const template = generateNewFollowerEmail(data);
+    await this.sendEmailWithQuietHoursCheck(
+      userEmail,
+      template.subject,
+      template.html,
+      template.text,
+      userId,
+      '', // No specific grave for follow notifications
+      'NEW_FOLLOWER'
+    );
+  }
+
+  /**
+   * Send follower memorial notification
+   */
+  static async sendFollowerMemorialNotification(
+    userId: string,
+    userEmail: string,
+    graveId: string,
+    data: FollowerMemorialEmailData
+  ): Promise<void> {
+    const template = generateFollowerMemorialEmail(data);
+    await this.sendEmailWithQuietHoursCheck(
+      userEmail,
+      template.subject,
+      template.html,
+      template.text,
+      userId,
+      graveId,
+      'FOLLOWER_NEW_MEMORIAL'
     );
   }
 }

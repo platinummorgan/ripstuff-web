@@ -228,6 +228,10 @@ model User {
   notificationPreference NotificationPreference?
   graveSubscriptions    GraveSubscription[]
   notificationHistory   NotificationHistory[]
+  
+  // Following relationships
+  followers             UserFollow[]            @relation("UserFollowers")
+  following             UserFollow[]            @relation("UserFollowing")
 
   @@unique([provider, providerId], map: "uq_user_provider_id")
   @@index([isBanned, bannedAt], map: "idx_user_banned")
@@ -243,9 +247,13 @@ model NotificationPreference {
   emailOnNewSympathy      Boolean  @default(true) @map("email_on_new_sympathy")
   emailOnFirstReaction    Boolean  @default(true) @map("email_on_first_reaction")
   emailDailyDigest        Boolean  @default(false) @map("email_daily_digest")
+  emailOnNewFollower      Boolean  @default(true) @map("email_on_new_follower")
+  emailOnFollowerMemorial Boolean  @default(true) @map("email_on_follower_memorial")
   smsEnabled              Boolean  @default(false) @map("sms_enabled")
   smsOnNewSympathy        Boolean  @default(false) @map("sms_on_new_sympathy")
   smsOnFirstReaction      Boolean  @default(false) @map("sms_on_first_reaction")
+  smsOnNewFollower        Boolean  @default(false) @map("sms_on_new_follower")
+  smsOnFollowerMemorial   Boolean  @default(false) @map("sms_on_follower_memorial")
   phoneNumber            String?   @map("phone_number") @db.VarChar(20)
   quietHoursEnabled      Boolean? @map("quiet_hours_enabled") // Optional for backward compatibility
   quietHoursStart        Int       @default(21) @map("quiet_hours_start") // 9 PM
@@ -312,6 +320,8 @@ enum NotificationType {
   NEW_SYMPATHY
   FIRST_DAILY_REACTION
   DAILY_DIGEST
+  NEW_FOLLOWER
+  FOLLOWER_NEW_MEMORIAL
 }
 
 enum NotificationMethod {
@@ -390,6 +400,21 @@ enum ReactionType {
 enum RoastEulogyType {
   ROAST
   EULOGY
+}
+
+model UserFollow {
+  id          String   @id @default(uuid()) @db.Uuid
+  followerId  String   @map("follower_id") @db.Uuid
+  followingId String   @map("following_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  @@unique([followerId, followingId], map: "uq_user_follows_follower_following")
+  @@index([followerId, createdAt], map: "idx_user_follows_follower")
+  @@index([followingId, createdAt], map: "idx_user_follows_following")
+  @@map("user_follows")
 }
 
 enum ReminderType {

@@ -1,4 +1,5 @@
 import { HeadstoneCard } from "@/components/HeadstoneCard";
+import { SearchableCemetery } from "@/components/cemetery/SearchableCemetery";
 import prisma from "@/lib/prisma";
 import type { FeedItem } from "@/lib/validation";
 
@@ -54,29 +55,15 @@ export default async function CemeteryPage() {
       <div className="flex items-center justify-between">
         <div className="text-center mx-auto">
           <h1 className="text-2xl font-semibold text-white">Cemetery</h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">Recent memorials from all keepers</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">Search and explore memorials from all keepers</p>
         </div>
         <div className="flex gap-4">
           <a href="/overworld" className="text-sm text-[var(--accent)] hover:underline">Overworld</a>
           <a href="/yard/explore" className="text-sm text-[var(--accent)] hover:underline">View cemeteries</a>
         </div>
       </div>
-      <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] p-6">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(80,120,80,0.14),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient( to bottom, rgba(40,60,50,0.20), rgba(40,60,50,0.20) 16px, rgba(20,30,30,0.12) 16px, rgba(20,30,30,0.12) 64px)]" />
-        {items.length === 0 ? (
-          <p className="text-center text-sm text-[var(--muted)]">No graves yet.</p>
-        ) : (
-          <div className="grid grid-cols-3 gap-5 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12">
-            {items.map((g, i) => (
-              <div key={g.id} style={{ transform: `rotate(${((i % 7) - 3) * 0.5}deg)` }} className="scale-[1.08]">
-                <HeadstoneCard grave={g} />
-                <p className="mt-1 text-center text-[10px] text-[var(--muted)]">{g.keeper}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      
+      <SearchableCemetery initialItems={items} />
     </div>
   );
 }

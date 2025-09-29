@@ -40,6 +40,19 @@ export interface DailyDigestEmailData {
   }>;
 }
 
+export interface NewFollowerEmailData {
+  followerName: string;
+  followerProfileUrl: string;
+  profileUrl: string;
+}
+
+export interface FollowerMemorialEmailData {
+  followerName: string;
+  memorialName: string;
+  memorialUrl: string;
+  followerProfileUrl: string;
+}
+
 export function generateNewSympathyEmail(data: NewSympathyEmailData): EmailTemplate {
   const subject = `New sympathy left for ${data.graveName}`;
   
@@ -278,6 +291,135 @@ View the memorial: ${data.graveUrl}
 ---
 You're receiving this daily digest because you have it enabled in your notification preferences.
 Update your preferences: ${data.graveUrl.replace('/grave/', '/profile')}
+  `;
+
+  return { subject, html, text };
+}
+
+export function generateNewFollowerEmail(data: NewFollowerEmailData): EmailTemplate {
+  const subject = `${data.followerName} started following you on Virtual Graveyard`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>${subject}</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; }
+        .header { background: #6366f1; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .follower-box { background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 15px 0; }
+        .button { display: inline-block; background: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 10px 5px; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Virtual Graveyard</h1>
+          <p>New follower notification</p>
+        </div>
+        <div class="content">
+          <h2>You have a new follower!</h2>
+          <div class="follower-box">
+            <p><strong>${data.followerName}</strong> is now following your memorial activity on Virtual Graveyard.</p>
+            <p>They'll be notified when you create new memorials and will see your updates in their feed.</p>
+          </div>
+          <p>
+            <a href="${data.followerProfileUrl}" class="button">View their profile</a>
+            <a href="${data.profileUrl}" class="button">Manage your followers</a>
+          </p>
+        </div>
+        <div class="footer">
+          <p>You're receiving this because you have new follower notifications enabled.</p>
+          <p><a href="${data.profileUrl}">Update your notification preferences</a></p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const text = `
+Virtual Graveyard - New Follower
+
+${data.followerName} started following you!
+
+They'll be notified when you create new memorials and will see your updates in their feed.
+
+View their profile: ${data.followerProfileUrl}
+Manage your followers: ${data.profileUrl}
+
+---
+You're receiving this because you have new follower notifications enabled.
+Update your preferences: ${data.profileUrl}
+  `;
+
+  return { subject, html, text };
+}
+
+export function generateFollowerMemorialEmail(data: FollowerMemorialEmailData): EmailTemplate {
+  const subject = `${data.followerName} created a new memorial: ${data.memorialName}`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>${subject}</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; }
+        .header { background: #1a1a2e; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .memorial-box { background: #fef7cd; border-left: 4px solid #f59e0b; padding: 15px; margin: 15px 0; }
+        .button { display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 10px 5px; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Virtual Graveyard</h1>
+          <p>New memorial from someone you follow</p>
+        </div>
+        <div class="content">
+          <h2>New memorial from ${data.followerName}</h2>
+          <div class="memorial-box">
+            <p><strong>${data.followerName}</strong> just created a new memorial:</p>
+            <h3>${data.memorialName}</h3>
+            <p>Check out their latest addition to the Virtual Graveyard.</p>
+          </div>
+          <p>
+            <a href="${data.memorialUrl}" class="button">View the memorial</a>
+            <a href="${data.followerProfileUrl}" class="button">Visit their profile</a>
+          </p>
+        </div>
+        <div class="footer">
+          <p>You're receiving this because you follow ${data.followerName} and have follower memorial notifications enabled.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const text = `
+Virtual Graveyard - New Memorial
+
+${data.followerName} just created a new memorial:
+
+${data.memorialName}
+
+Check out their latest addition to the Virtual Graveyard.
+
+View the memorial: ${data.memorialUrl}
+Visit their profile: ${data.followerProfileUrl}
+
+---
+You're receiving this because you follow ${data.followerName} and have follower memorial notifications enabled.
   `;
 
   return { subject, html, text };
