@@ -164,6 +164,9 @@ export function ModerationContent({ searchParams }: ModerationContentProps) {
             Refresh
           </Button>
           <Button variant="secondary" asChild>
+            <Link href="/admin/outreach">📢 Marketing Command Center</Link>
+          </Button>
+          <Button variant="secondary" asChild>
             <Link href="/moderation/users">👥 User Management</Link>
           </Button>
           <Button variant="ghost" asChild>
