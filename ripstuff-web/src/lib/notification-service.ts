@@ -1,5 +1,6 @@
 // Simplified email service for notification system
 import { Resend } from 'resend';
+import { NotificationType } from '@prisma/client';
 import { prisma } from './prisma';
 import { 
   generateNewSympathyEmail,
@@ -60,7 +61,7 @@ export class NotificationEmailService {
     text: string,
     userId: string,
     graveId: string,
-    type: 'NEW_SYMPATHY' | 'FIRST_DAILY_REACTION' | 'DAILY_DIGEST' | 'NEW_FOLLOWER' | 'FOLLOWER_NEW_MEMORIAL'
+    type: NotificationType
   ): Promise<void> {
     try {
       // Get user's notification preferences
@@ -116,7 +117,7 @@ export class NotificationEmailService {
   private static async logNotification(
     userId: string,
     graveId: string,
-    type: 'NEW_SYMPATHY' | 'FIRST_DAILY_REACTION' | 'DAILY_DIGEST' | 'NEW_FOLLOWER' | 'FOLLOWER_NEW_MEMORIAL',
+    type: NotificationType,
     success: boolean,
     errorMessage?: string
   ): Promise<void> {
@@ -153,7 +154,7 @@ export class NotificationEmailService {
       template.text,
       userId,
       graveId,
-      'NEW_SYMPATHY'
+      'NEW_SYMPATHY' as NotificationType
     );
   }
 
@@ -193,7 +194,7 @@ export class NotificationEmailService {
       template.text,
       userId,
       graveId,
-      'FIRST_DAILY_REACTION'
+      'FIRST_DAILY_REACTION' as NotificationType
     );
   }
 
@@ -214,7 +215,7 @@ export class NotificationEmailService {
       template.text,
       userId,
       graveId,
-      'DAILY_DIGEST'
+      'DAILY_DIGEST' as NotificationType
     );
   }
 
@@ -234,7 +235,7 @@ export class NotificationEmailService {
       template.text,
       userId,
       '', // No specific grave for follow notifications
-      'NEW_FOLLOWER'
+      'NEW_FOLLOWER' as NotificationType
     );
   }
 
@@ -255,7 +256,7 @@ export class NotificationEmailService {
       template.text,
       userId,
       graveId,
-      'FOLLOWER_NEW_MEMORIAL'
+      'FOLLOWER_NEW_MEMORIAL' as NotificationType
     );
   }
 }

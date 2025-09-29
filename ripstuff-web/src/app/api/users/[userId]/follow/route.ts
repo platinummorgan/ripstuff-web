@@ -56,7 +56,7 @@ export async function POST(
         where: { userId: userId },
       });
 
-      if (targetUserPrefs?.emailOnNewFollower) {
+      if ((targetUserPrefs as any)?.emailOnNewFollower) {
         await NotificationEmailService.sendNewFollowerNotification(
           userId,
           targetUser.email,
