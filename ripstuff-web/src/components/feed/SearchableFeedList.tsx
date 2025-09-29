@@ -25,13 +25,14 @@ export function SearchableFeedList({
   const [items, setItems] = useState<FeedItem[]>(initialItems);
   const [filters, setFilters] = useState<SearchFilters | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
+  const [offset, setOffset] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [searchPerformed, setSearchPerformed] = useState(false);
 
   // Build query parameters from filters
-  const buildQueryParams = useCallback((searchFilters: SearchFilters, cursorParam?: string) => {
+  const buildQueryParams = useCallback((searchFilters: SearchFilters, cursorParam?: string, offsetParam?: number) => {
     const params = new URLSearchParams();
     params.set('limit', '12');
     
@@ -58,8 +59,18 @@ export function SearchableFeedList({
     if (searchFilters.minReactions > 0) {
       params.set('minReactions', searchFilters.minReactions.toString());
     }
+
+    // Determine if we have active filters (affects pagination method)
+    const hasActiveFilters = searchFilters.query || 
+                           searchFilters.category !== 'ALL' || 
+                           searchFilters.sortBy !== 'newest' || 
+                           searchFilters.timeRange !== 'all' || 
+                           searchFilters.hasPhoto !== null || 
+                           searchFilters.minReactions > 0;
     
-    if (cursorParam) {
+    if (hasActiveFilters && offsetParam !== undefined) {
+      params.set('offset', offsetParam.toString());
+    } else if (cursorParam) {
       params.set('cursor', cursorParam);
     }
     
@@ -72,7 +83,26 @@ export function SearchableFeedList({
     setError(null);
 
     try {
-      const queryParams = buildQueryParams(searchFilters, isLoadMore && cursor ? cursor : undefined);
+      // Determine if we have active filters
+      const hasActiveFilters = searchFilters.query || 
+                             searchFilters.category !== 'ALL' || 
+                             searchFilters.sortBy !== 'newest' || 
+                             searchFilters.timeRange !== 'all' || 
+                             searchFilters.hasPhoto !== null || 
+                             searchFilters.minReactions > 0;
+
+      let queryParams: string;
+      if (hasActiveFilters && isLoadMore) {
+        // Use offset-based pagination for filtered results
+        queryParams = buildQueryParams(searchFilters, undefined, offset);
+      } else if (isLoadMore && cursor) {
+        // Use cursor-based pagination for simple queries
+        queryParams = buildQueryParams(searchFilters, cursor);
+      } else {
+        // New search - no pagination params
+        queryParams = buildQueryParams(searchFilters);
+      }
+
       const response = await fetch(`/api/feed?${queryParams}`);
       
       if (!response.ok) {
@@ -83,9 +113,13 @@ export function SearchableFeedList({
       
       if (isLoadMore) {
         setItems(prev => [...prev, ...data.items]);
+        if (hasActiveFilters) {
+          setOffset(prev => prev + 12); // Increment offset by limit
+        }
       } else {
         setItems(data.items);
         setSearchPerformed(true);
+        setOffset(12); // Reset offset for new search
       }
       
       setCursor(data.nextCursor);
@@ -100,21 +134,22 @@ export function SearchableFeedList({
     } finally {
       setLoading(false);
     }
-  }, [cursor, buildQueryParams]);
+  }, [cursor, offset, buildQueryParams]);
 
   // Handle filter changes
   const handleFiltersChange = useCallback((newFilters: SearchFilters) => {
     setFilters(newFilters);
     setCursor(null); // Reset cursor for new search
+    setOffset(0); // Reset offset for new search
     performSearch(newFilters, false);
   }, [performSearch]);
 
   // Load more items
   const loadMore = useCallback(() => {
-    if (!loading && hasMore && cursor && filters) {
+    if (!loading && hasMore && filters) {
       performSearch(filters, true);
     }
-  }, [loading, hasMore, cursor, filters, performSearch]);
+  }, [loading, hasMore, filters, performSearch]);
 
   // Show initial content or search results
   const showingResults = searchPerformed || filters;

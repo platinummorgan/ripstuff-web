@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
   const timeRange = params.timeRange || 'all';
   const hasPhoto = params.hasPhoto === 'true' ? true : params.hasPhoto === 'false' ? false : undefined;
   const minReactions = params.minReactions ? parseInt(params.minReactions, 10) : 0;
+  const offset = params.offset ? parseInt(params.offset, 10) : 0;
 
   const devShowPending = process.env.NEXT_PUBLIC_SHOW_PENDING_IN_FEED === "1";
   const where: Prisma.GraveWhereInput = devShowPending
@@ -98,7 +99,11 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  if (cursorDate && !timeRange) {
+  // Determine if we have active filters (use offset-based pagination for filtered results)
+  const hasActiveFilters = searchQuery || category || sortBy !== 'newest' || timeRange !== 'all' || hasPhoto !== undefined || minReactions > 0;
+  
+  // Use cursor-based pagination only for simple newest-first queries without filters
+  if (cursorDate && !hasActiveFilters) {
     where.createdAt = {
       lt: cursorDate,
     };
@@ -150,10 +155,10 @@ export async function GET(req: NextRequest) {
     console.log('[API/feed] Query:', JSON.stringify(where));
     console.log('[API/feed] OrderBy:', JSON.stringify(orderBy));
     
-    let graves = await prisma.grave.findMany({
+    // Use different pagination strategies based on whether filters are active
+    const queryOptions: any = {
       where,
       orderBy,
-      take: limit + 1,
       select: {
         id: true,
         slug: true,
@@ -171,7 +176,18 @@ export async function GET(req: NextRequest) {
         featured: true,
         creatorDeviceHash: true,
       },
-    });
+    };
+
+    if (hasActiveFilters) {
+      // Use offset-based pagination for filtered results
+      queryOptions.skip = offset;
+      queryOptions.take = limit + 1; // +1 to check if there are more results
+    } else {
+      // Use cursor-based pagination for simple queries
+      queryOptions.take = limit + 1;
+    }
+
+    let graves = await prisma.grave.findMany(queryOptions);
 
     // Apply minimum reactions filter after fetching
     if (minReactions > 0) {
@@ -197,10 +213,18 @@ export async function GET(req: NextRequest) {
     );
     console.log('[API/feed] Graves found:', graves.length);
 
+    // Handle pagination metadata
     let nextCursor: string | null = null;
+    let nextOffset: number | null = null;
+    
     if (graves.length > limit) {
-      const nextRecord = graves.pop();
-      if (nextRecord) {
+      const nextRecord = graves.pop(); // Remove the extra record
+      
+      if (hasActiveFilters) {
+        // For filtered results, use offset-based pagination
+        nextOffset = offset + limit;
+      } else if (nextRecord) {
+        // For simple queries, use cursor-based pagination
         nextCursor = nextRecord.createdAt.toISOString();
       }
     }
@@ -235,7 +259,7 @@ export async function GET(req: NextRequest) {
 
     const payload = feedResponse.parse({
       items,
-      nextCursor,
+      nextCursor: nextCursor || (nextOffset !== null ? nextOffset.toString() : null),
     });
 
     return json(payload, 200);
