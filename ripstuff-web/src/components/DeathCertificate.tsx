@@ -170,22 +170,57 @@ function DeathCertificateShareButton({ grave, graveUrl, graveSlug, controversy }
           return;
         }
 
-        // Fallback: Create downloadable link and open social platform
+        // Enhanced sharing experience with better UX
+        
+        // 1. Always create the downloadable certificate first
         const link = document.createElement('a');
         link.download = `death-certificate-${graveSlug}.png`;
         link.href = dataUrl;
-        link.click();
-
-        // Still open the social platform with text
-        setTimeout(() => {
-          if (platform === 'twitter') {
-            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText + '\n\n📄 Certificate image downloaded - attach it to your tweet!')}`;
-            window.open(twitterUrl, '_blank');
-          } else if (platform === 'facebook') {
-            const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(graveUrl)}&quote=${encodeURIComponent(shareText + '\n\n📄 Certificate image downloaded - attach it to your post!')}`;
-            window.open(fbUrl, '_blank');
+        
+        if (platform === 'twitter') {
+          // Twitter sharing workflow
+          link.click(); // Download certificate
+          
+          // Copy text to clipboard for easy pasting
+          try {
+            await navigator.clipboard.writeText(shareText);
+            
+            // Show success message and open Twitter
+            alert('🎯 SUCCESS!\n\n✅ Certificate downloaded\n✅ Tweet text copied to clipboard\n\n🐦 Twitter will open next - paste your text and attach the certificate image for maximum viral impact!');
+            
+            // Open Twitter compose
+            setTimeout(() => {
+              window.open('https://twitter.com/compose/tweet', '_blank');
+            }, 1000);
+            
+          } catch (clipboardError) {
+            // Fallback if clipboard access fails
+            alert('📄 Certificate downloaded!\n\n🐦 Twitter will open next. Copy this text and attach the certificate:\n\n' + shareText);
+            window.open('https://twitter.com/compose/tweet', '_blank');
           }
-        }, 500);
+          
+        } else if (platform === 'facebook') {
+          // Facebook sharing workflow
+          link.click(); // Download certificate
+          
+          // Copy text to clipboard
+          try {
+            await navigator.clipboard.writeText(shareText);
+            
+            // Show success message and open Facebook
+            alert('🎯 SUCCESS!\n\n✅ Certificate downloaded\n✅ Post text copied to clipboard\n\n📘 Facebook will open next - paste your text and attach the certificate image!');
+            
+            // Open Facebook
+            setTimeout(() => {
+              window.open('https://www.facebook.com/', '_blank');
+            }, 1000);
+            
+          } catch (clipboardError) {
+            // Fallback if clipboard access fails
+            alert('📄 Certificate downloaded!\n\n📘 Facebook will open next. Copy this text and attach the certificate:\n\n' + shareText);
+            window.open('https://www.facebook.com/', '_blank');
+          }
+        }
 
         analytics.trackSocialShare(platform, grave.title, 'death_certificate');
 
