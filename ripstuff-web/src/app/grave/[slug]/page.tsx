@@ -17,6 +17,7 @@ import { GraveViewTracker } from "@/components/GraveViewTracker";
 import { RoastEulogyVoting } from "@/components/RoastEulogyVoting";
 import { VotingProvider } from "@/components/VotingContext";
 import type { GraveDetailResponse } from "@/lib/validation";
+import { GraveDateDisplay } from "@/components/GraveDateDisplay";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
 
@@ -113,7 +114,7 @@ export default async function GravePage({ params }: { params: { slug: string } }
             {grave.category.replace(/_/g, " ")}
           </p>
           <h1 className="text-4xl font-semibold text-white sm:text-5xl">{grave.title}</h1>
-          {grave.datesText && <p className="text-sm text-[var(--muted)]">{grave.datesText}</p>}
+          <GraveDateDisplay createdAt={grave.createdAt} datesText={grave.datesText} />
           {badges.length > 0 && (
             <MemorialBadges badges={badges} size="md" />
           )}
