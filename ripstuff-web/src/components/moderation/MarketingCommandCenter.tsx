@@ -171,7 +171,7 @@ export function MarketingCommandCenter() {
     <div className="space-y-8">
       {/* Quick Examples */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <h2 className="col-span-full text-xl font-semibold text-white mb-4">⚡ Quick Examples</h2>
+        <h2 className="col-span-full text-xl font-semibold text-[var(--foreground)] mb-4">⚡ Quick Examples</h2>
         {quickFillExamples.map((example, index) => (
           <Button
             key={index}
@@ -185,7 +185,7 @@ export function MarketingCommandCenter() {
             className="text-left h-auto p-4 flex flex-col items-start space-y-2"
           >
             <div className="flex items-center justify-between w-full">
-              <div className="font-medium text-white">{example.name}</div>
+              <div className="font-medium text-[var(--foreground)]">{example.name}</div>
               <div className="text-xs text-[var(--accent)]">{example.platform}</div>
             </div>
             <div className="text-sm text-[var(--muted)]">{example.cause}</div>
@@ -197,26 +197,26 @@ export function MarketingCommandCenter() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column: Input Form */}
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-white">📝 Create Prefilled Link</h2>
+          <h2 className="text-xl font-semibold text-[var(--foreground)]">📝 Create Prefilled Link</h2>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Item Name</label>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-2">Item Name</label>
               <input
                 type="text"
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 placeholder="e.g., iPhone 15 Pro"
-                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-white placeholder:text-[var(--muted)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
+                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Category</label>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-2">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-white focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
+                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
               >
                 <option value="TECH_GADGETS">📱 Tech & Gadgets</option>
                 <option value="TOYS_GAMES">🎮 Toys & Games</option>
@@ -230,33 +230,33 @@ export function MarketingCommandCenter() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Cause of Death</label>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-2">Cause of Death</label>
               <input
                 type="text"
                 value={causeOfDeath}
                 onChange={(e) => setCauseOfDeath(e.target.value)}
                 placeholder="e.g., Liquid damage, Battery bloat, Overheat"
-                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-white placeholder:text-[var(--muted)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
+                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Epitaph (Optional)</label>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-2">Epitaph (Optional)</label>
               <input
                 type="text"
                 value={epitaph}
                 onChange={(e) => setEpitaph(e.target.value)}
                 placeholder="e.g., Died updating, Water found a way"
-                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-white placeholder:text-[var(--muted)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
+                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Platform</label>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-2">Platform</label>
               <select
                 value={platform}
                 onChange={(e) => setPlatform(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-white focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
+                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
               >
                 <option value="twitter">🐦 Twitter</option>
                 <option value="tiktok">🎵 TikTok</option>
@@ -277,18 +277,18 @@ export function MarketingCommandCenter() {
 
         {/* Right Column: Templates and Output */}
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-white">💬 Response Templates</h2>
+          <h2 className="text-xl font-semibold text-[var(--foreground)]">💬 Response Templates</h2>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Template</label>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-2">Template</label>
               <select
                 value={selectedTemplate.id}
                 onChange={(e) => {
                   const template = DEFAULT_TEMPLATES.find(t => t.id === e.target.value);
                   if (template) setSelectedTemplate(template);
                 }}
-                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-white focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
+                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
               >
                 <optgroup label="🐦 Twitter (280 chars)">
                   {DEFAULT_TEMPLATES.filter(t => t.platform === 'Twitter').map(template => (
@@ -348,7 +348,7 @@ export function MarketingCommandCenter() {
                   </div>
                 )}
               </div>
-              <div className="text-sm text-white whitespace-pre-line">
+              <div className="text-sm text-[var(--foreground)] whitespace-pre-line">
                 {selectedTemplate.template}
               </div>
             </div>
@@ -357,11 +357,11 @@ export function MarketingCommandCenter() {
           {/* Generated Output */}
           {generatedLink && (
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-white">🎯 Generated Output</h3>
+              <h3 className="text-lg font-medium text-[var(--foreground)]">🎯 Generated Output</h3>
               
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-white">Prefilled Link</label>
+                  <label className="text-sm font-medium text-[var(--foreground)]">Prefilled Link</label>
                   <Button
                     variant="secondary"
                     onClick={() => copyToClipboard(generatedLink)}
@@ -370,14 +370,14 @@ export function MarketingCommandCenter() {
                     📋 Copy
                   </Button>
                 </div>
-                <div className="p-3 rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.02)] text-sm text-white break-all">
+                <div className="p-3 rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.02)] text-sm text-[var(--foreground)] break-all">
                   {generatedLink}
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-white">Complete Message</label>
+                  <label className="text-sm font-medium text-[var(--foreground)]">Complete Message</label>
                   <Button
                     variant="secondary"
                     onClick={() => copyToClipboard(generatedMessage)}
@@ -386,7 +386,7 @@ export function MarketingCommandCenter() {
                     📋 Copy
                   </Button>
                 </div>
-                <div className="p-3 rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.02)] text-sm text-white whitespace-pre-line">
+                <div className="p-3 rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.02)] text-sm text-[var(--foreground)] whitespace-pre-line">
                   {generatedMessage}
                 </div>
               </div>
