@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { GraveCategory } from "@prisma/client";
 
 // Simple SVG Icons
@@ -89,13 +89,35 @@ export function SearchAndFilter({ onFiltersChange, initialFilters, className = "
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounced filter change handler
+  const debouncedFilterChange = useCallback((newFilters: SearchFilters) => {
+    // Clear any pending timeout
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    // Set a new timeout for debouncing
+    debounceTimeoutRef.current = setTimeout(() => {
+      console.log('[SearchAndFilter] Debounced filter change:', newFilters);
+      onFiltersChange(newFilters);
+    }, 300); // 300ms debounce
+  }, [onFiltersChange]);
 
   // Only trigger onChange after user interaction, not on initial render
   useEffect(() => {
     if (hasUserInteracted) {
-      onFiltersChange(filters);
+      debouncedFilterChange(filters);
     }
-  }, [filters, onFiltersChange, hasUserInteracted]);
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [filters, hasUserInteracted, debouncedFilterChange]);
 
   const updateFilter = <K extends keyof SearchFilters>(
     key: K,
@@ -106,9 +128,25 @@ export function SearchAndFilter({ onFiltersChange, initialFilters, className = "
   };
 
   const resetFilters = () => {
+    console.log('[SearchAndFilter] Resetting filters');
+    
+    // Clear any pending debounced calls
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    
+    // Set user interaction flag and reset filters
     setHasUserInteracted(true);
-    setFilters(DEFAULT_FILTERS);
     setShowAdvanced(false);
+    
+    // Reset filters and trigger immediate change (no debounce for reset)
+    setFilters(DEFAULT_FILTERS);
+    
+    // Trigger immediate reset without debounce
+    setTimeout(() => {
+      console.log('[SearchAndFilter] Immediate reset trigger');
+      onFiltersChange(DEFAULT_FILTERS);
+    }, 0);
   };
 
   const hasActiveFilters = () => {

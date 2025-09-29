@@ -30,6 +30,7 @@ export function SearchableFeedList({
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [searchPerformed, setSearchPerformed] = useState(false);
+  const [currentSearchId, setCurrentSearchId] = useState<string | null>(null);
 
   // Build query parameters from filters
   const buildQueryParams = useCallback((searchFilters: SearchFilters, cursorParam?: string, offsetParam?: number) => {
@@ -79,7 +80,16 @@ export function SearchableFeedList({
 
   // Perform search with current filters
   const performSearch = useCallback(async (searchFilters: SearchFilters, isLoadMore = false) => {
-    console.log('[SearchableFeedList] performSearch called:', { searchFilters, isLoadMore });
+    const searchId = Date.now().toString();
+    console.log('[SearchableFeedList] performSearch called:', { searchFilters, isLoadMore, searchId });
+    
+    // Cancel if there's already a search in progress and this is a new search (not load more)
+    if (loading && !isLoadMore) {
+      console.log('[SearchableFeedList] Cancelling previous search');
+      return;
+    }
+    
+    setCurrentSearchId(searchId);
     setLoading(true);
     setError(null);
 
@@ -112,6 +122,12 @@ export function SearchableFeedList({
       
       const data: ListResponse = await response.json();
       
+      // Check if this search is still current (prevent race conditions)
+      if (currentSearchId !== searchId) {
+        console.log('[SearchableFeedList] Search outdated, ignoring results');
+        return;
+      }
+      
       if (isLoadMore) {
         setItems(prev => [...prev, ...data.items]);
         if (hasActiveFilters) {
@@ -128,18 +144,44 @@ export function SearchableFeedList({
       
     } catch (err) {
       console.error('Search error:', err);
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-      if (!isLoadMore) {
-        setItems([]);
+      // Only update error state if this is still the current search
+      if (currentSearchId === searchId) {
+        setError(err instanceof Error ? err.message : 'Something went wrong');
+        if (!isLoadMore) {
+          setItems([]);
+        }
       }
     } finally {
-      setLoading(false);
+      // Only clear loading if this is still the current search
+      if (currentSearchId === searchId) {
+        setLoading(false);
+      }
     }
-  }, [cursor, offset, buildQueryParams]);
+  }, [cursor, offset, buildQueryParams, loading, currentSearchId]);
 
   // Handle filter changes
   const handleFiltersChange = useCallback((newFilters: SearchFilters) => {
     console.log('[SearchableFeedList] Filter change triggered:', newFilters);
+    
+    // Check if this is a reset to default filters
+    const isReset = newFilters.query === "" && 
+                   newFilters.category === "ALL" && 
+                   newFilters.sortBy === "newest" && 
+                   newFilters.timeRange === "all" && 
+                   newFilters.hasPhoto === null && 
+                   newFilters.minReactions === 0;
+    
+    if (isReset) {
+      console.log('[SearchableFeedList] Filters reset - showing initial items');
+      setFilters(null);
+      setSearchPerformed(false);
+      setCursor(null);
+      setOffset(0);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+    
     setFilters(newFilters);
     setCursor(null); // Reset cursor for new search
     setOffset(0); // Reset offset for new search
@@ -229,7 +271,15 @@ export function SearchableFeedList({
                   Try adjusting your search criteria or filters
                 </p>
                 <button 
-                  onClick={() => setFilters(null)}
+                  onClick={() => {
+                    console.log('[SearchableFeedList] Clear all filters clicked');
+                    setFilters(null);
+                    setSearchPerformed(false);
+                    setCursor(null);
+                    setOffset(0);
+                    setLoading(false);
+                    setError(null);
+                  }}
                   className="text-sm text-[var(--accent)] hover:underline"
                 >
                   Clear all filters
