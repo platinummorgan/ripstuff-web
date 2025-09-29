@@ -83,6 +83,13 @@ export function SearchableFeedList({
     setLoading(true);
     setError(null);
 
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      console.error('[SearchableFeedList] Search timeout - forcing loading to false');
+      setLoading(false);
+      setError('Search request timed out. Please try again.');
+    }, 10000); // 10 second timeout
+
     try {
       // Determine if we have active filters
       const hasActiveFilters = searchFilters.query || 
@@ -104,13 +111,15 @@ export function SearchableFeedList({
         queryParams = buildQueryParams(searchFilters);
       }
 
+      console.log('[SearchableFeedList] Making API call:', `/api/feed?${queryParams}`);
       const response = await fetch(`/api/feed?${queryParams}`);
       
       if (!response.ok) {
-        throw new Error('Failed to search memorials');
+        throw new Error(`Failed to search memorials: ${response.status}`);
       }
       
       const data: ListResponse = await response.json();
+      console.log('[SearchableFeedList] API response received:', data);
       
       if (isLoadMore) {
         setItems(prev => [...prev, ...data.items]);
@@ -133,6 +142,8 @@ export function SearchableFeedList({
         setItems([]);
       }
     } finally {
+      clearTimeout(timeoutId);
+      console.log('[SearchableFeedList] Setting loading to false');
       setLoading(false);
     }
   }, [cursor, offset, buildQueryParams]);
