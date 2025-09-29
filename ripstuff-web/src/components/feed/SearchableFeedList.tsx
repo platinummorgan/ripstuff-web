@@ -79,6 +79,7 @@ export function SearchableFeedList({
 
   // Perform search with current filters
   const performSearch = useCallback(async (searchFilters: SearchFilters, isLoadMore = false) => {
+    console.log('[SearchableFeedList] performSearch called:', { searchFilters, isLoadMore });
     setLoading(true);
     setError(null);
 
@@ -138,6 +139,7 @@ export function SearchableFeedList({
 
   // Handle filter changes
   const handleFiltersChange = useCallback((newFilters: SearchFilters) => {
+    console.log('[SearchableFeedList] Filter change triggered:', newFilters);
     setFilters(newFilters);
     setCursor(null); // Reset cursor for new search
     setOffset(0); // Reset offset for new search

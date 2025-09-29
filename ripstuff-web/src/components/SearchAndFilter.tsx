@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { GraveCategory } from "@prisma/client";
 
 // Simple SVG Icons
@@ -88,20 +88,25 @@ export function SearchAndFilter({ onFiltersChange, initialFilters, className = "
   
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
-  // Trigger onChange when filters change
+  // Only trigger onChange after user interaction, not on initial render
   useEffect(() => {
-    onFiltersChange(filters);
-  }, [filters, onFiltersChange]);
+    if (hasUserInteracted) {
+      onFiltersChange(filters);
+    }
+  }, [filters, onFiltersChange, hasUserInteracted]);
 
   const updateFilter = <K extends keyof SearchFilters>(
     key: K,
     value: SearchFilters[K]
   ) => {
+    setHasUserInteracted(true);
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
   const resetFilters = () => {
+    setHasUserInteracted(true);
     setFilters(DEFAULT_FILTERS);
     setShowAdvanced(false);
   };
