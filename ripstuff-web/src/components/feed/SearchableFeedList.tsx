@@ -30,7 +30,6 @@ export function SearchableFeedList({
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [searchPerformed, setSearchPerformed] = useState(false);
-  const [currentSearchId, setCurrentSearchId] = useState<string | null>(null);
 
   // Build query parameters from filters
   const buildQueryParams = useCallback((searchFilters: SearchFilters, cursorParam?: string, offsetParam?: number) => {
@@ -80,16 +79,7 @@ export function SearchableFeedList({
 
   // Perform search with current filters
   const performSearch = useCallback(async (searchFilters: SearchFilters, isLoadMore = false) => {
-    const searchId = Date.now().toString();
-    console.log('[SearchableFeedList] performSearch called:', { searchFilters, isLoadMore, searchId });
-    
-    // Cancel if there's already a search in progress and this is a new search (not load more)
-    if (loading && !isLoadMore) {
-      console.log('[SearchableFeedList] Cancelling previous search');
-      return;
-    }
-    
-    setCurrentSearchId(searchId);
+    console.log('[SearchableFeedList] performSearch called:', { searchFilters, isLoadMore });
     setLoading(true);
     setError(null);
 
@@ -122,12 +112,6 @@ export function SearchableFeedList({
       
       const data: ListResponse = await response.json();
       
-      // Check if this search is still current (prevent race conditions)
-      if (currentSearchId !== searchId) {
-        console.log('[SearchableFeedList] Search outdated, ignoring results');
-        return;
-      }
-      
       if (isLoadMore) {
         setItems(prev => [...prev, ...data.items]);
         if (hasActiveFilters) {
@@ -144,43 +128,18 @@ export function SearchableFeedList({
       
     } catch (err) {
       console.error('Search error:', err);
-      // Only update error state if this is still the current search
-      if (currentSearchId === searchId) {
-        setError(err instanceof Error ? err.message : 'Something went wrong');
-        if (!isLoadMore) {
-          setItems([]);
-        }
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+      if (!isLoadMore) {
+        setItems([]);
       }
     } finally {
-      // Only clear loading if this is still the current search
-      if (currentSearchId === searchId) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
-  }, [cursor, offset, buildQueryParams, loading, currentSearchId]);
+  }, [cursor, offset, buildQueryParams]);
 
   // Handle filter changes
   const handleFiltersChange = useCallback((newFilters: SearchFilters) => {
     console.log('[SearchableFeedList] Filter change triggered:', newFilters);
-    
-    // Check if this is a reset to default filters
-    const isReset = newFilters.query === "" && 
-                   newFilters.category === "ALL" && 
-                   newFilters.sortBy === "newest" && 
-                   newFilters.timeRange === "all" && 
-                   newFilters.hasPhoto === null && 
-                   newFilters.minReactions === 0;
-    
-    if (isReset) {
-      console.log('[SearchableFeedList] Filters reset - showing initial items');
-      setFilters(null);
-      setSearchPerformed(false);
-      setCursor(null);
-      setOffset(0);
-      setLoading(false);
-      setError(null);
-      return;
-    }
     
     setFilters(newFilters);
     setCursor(null); // Reset cursor for new search
