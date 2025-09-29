@@ -335,7 +335,7 @@ export function MarketingCommandCenter() {
               </select>
             </div>
 
-            <div className="p-4 rounded-lg border border-white/20 bg-black/20">
+            <div className="p-4 rounded-lg border border-white/20 bg-gray-900 shadow-inner">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-sm text-gray-400">
                   Platform: {selectedTemplate.platform} | Scenario: {selectedTemplate.scenario}
@@ -348,7 +348,7 @@ export function MarketingCommandCenter() {
                   </div>
                 )}
               </div>
-              <div className="text-sm text-white whitespace-pre-line">
+              <div className="text-sm text-white whitespace-pre-line bg-gray-800 p-3 rounded border border-gray-700" style={{color: '#ffffff', backgroundColor: '#1f2937'}}>
                 {selectedTemplate.template}
               </div>
             </div>
@@ -370,7 +370,7 @@ export function MarketingCommandCenter() {
                     📋 Copy
                   </Button>
                 </div>
-                <div className="p-3 rounded-lg border border-white/20 bg-black/20 text-sm text-white break-all">
+                <div className="p-3 rounded-lg border border-gray-700 bg-gray-800 text-sm text-white break-all" style={{color: '#ffffff', backgroundColor: '#1f2937'}}>
                   {generatedLink}
                 </div>
               </div>
@@ -386,7 +386,7 @@ export function MarketingCommandCenter() {
                     📋 Copy
                   </Button>
                 </div>
-                <div className="p-3 rounded-lg border border-white/20 bg-black/20 text-sm text-white whitespace-pre-line">
+                <div className="p-3 rounded-lg border border-gray-700 bg-gray-800 text-sm text-white whitespace-pre-line" style={{color: '#ffffff', backgroundColor: '#1f2937'}}>
                   {generatedMessage}
                 </div>
               </div>
