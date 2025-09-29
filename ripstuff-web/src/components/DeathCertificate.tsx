@@ -36,11 +36,66 @@ interface DeathCertificateShareButtonProps {
     createdAt: string;
   };
   graveUrl: string;
+  graveSlug: string;
   controversy: ControversyScore;
 }
 
-function DeathCertificateShareButton({ grave, graveUrl, controversy }: DeathCertificateShareButtonProps) {
+function DeathCertificateShareButton({ grave, graveUrl, graveSlug, controversy }: DeathCertificateShareButtonProps) {
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // Color normalization functions (need to be accessible in this scope)
+  const normalizeColorValue = (property: keyof CSSStyleDeclaration, value: string) => {
+    try {
+      const probe = document.createElement('div');
+      probe.style.position = 'absolute';
+      probe.style.visibility = 'hidden';
+      probe.style.pointerEvents = 'none';
+      
+      if (typeof property === 'string' && probe.style[property as any] !== undefined) {
+        (probe.style as any)[property] = value;
+        document.body.appendChild(probe);
+        const computedValue = window.getComputedStyle(probe).getPropertyValue(property);
+        document.body.removeChild(probe);
+        return computedValue || value;
+      }
+      return value;
+    } catch (error) {
+      console.warn(`Error normalizing color value for ${String(property)}:`, error);
+      return value;
+    }
+  };
+
+  const applyLegacyColorOverrides = (root: HTMLElement) => {
+    const elementsToRestore: Array<{ element: HTMLElement; property: string; originalValue: string }> = [];
+    const colorProperties = ['color', 'backgroundColor', 'borderColor', 'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor'];
+    
+    const processElement = (element: HTMLElement) => {
+      const computedStyle = window.getComputedStyle(element);
+      
+      colorProperties.forEach(property => {
+        const currentValue = (computedStyle as any)[property];
+        if (currentValue && (currentValue.includes('oklch') || currentValue.includes('color-mix'))) {
+          const legacyValue = normalizeColorValue(property as keyof CSSStyleDeclaration, currentValue);
+          elementsToRestore.push({ element, property, originalValue: currentValue });
+          (element.style as any)[property] = legacyValue;
+        }
+      });
+    };
+
+    processElement(root);
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+    let node = walker.nextNode();
+    while (node) {
+      processElement(node as HTMLElement);
+      node = walker.nextNode();
+    }
+
+    return () => {
+      elementsToRestore.forEach(({ element, property, originalValue }) => {
+        (element.style as any)[property] = originalValue;
+      });
+    };
+  };
 
   const generateShareText = (platform: 'twitter' | 'facebook' | 'reddit' | 'copy') => {
     const baseText = `💀 Official Death Certificate for my ${grave.title}`;
@@ -76,9 +131,75 @@ function DeathCertificateShareButton({ grave, graveUrl, controversy }: DeathCert
     }
   };
 
-  const handleShare = (platform: 'twitter' | 'facebook' | 'reddit' | 'copy') => {
+  const handleShare = async (platform: 'twitter' | 'facebook' | 'reddit' | 'copy') => {
     const shareText = generateShareText(platform);
     
+    // For Twitter and Facebook, generate and share the certificate image
+    if (platform === 'twitter' || platform === 'facebook') {
+      try {
+        // Generate the certificate image first
+        const certificateElement = document.querySelector('[data-certificate="true"]') as HTMLElement;
+        if (!certificateElement) {
+          console.error('Certificate element not found for sharing');
+          return;
+        }
+
+        // Apply color fixes and generate image
+        const restoreColors = applyLegacyColorOverrides(certificateElement);
+        const dataUrl = await domtoimage.toPng(certificateElement, { 
+          quality: 1,
+          width: 800,
+          height: 700
+        });
+        restoreColors();
+
+        // Convert to blob for sharing
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const file = new File([blob], `death-certificate-${graveSlug}.png`, { type: 'image/png' });
+
+        // Check if Web Share API supports files (mainly mobile)
+        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+          await navigator.share({
+            title: `Death Certificate for ${grave.title}`,
+            text: shareText,
+            url: graveUrl,
+            files: [file]
+          });
+          analytics.trackSocialShare(platform, grave.title, 'death_certificate');
+          return;
+        }
+
+        // Fallback: Create downloadable link and open social platform
+        const link = document.createElement('a');
+        link.download = `death-certificate-${graveSlug}.png`;
+        link.href = dataUrl;
+        link.click();
+
+        // Still open the social platform with text
+        setTimeout(() => {
+          if (platform === 'twitter') {
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText + '\n\n📄 Certificate image downloaded - attach it to your tweet!')}`;
+            window.open(twitterUrl, '_blank');
+          } else if (platform === 'facebook') {
+            const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(graveUrl)}&quote=${encodeURIComponent(shareText + '\n\n📄 Certificate image downloaded - attach it to your post!')}`;
+            window.open(fbUrl, '_blank');
+          }
+        }, 500);
+
+        analytics.trackSocialShare(platform, grave.title, 'death_certificate');
+
+      } catch (error) {
+        console.error('Error generating certificate for sharing:', error);
+        // Fallback to text-only sharing
+        handleTextOnlyShare(platform, shareText);
+      }
+    } else {
+      handleTextOnlyShare(platform, shareText);
+    }
+  };
+
+  const handleTextOnlyShare = (platform: 'twitter' | 'facebook' | 'reddit' | 'copy', shareText: string) => {
     switch (platform) {
       case 'twitter':
         const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
@@ -511,6 +632,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
       {/* Certificate Preview */}
       <div 
         ref={certificateRef}
+        data-certificate="true"
         className="bg-gradient-to-br from-gray-900 via-gray-800 to-black border-8 border-amber-600 rounded-lg p-8 text-white relative overflow-hidden mx-auto"
         style={{ width: '100%', maxWidth: '800px' }}
       >
@@ -672,6 +794,7 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
               createdAt: grave.createdAt
             }}
             graveUrl={graveUrl}
+            graveSlug={graveUrl.split('/').pop() || 'certificate'}
             controversy={controversy}
           />
         </div>
