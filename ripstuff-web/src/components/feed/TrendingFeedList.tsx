@@ -1,68 +1,46 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import { GraveCard } from "@/components/GraveCard";
 import type { FeedItem } from "@/lib/validation";
 
-interface TrendingFeedListProps {
-  timeframe?: '24h' | '7d' | '30d';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
+
+async function fetchTrendingGraves(): Promise<FeedItem[]> {
+  try {
+    // Fetch all graves and sort by engagement for true trending
+    const response = await fetch(`${baseUrl}/api/feed?limit=20`, {
+      next: { revalidate: 300 }, // Cache for 5 minutes
+    });
+    if (!response.ok) return [];
+    
+    const data = await response.json();
+    
+    // Sort by total reactions to find truly trending content
+    const sortedByEngagement = data.items.sort((a: FeedItem, b: FeedItem) => {
+      const aTotal = Object.values(a.reactions).reduce((sum, count) => sum + count, 0);
+      const bTotal = Object.values(b.reactions).reduce((sum, count) => sum + count, 0);
+      return bTotal - aTotal;
+    });
+    
+    // Only show items that have at least 1 reaction to be considered "trending"
+    const actuallyTrending = sortedByEngagement.filter((item: FeedItem) => {
+      const totalReactions = Object.values(item.reactions).reduce((sum: number, count: number) => sum + count, 0);
+      return totalReactions > 0;
+    });
+    
+    // Return top 6 trending items
+    return actuallyTrending.slice(0, 6);
+  } catch (error) {
+    console.error('Error fetching trending graves:', error);
+    return [];
+  }
 }
 
-export function TrendingFeedList({ timeframe = '24h' }: TrendingFeedListProps) {
-  const [trendingGraves, setTrendingGraves] = useState<FeedItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedTimeframe, setSelectedTimeframe] = useState(timeframe);
-
-  useEffect(() => {
-    const fetchTrendingGraves = async () => {
-      try {
-        // Fetch all graves (not just featured) and sort by engagement for true trending
-        const response = await fetch(`/api/feed?limit=20`); // Get more items to find truly trending ones
-        if (!response.ok) throw new Error('Failed to fetch');
-        
-        const data = await response.json();
-        
-        // Sort by total reactions to find truly trending content
-        const sortedByEngagement = data.items.sort((a: FeedItem, b: FeedItem) => {
-          const aTotal = Object.values(a.reactions).reduce((sum, count) => sum + count, 0);
-          const bTotal = Object.values(b.reactions).reduce((sum, count) => sum + count, 0);
-          return bTotal - aTotal;
-        });
-        
-        // Only show items that have at least 1 reaction to be considered "trending"
-        const actuallyTrending = sortedByEngagement.filter((item: FeedItem) => {
-          const totalReactions = Object.values(item.reactions).reduce((sum: number, count: number) => sum + count, 0);
-          return totalReactions > 0;
-        });
-        
-        setTrendingGraves(actuallyTrending.slice(0, 6));
-      } catch (error) {
-        console.error('Failed to fetch trending graves:', error);
-        setTrendingGraves([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTrendingGraves();
-  }, [selectedTimeframe]);
-
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="animate-pulse">
-            <div className="rounded-3xl bg-[rgba(255,255,255,0.05)] p-6 h-48"></div>
-          </div>
-        ))}
-      </div>
-    );
-  }
+export async function TrendingFeedList() {
+  const trendingGraves = await fetchTrendingGraves();
 
   if (!trendingGraves.length) {
     return (
       <div className="text-center p-8 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)]">
-        <p className="text-[var(--muted)]">No trending content found for this timeframe.</p>
+        <p className="text-[var(--muted)]">No trending content yet.</p>
         <p className="text-sm text-[var(--muted)] mt-2">Be the first to create something viral!</p>
       </div>
     );
@@ -70,27 +48,6 @@ export function TrendingFeedList({ timeframe = '24h' }: TrendingFeedListProps) {
 
   return (
     <div>
-      {/* Timeframe Selector */}
-      <div className="flex gap-2 mb-6">
-        {[
-          { key: '24h', label: 'Last 24 Hours' },
-          { key: '7d', label: 'This Week' },
-          { key: '30d', label: 'This Month' },
-        ].map((option) => (
-          <button
-            key={option.key}
-            onClick={() => setSelectedTimeframe(option.key as '24h' | '7d' | '30d')}
-            className={`px-4 py-2 text-sm rounded-lg transition-colors ${
-              selectedTimeframe === option.key
-                ? 'bg-[var(--accent)] text-black font-medium'
-                : 'bg-[rgba(255,255,255,0.05)] text-[var(--muted)] hover:bg-[rgba(255,255,255,0.08)] hover:text-white'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
       {/* Trending Content Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {trendingGraves.map((grave, index) => (

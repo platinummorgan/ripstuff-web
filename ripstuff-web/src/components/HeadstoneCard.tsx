@@ -54,7 +54,7 @@ function getTombstoneVariation(grave: FeedItem): {
   let seed = grave.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   
   // Age-based variations using a fixed reference date to avoid SSR hydration issues
-  const referenceDate = new Date('2025-09-27').getTime(); // Fixed reference date
+  const referenceDate = new Date('2025-09-28').getTime(); // Fixed reference date
   const ageInDays = (referenceDate - new Date(grave.createdAt).getTime()) / (1000 * 60 * 60 * 24);
   
   // Popular graves get more ornate styles

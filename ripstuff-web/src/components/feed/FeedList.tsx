@@ -1,10 +1,8 @@
-"use client";
-
-import { useCallback, useEffect, useState } from "react";
-
-import { Button } from "@/components/Button";
+import { Prisma } from "@prisma/client";
 import { GraveCard } from "@/components/GraveCard";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadMoreFeedButton } from "./LoadMoreFeedButton";
+import { createEulogyPreview } from "@/lib/eulogy";
+import prisma from "@/lib/prisma";
 import type { FeedItem } from "@/lib/validation";
 
 interface FeedResponse {
@@ -12,67 +10,107 @@ interface FeedResponse {
   nextCursor: string | null;
 }
 
-// Use relative URLs for API calls to avoid client-side env variable issues
-
 interface FeedListProps {
   featured?: boolean;
 }
 
-export function FeedList({ featured }: FeedListProps = {}) {
-  const [items, setItems] = useState<FeedItem[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(false);
+async function fetchFeedItems(featured?: boolean): Promise<FeedResponse> {
+  try {
+    const devShowPending = process.env.NEXT_PUBLIC_SHOW_PENDING_IN_FEED === "1";
+    const where: Prisma.GraveWhereInput = devShowPending
+      ? { status: { in: ["APPROVED", "PENDING"] } }
+      : { status: "APPROVED" };
 
-  const loadPage = useCallback(async (initial = false) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const params = new URLSearchParams({ limit: "8" });
-      if (!initial && cursor) {
-        params.set("cursor", cursor);
-      }
-      if (featured !== undefined) {
-        params.set("featured", featured.toString());
-      }
-
-      const url = `/api/feed?${params.toString()}`;
-      console.log('[FeedList] Fetching:', url);
-      const res = await fetch(url);
-      const data = (await res.json()) as FeedResponse;
-      console.log('[FeedList] Data:', data);
-
-      if (!res.ok) {
-        throw new Error(data?.items ? "Unable to load more graves" : "Unable to load graves");
-      }
-
-      setItems((prev) => (initial ? data.items : [...prev, ...data.items]));
-      setCursor(data.nextCursor);
-      setInitialized(true);
-    } catch (err) {
-      console.error('[FeedList] Error:', err);
-      setError(err instanceof Error ? err.message : "Something went wrong loading graves.");
-    } finally {
-      setLoading(false);
+    if (typeof featured === "boolean") {
+      where.featured = featured;
     }
-  }, [cursor]);
 
-  useEffect(() => {
-    // initial load
-    void loadPage(true);
-  }, [loadPage]);
+    const limit = 8;
+    const graves = await prisma.grave.findMany({
+      where,
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: limit + 1,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        category: true,
+        eulogyText: true,
+        photoUrl: true,
+        heartCount: true,
+        candleCount: true,
+        roseCount: true,
+        lolCount: true,
+        createdAt: true,
+        featured: true,
+        creatorDeviceHash: true,
+      },
+    });
 
-  if (loading && !initialized) {
-    return <LoadingSpinner label="Waking undertakers" />;
+    // Get creator info for all graves
+    const deviceHashes = graves
+      .map(g => g.creatorDeviceHash)
+      .filter((hash): hash is string => hash !== null);
+    
+    const creators = deviceHashes.length > 0 
+      ? await prisma.user.findMany({
+          where: { deviceHash: { in: deviceHashes } },
+          select: { deviceHash: true, name: true, picture: true },
+        })
+      : [];
+    
+    const creatorMap = new Map(
+      creators.map(creator => [creator.deviceHash, creator])
+    );
+
+    let nextCursor: string | null = null;
+    if (graves.length > limit) {
+      const nextRecord = graves.pop();
+      if (nextRecord) {
+        nextCursor = nextRecord.createdAt.toISOString();
+      }
+    }
+
+    const items: FeedItem[] = graves.map((grave) => {
+      const creator = grave.creatorDeviceHash 
+        ? creatorMap.get(grave.creatorDeviceHash) 
+        : null;
+      
+      return {
+        id: grave.id,
+        slug: grave.slug,
+        title: grave.title,
+        category: grave.category,
+        eulogyPreview: createEulogyPreview(grave.eulogyText),
+        photoUrl: grave.photoUrl ?? null,
+        reactions: {
+          heart: grave.heartCount,
+          candle: grave.candleCount,
+          rose: grave.roseCount,
+          lol: grave.lolCount,
+        },
+        createdAt: grave.createdAt.toISOString(),
+        featured: grave.featured,
+        creatorInfo: creator ? {
+          name: creator.name,
+          picture: creator.picture,
+        } : null,
+      };
+    });
+
+    return { items, nextCursor };
+  } catch (error) {
+    console.error('[FeedList] Error fetching feed items:', error);
+    return { items: [], nextCursor: null };
   }
+}
 
-  if (error && !items.length) {
-    return <p className="text-sm text-[#ff8097]">{error}</p>;
-  }
+export async function FeedList({ featured }: FeedListProps = {}) {
+  const { items, nextCursor } = await fetchFeedItems(featured);
 
-  if (!items.length && initialized && !loading) {
+  if (!items.length) {
     return <p className="text-sm text-[var(--muted)]">No graves here yet. Be the first to bury something memorable.</p>;
   }
 
@@ -83,14 +121,13 @@ export function FeedList({ featured }: FeedListProps = {}) {
           <GraveCard key={`${item.id}-${item.slug}`} grave={item} />
         ))}
       </div>
-      {error && (
-        <p className="text-sm text-[#ff8097]">{error}</p>
-      )}
-      {cursor && (
+      {nextCursor && (
         <div className="flex justify-center">
-          <Button disabled={loading} onClick={() => loadPage(false)}>
-            {loading ? <LoadingSpinner label="Loading more" /> : "Load more"}
-          </Button>
+          <LoadMoreFeedButton 
+            cursor={nextCursor} 
+            featured={featured}
+            initialItems={items}
+          />
         </div>
       )}
     </div>
