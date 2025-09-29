@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
           id: user.id,
           email: user.email,
           name: user.name,
-          picture: user.picture
+          picture: user.picture,
+          isModerator: user.isModerator
         }
       });
     }
