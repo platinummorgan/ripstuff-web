@@ -168,35 +168,36 @@ export function MarketingCommandCenter() {
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Quick Examples */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <h2 className="col-span-full text-xl font-semibold text-[var(--foreground)] mb-4">⚡ Quick Examples</h2>
-        {quickFillExamples.map((example, index) => (
-          <Button
-            key={index}
-            variant="secondary"
-            onClick={() => {
-              setItemName(example.name);
-              setCategory(example.category);
-              setCauseOfDeath(example.cause);
-              setEpitaph(example.epitaph);
-            }}
-            className="text-left h-auto p-4 flex flex-col items-start space-y-2"
-          >
-            <div className="flex items-center justify-between w-full">
-              <div className="font-medium text-[var(--foreground)]">{example.name}</div>
-              <div className="text-xs text-[var(--accent)]">{example.platform}</div>
-            </div>
-            <div className="text-sm text-[var(--muted)]">{example.cause}</div>
-            <div className="text-xs text-[var(--muted)] italic">"{example.epitaph}"</div>
-          </Button>
-        ))}
-      </div>
+    <>
+      <div className="space-y-8">
+        {/* Quick Examples */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h2 className="col-span-full text-xl font-semibold text-[var(--foreground)] mb-4">⚡ Quick Examples</h2>
+          {quickFillExamples.map((example, index) => (
+            <Button
+              key={index}
+              variant="secondary"
+              onClick={() => {
+                setItemName(example.name);
+                setCategory(example.category);
+                setCauseOfDeath(example.cause);
+                setEpitaph(example.epitaph);
+              }}
+              className="text-left h-auto p-4 flex flex-col items-start space-y-2"
+            >
+              <div className="flex items-center justify-between w-full">
+                <div className="font-medium text-[var(--foreground)]">{example.name}</div>
+                <div className="text-xs text-[var(--accent)]">{example.platform}</div>
+              </div>
+              <div className="text-sm text-[var(--muted)]">{example.cause}</div>
+              <div className="text-xs text-[var(--muted)] italic">"{example.epitaph}"</div>
+            </Button>
+          ))
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column: Input Form */}
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column: Input Form */}
+          <div className="space-y-6">
           <h2 className="text-xl font-semibold text-[var(--foreground)]">📝 Create Prefilled Link</h2>
           
           <div className="space-y-4">
@@ -216,7 +217,7 @@ export function MarketingCommandCenter() {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
+                className="marketing-select w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
               >
                 <option value="TECH_GADGETS">📱 Tech & Gadgets</option>
                 <option value="TOYS_GAMES">🎮 Toys & Games</option>
@@ -256,7 +257,7 @@ export function MarketingCommandCenter() {
               <select
                 value={platform}
                 onChange={(e) => setPlatform(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
+                className="marketing-select w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
               >
                 <option value="twitter">🐦 Twitter</option>
                 <option value="tiktok">🎵 TikTok</option>
@@ -288,7 +289,7 @@ export function MarketingCommandCenter() {
                   const template = DEFAULT_TEMPLATES.find(t => t.id === e.target.value);
                   if (template) setSelectedTemplate(template);
                 }}
-                className="w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
+                className="marketing-select w-full rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 text-[var(--foreground)] focus:border-[rgba(154,230,180,0.5)] focus:outline-none"
               >
                 <optgroup label="🐦 Twitter (280 chars)">
                   {DEFAULT_TEMPLATES.filter(t => t.platform === 'Twitter').map(template => (
@@ -437,5 +438,24 @@ export function MarketingCommandCenter() {
         </div>
       </div>
     </div>
+      <style jsx global>{`
+        .marketing-select {
+          color: var(--foreground);
+          background-color: rgba(17, 24, 39, 0.85);
+        }
+
+        .marketing-select option,
+        .marketing-select optgroup {
+          color: #111827;
+          background-color: #f9fafb;
+        }
+
+        .marketing-select option:checked,
+        .marketing-select option:hover {
+          background-color: #e5e7eb;
+          color: #111827;
+        }
+      `}</style>
+    </>
   );
 }
