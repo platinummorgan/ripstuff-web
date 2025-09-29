@@ -162,7 +162,7 @@ export default async function GravePage({ params }: { params: { slug: string } }
 
       <section className="rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
         <SectionHeader title="Epitaph" description="Memorial words honoring a departed item." />
-        <article className="mt-6 space-y-4 whitespace-pre-line text-base leading-7 text-[var(--foreground)]">
+        <article className="mt-6 space-y-4 whitespace-pre-line break-words overflow-wrap-anywhere text-base leading-7 text-[var(--foreground)]">
           {grave.eulogyText}
         </article>
         <div className="mt-4 text-sm text-gray-400 italic flex items-center gap-2">
