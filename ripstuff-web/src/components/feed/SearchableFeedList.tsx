@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { GraveCard } from "@/components/GraveCard";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { SearchAndFilter, type SearchFilters } from "@/components/SearchAndFilter";
@@ -30,6 +30,7 @@ export function SearchableFeedList({
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [searchPerformed, setSearchPerformed] = useState(false);
+  const performSearchRef = useRef<typeof performSearch>();
 
   // Build query parameters from filters
   const buildQueryParams = useCallback((searchFilters: SearchFilters, cursorParam?: string, offsetParam?: number) => {
@@ -148,15 +149,22 @@ export function SearchableFeedList({
     }
   }, [cursor, offset, buildQueryParams]);
 
-  // Handle filter changes
+  // Keep ref updated
+  performSearchRef.current = performSearch;
+
+  // Handle filter changes - use a stable reference to break dependency cycle
   const handleFiltersChange = useCallback((newFilters: SearchFilters) => {
     console.log('[SearchableFeedList] Filter change triggered:', newFilters);
     
     setFilters(newFilters);
     setCursor(null); // Reset cursor for new search
     setOffset(0); // Reset offset for new search
-    performSearch(newFilters, false);
-  }, [performSearch]);
+    
+    // Use ref to avoid dependency cycle
+    if (performSearchRef.current) {
+      performSearchRef.current(newFilters, false);
+    }
+  }, []);
 
   // Load more items
   const loadMore = useCallback(() => {

@@ -94,12 +94,10 @@ export function SearchAndFilter({ onFiltersChange, initialFilters, className = "
   // Only trigger onChange after user interaction, not on initial render
   useEffect(() => {
     if (hasUserInteracted) {
-      // For dropdown changes (category, sort), trigger immediately
-      // For text input, we can add debounce later if needed
       console.log('[SearchAndFilter] Filter change triggered:', filters);
       onFiltersChange(filters);
     }
-  }, [filters, hasUserInteracted, onFiltersChange]);
+  }, [filters, hasUserInteracted]); // Remove onFiltersChange from deps to prevent infinite loop
 
   const updateFilter = <K extends keyof SearchFilters>(
     key: K,
