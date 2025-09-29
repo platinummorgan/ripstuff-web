@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
-import { NotificationEmailService } from '@/lib/notification-service';
+import { EmailService } from '@/lib/email-service-switcher';
 
 export async function POST(
   request: NextRequest,
@@ -57,7 +57,7 @@ export async function POST(
       });
 
       if ((targetUserPrefs as any)?.emailOnNewFollower) {
-        await NotificationEmailService.sendNewFollowerNotification(
+        await EmailService.sendNewFollowerNotification(
           userId,
           targetUser.email,
           {

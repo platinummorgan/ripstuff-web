@@ -1,24 +1,17 @@
-// Email service switcher - chooses between Resend and Gmail SMTP
+// Email service switcher - uses Gmail SMTP (Resend removed)
 import { GmailNotificationService } from './gmail-smtp-service';
-import { NotificationEmailService } from './notification-service';
 import {
   NewSympathyEmailData,
   FirstReactionEmailData,
-  DailyDigestEmailData
+  DailyDigestEmailData,
+  NewFollowerEmailData,
+  FollowerMemorialEmailData
 } from './email-templates';
 
 /**
- * Email service that automatically chooses between Gmail SMTP and Resend
- * based on EMAIL_PROVIDER environment variable
+ * Email service - uses Gmail SMTP for all notifications
  */
 export class EmailService {
-  private static get provider() {
-    return process.env.EMAIL_PROVIDER || 'resend';
-  }
-
-  private static get isGmail() {
-    return this.provider === 'gmail';
-  }
 
   /**
    * Send new sympathy notification
@@ -29,11 +22,7 @@ export class EmailService {
     graveId: string,
     data: NewSympathyEmailData
   ): Promise<void> {
-    if (this.isGmail) {
-      await GmailNotificationService.sendNewSympathyNotification(userId, userEmail, graveId, data);
-    } else {
-      await NotificationEmailService.sendNewSympathyNotification(userId, userEmail, graveId, data);
-    }
+    await GmailNotificationService.sendNewSympathyNotification(userId, userEmail, graveId, data);
   }
 
   /**
@@ -45,11 +34,7 @@ export class EmailService {
     graveId: string,
     data: FirstReactionEmailData
   ): Promise<void> {
-    if (this.isGmail) {
-      await GmailNotificationService.sendFirstReactionNotification(userId, userEmail, graveId, data);
-    } else {
-      await NotificationEmailService.sendFirstReactionNotification(userId, userEmail, graveId, data);
-    }
+    await GmailNotificationService.sendFirstReactionNotification(userId, userEmail, graveId, data);
   }
 
   /**
@@ -61,39 +46,46 @@ export class EmailService {
     graveId: string,
     data: DailyDigestEmailData
   ): Promise<void> {
-    if (this.isGmail) {
-      await GmailNotificationService.sendDailyDigestNotification(userId, userEmail, graveId, data);
-    } else {
-      await NotificationEmailService.sendDailyDigestNotification(userId, userEmail, graveId, data);
-    }
+    await GmailNotificationService.sendDailyDigestNotification(userId, userEmail, graveId, data);
+  }
+
+  /**
+   * Send new follower notification
+   */
+  static async sendNewFollowerNotification(
+    userId: string,
+    userEmail: string,
+    data: NewFollowerEmailData
+  ): Promise<void> {
+    await GmailNotificationService.sendNewFollowerNotification(userId, userEmail, data);
+  }
+
+  /**
+   * Send follower memorial notification
+   */
+  static async sendFollowerMemorialNotification(
+    userId: string,
+    userEmail: string,
+    graveId: string,
+    data: FollowerMemorialEmailData
+  ): Promise<void> {
+    await GmailNotificationService.sendFollowerMemorialNotification(userId, userEmail, graveId, data);
   }
 
   /**
    * Test email service connection
    */
   static async testConnection(): Promise<boolean> {
-    if (this.isGmail) {
-      return await GmailNotificationService.testConnection();
-    } else {
-      // Resend doesn't have a direct test method, assume it works if API key is set
-      return !!process.env.RESEND_API_KEY;
-    }
+    return await GmailNotificationService.testConnection();
   }
 
   /**
    * Get current email provider info
    */
   static getProviderInfo(): { provider: string; fromEmail: string } {
-    if (this.isGmail) {
-      return {
-        provider: 'Gmail SMTP',
-        fromEmail: process.env.GMAIL_FROM_EMAIL || 'notifications@ripstuff.net'
-      };
-    } else {
-      return {
-        provider: 'Resend',
-        fromEmail: 'notifications@virtualgraveyard.com'
-      };
-    }
+    return {
+      provider: 'Gmail SMTP',
+      fromEmail: process.env.GMAIL_FROM_EMAIL || 'notifications@ripstuff.net'
+    };
   }
 }
