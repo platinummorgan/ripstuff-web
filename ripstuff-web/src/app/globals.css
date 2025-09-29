@@ -58,3 +58,22 @@ textarea, input[type="text"] {
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
+/* Marketing Command Center select tweaks */
+.marketing-select {
+  color: var(--foreground);
+  background-color: rgba(17, 24, 39, 0.85);
+  color-scheme: dark;
+}
+
+.marketing-select option,
+.marketing-select optgroup {
+  color: #111827;
+  background-color: #f9fafb;
+}
+
+.marketing-select option:checked,
+.marketing-select option:hover {
+  background-color: #e5e7eb;
+  color: #111827;
+}
+

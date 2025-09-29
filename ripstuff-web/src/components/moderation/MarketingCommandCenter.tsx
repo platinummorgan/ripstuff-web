@@ -192,7 +192,7 @@ export function MarketingCommandCenter() {
               <div className="text-sm text-[var(--muted)]">{example.cause}</div>
               <div className="text-xs text-[var(--muted)] italic">"{example.epitaph}"</div>
             </Button>
-          ))
+          ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -438,24 +438,6 @@ export function MarketingCommandCenter() {
         </div>
       </div>
     </div>
-      <style jsx global>{`
-        .marketing-select {
-          color: var(--foreground);
-          background-color: rgba(17, 24, 39, 0.85);
-        }
-
-        .marketing-select option,
-        .marketing-select optgroup {
-          color: #111827;
-          background-color: #f9fafb;
-        }
-
-        .marketing-select option:checked,
-        .marketing-select option:hover {
-          background-color: #e5e7eb;
-          color: #111827;
-        }
-      `}</style>
     </>
   );
 }
