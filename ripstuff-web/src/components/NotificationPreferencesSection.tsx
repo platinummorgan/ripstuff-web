@@ -91,8 +91,8 @@ export function NotificationPreferencesSection() {
       if (response.ok) {
         setMessage('Notification preferences updated successfully!');
       } else {
-        const error = await response.json();
-        setMessage(error.message || 'Failed to update preferences');
+        const errorData = await response.json();
+        setMessage(errorData.error || errorData.message || 'Failed to update preferences');
       }
     } catch (error) {
       setMessage('An error occurred while updating preferences');

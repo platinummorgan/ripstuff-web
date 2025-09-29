@@ -335,9 +335,9 @@ export function MarketingCommandCenter() {
               </select>
             </div>
 
-            <div className="p-4 rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.02)]">
+            <div className="p-4 rounded-lg border border-white/20 bg-black/20">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-sm text-[var(--muted)]">
+                <div className="text-sm text-gray-400">
                   Platform: {selectedTemplate.platform} | Scenario: {selectedTemplate.scenario}
                 </div>
                 {selectedTemplate.platform === 'Twitter' && (
@@ -348,7 +348,7 @@ export function MarketingCommandCenter() {
                   </div>
                 )}
               </div>
-              <div className="text-sm text-[var(--foreground)] whitespace-pre-line">
+              <div className="text-sm text-white whitespace-pre-line">
                 {selectedTemplate.template}
               </div>
             </div>
@@ -370,14 +370,14 @@ export function MarketingCommandCenter() {
                     📋 Copy
                   </Button>
                 </div>
-                <div className="p-3 rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.02)] text-sm text-[var(--foreground)] break-all">
+                <div className="p-3 rounded-lg border border-white/20 bg-black/20 text-sm text-white break-all">
                   {generatedLink}
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-[var(--foreground)]">Complete Message</label>
+                  <label className="text-sm font-medium text-white">Complete Message</label>
                   <Button
                     variant="secondary"
                     onClick={() => copyToClipboard(generatedMessage)}
@@ -386,7 +386,7 @@ export function MarketingCommandCenter() {
                     📋 Copy
                   </Button>
                 </div>
-                <div className="p-3 rounded-lg border border-[var(--border)] bg-[rgba(255,255,255,0.02)] text-sm text-[var(--foreground)] whitespace-pre-line">
+                <div className="p-3 rounded-lg border border-white/20 bg-black/20 text-sm text-white whitespace-pre-line">
                   {generatedMessage}
                 </div>
               </div>
