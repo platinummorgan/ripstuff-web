@@ -213,30 +213,64 @@ export function MemorialShareCard({ grave, graveUrl }: MemorialShareCardProps) {
 
   const downloadShareCard = async (format: ShareFormat) => {
     const cardRef = cardRefs[format];
-    if (!cardRef.current) return;
+    if (!cardRef.current) {
+      console.error('Card ref not found for format:', format);
+      alert('Memorial card element not ready. Please try again.');
+      return;
+    }
 
     setIsGenerating(true);
     setActiveFormat(format);
 
     try {
-      const dataUrl = await domtoimage.toPng(cardRef.current, {
-        quality: 0.9,
-        bgcolor: '#000000',
-        width: cardRef.current.scrollWidth,
-        height: cardRef.current.scrollHeight,
+      console.log('📸 Starting memorial card generation for format:', format);
+      console.log('📐 Element dimensions:', {
+        scrollWidth: cardRef.current.scrollWidth,
+        scrollHeight: cardRef.current.scrollHeight,
+        offsetWidth: cardRef.current.offsetWidth,
+        offsetHeight: cardRef.current.offsetHeight
       });
+
+      // Make sure the element is visible and properly sized
+      const computedStyle = window.getComputedStyle(cardRef.current);
+      if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden') {
+        console.error('❌ Memorial card element is not visible');
+        alert('Memorial card is not visible. Please try again.');
+        return;
+      }
+
+      // Force a layout and wait a moment for rendering
+      cardRef.current.offsetHeight; // Force reflow
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const dataUrl = await domtoimage.toPng(cardRef.current, {
+        quality: 1.0,
+        bgcolor: '#000000',
+        width: cardRef.current.offsetWidth || 400,
+        height: cardRef.current.offsetHeight || 600,
+      });
+
+      console.log('✅ Memorial card generated, data URL length:', dataUrl.length);
+
+      if (dataUrl.length < 1000) {
+        console.error('❌ Generated image is too small, likely empty');
+        alert('Generated memorial card appears to be empty. Please try again.');
+        return;
+      }
 
       const link = document.createElement('a');
       link.download = `memorial-card-${format}-${grave.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.png`;
       link.href = dataUrl;
       link.click();
 
+      console.log('✅ Memorial card download initiated');
+
       // Track download
       analytics.trackDeathCertificateDownload(grave.id, undefined);
       
     } catch (error) {
-      console.error('Memorial card generation failed:', error);
-      alert('Failed to generate memorial card. Please try again.');
+      console.error('❌ Memorial card generation failed:', error);
+      alert('Failed to generate memorial card: ' + (error as Error).message);
     } finally {
       setIsGenerating(false);
       setActiveFormat(null);
@@ -371,8 +405,8 @@ export function MemorialShareCard({ grave, graveUrl }: MemorialShareCardProps) {
         </div>
       </div>
 
-      {/* Preview Cards (Hidden, used for generation) */}
-      <div className="hidden">
+      {/* Preview Cards (Invisible but rendered for generation) */}
+      <div className="fixed -left-[9999px] -top-[9999px] pointer-events-none">
         {Object.entries(cardRefs).map(([format, ref]) => (
           <div key={format} ref={ref}>
             <ShareCard grave={grave} format={format as ShareFormat} />
