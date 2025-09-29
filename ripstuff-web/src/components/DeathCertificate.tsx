@@ -4,6 +4,8 @@ import { useState, useRef } from 'react';
 import domtoimage from 'dom-to-image';
 import QRCode from 'qrcode';
 import { useVoting } from "@/components/VotingContext";
+import { analytics } from "@/lib/analytics";
+import { ViralHashtagGenerator } from "@/lib/hashtag-generator";
 
 interface DeathCertificateProps {
   grave: {
@@ -24,6 +26,149 @@ interface ControversyScore {
   level: 'Saint' | 'Respected' | 'Divisive' | 'Controversial' | 'Roasted';
   color: string;
   description: string;
+}
+
+interface DeathCertificateShareButtonProps {
+  grave: {
+    title: string;
+    category: string;
+    eulogyText: string;
+    createdAt: string;
+  };
+  graveUrl: string;
+  controversy: ControversyScore;
+}
+
+function DeathCertificateShareButton({ grave, graveUrl, controversy }: DeathCertificateShareButtonProps) {
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const generateShareText = (platform: 'twitter' | 'facebook' | 'reddit' | 'copy') => {
+    const baseText = `💀 Official Death Certificate for my ${grave.title}`;
+    const status = controversy.level === 'Saint' ? 'beloved' : 
+                  controversy.level === 'Respected' ? 'well-respected' : 
+                  controversy.level === 'Divisive' ? 'controversial' :
+                  controversy.level === 'Controversial' ? 'highly controversial' : 'absolutely roasted';
+    
+    // Generate viral hashtags for the grave
+    const hashtags = ViralHashtagGenerator.getFormattedHashtags({
+      title: grave.title,
+      category: grave.category,
+      eulogyText: grave.eulogyText,
+      createdAt: grave.createdAt
+    }, {
+      maxCount: platform === 'twitter' ? 8 : platform === 'facebook' ? 5 : 10,
+      platform: platform === 'copy' ? 'twitter' : platform === 'reddit' ? 'twitter' : platform as 'twitter' | 'facebook'
+    });
+
+    // Add controversy-specific hashtags
+    const controversyTags = ViralHashtagGenerator.getControversyHashtags(controversy.level);
+    const allHashtags = [...hashtags.slice(0, 6), ...controversyTags.slice(0, 2)];
+    
+    switch (platform) {
+      case 'twitter':
+        return `${baseText} - Status: ${status} 📊\n\nMourn with me at ${graveUrl}\n\n${allHashtags.join(' ')}`;
+      case 'facebook':
+        return `${baseText}\n\nThis ${status} item has officially been laid to rest in the Virtual Graveyard. View the full memorial and share your condolences:\n\n${graveUrl}\n\n${hashtags.slice(0, 3).join(' ')}`;
+      case 'reddit':
+        return `${baseText} - Community voted it as "${status}"`;
+      default:
+        return baseText;
+    }
+  };
+
+  const handleShare = (platform: 'twitter' | 'facebook' | 'reddit' | 'copy') => {
+    const shareText = generateShareText(platform);
+    
+    switch (platform) {
+      case 'twitter':
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+        window.open(twitterUrl, '_blank');
+        analytics.trackSocialShare('twitter', grave.title, 'death_certificate');
+        break;
+      case 'facebook':
+        const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(graveUrl)}&quote=${encodeURIComponent(shareText)}`;
+        window.open(fbUrl, '_blank');
+        analytics.trackSocialShare('facebook', grave.title, 'death_certificate');
+        break;
+      case 'reddit':
+        const redditUrl = `https://reddit.com/submit?url=${encodeURIComponent(graveUrl)}&title=${encodeURIComponent(shareText)}`;
+        window.open(redditUrl, '_blank');
+        analytics.trackSocialShare('reddit', grave.title, 'death_certificate');
+        break;
+      case 'copy':
+        navigator.clipboard.writeText(`${shareText}\n\n${graveUrl}`);
+        analytics.trackSocialShare('copy_link', grave.title, 'death_certificate');
+        break;
+    }
+    setShowDropdown(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setShowDropdown(!showDropdown)}
+        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center gap-2"
+      >
+        📤 Share Certificate
+      </button>
+
+      {showDropdown && (
+        <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-48 bg-[#0B1123] border border-[rgba(255,255,255,0.08)] rounded-lg shadow-xl z-50">
+          <div className="p-2">
+            <div className="text-xs text-[var(--muted)] mb-2 px-2">Share death certificate</div>
+            
+            <button
+              onClick={() => handleShare('twitter')}
+              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-white hover:bg-[rgba(29,161,242,0.1)] hover:text-[#1DA1F2] rounded transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+              </svg>
+              Twitter
+            </button>
+            
+            <button
+              onClick={() => handleShare('facebook')}
+              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-white hover:bg-[rgba(24,119,242,0.1)] hover:text-[#1877F2] rounded transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+              Facebook
+            </button>
+            
+            <button
+              onClick={() => handleShare('reddit')}
+              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-white hover:bg-[rgba(255,69,0,0.1)] hover:text-[#FF4500] rounded transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+              </svg>
+              Reddit
+            </button>
+            
+            <button
+              onClick={() => handleShare('copy')}
+              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-white hover:bg-[rgba(255,255,255,0.05)] rounded transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+              </svg>
+              Copy Link
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Click outside to close */}
+      {showDropdown && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setShowDropdown(false)}
+        />
+      )}
+    </div>
+  );
 }
 
 export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
@@ -499,24 +644,37 @@ export function DeathCertificate({ grave, graveUrl }: DeathCertificateProps) {
         </div>
       </div>
 
-      {/* Download Button */}
+      {/* Download & Share Buttons */}
       <div className="text-center">
-        <button
-          onClick={downloadCertificate}
-          disabled={isGenerating}
-          className="bg-amber-600 hover:bg-amber-700 disabled:bg-amber-800 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center gap-2 mx-auto"
-        >
-          {isGenerating ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-              Generating Certificate...
-            </>
-          ) : (
-            <>
-              📜 Download Death Certificate
-            </>
-          )}
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+          <button
+            onClick={downloadCertificate}
+            disabled={isGenerating}
+            className="bg-amber-600 hover:bg-amber-700 disabled:bg-amber-800 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center gap-2"
+          >
+            {isGenerating ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                Generating Certificate...
+              </>
+            ) : (
+              <>
+                📜 Download Certificate
+              </>
+            )}
+          </button>
+          
+          <DeathCertificateShareButton 
+            grave={{
+              title: grave.title,
+              category: grave.category,
+              eulogyText: grave.eulogyText,
+              createdAt: grave.createdAt
+            }}
+            graveUrl={graveUrl}
+            controversy={controversy}
+          />
+        </div>
         <p className="text-sm text-gray-400 mt-2">
           High-resolution PNG • Perfect for sharing or framing
         </p>

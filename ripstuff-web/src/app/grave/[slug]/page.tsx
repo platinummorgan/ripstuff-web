@@ -10,6 +10,9 @@ import { SocialShare } from "@/components/SocialShare";
 import { SympathySection } from "@/components/SympathySection";
 import { MemorialBadges, calculateBadges } from "@/components/MemorialBadges";
 import { DeathCertificate } from "@/components/DeathCertificate";
+import { MemorialShareCard } from "@/components/MemorialShareCard";
+import { TikTokBurialTemplate } from "@/components/TikTokBurialTemplate";
+import { InstagramStoryTemplate } from "@/components/InstagramStoryTemplate";
 import { GraveViewTracker } from "@/components/GraveViewTracker";
 import { RoastEulogyVoting } from "@/components/RoastEulogyVoting";
 import { VotingProvider } from "@/components/VotingContext";
@@ -214,6 +217,51 @@ export default async function GravePage({ params }: { params: { slug: string } }
           />
         </section>
       </VotingProvider>
+
+      <section className="space-y-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
+        <SectionHeader title="Memorial Cards" description="Share beautiful memorial cards on social media." />
+        <MemorialShareCard 
+          grave={{
+            id: grave.id,
+            title: grave.title,
+            category: grave.category,
+            eulogyText: grave.eulogyText,
+            createdAt: grave.createdAt,
+            photoUrl: grave.photoUrl,
+            reactions: grave.reactions,
+          }}
+          graveUrl={`${baseUrl}/grave/${grave.slug}`}
+        />
+      </section>
+
+      <section className="space-y-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
+        <SectionHeader title="TikTok Burial Ceremonies" description="Create viral TikTok videos with these burial ceremony templates." />
+        <TikTokBurialTemplate 
+          grave={{
+            title: grave.title,
+            category: grave.category,
+            eulogyText: grave.eulogyText,
+            createdAt: grave.createdAt,
+          }}
+          graveUrl={`${baseUrl}/grave/${grave.slug}`}
+        />
+      </section>
+
+      <section className="space-y-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
+        <SectionHeader title="Instagram Stories" description="Create engaging Instagram Stories that drive traffic to your memorial." />
+        <InstagramStoryTemplate 
+          grave={{
+            id: grave.id,
+            title: grave.title,
+            category: grave.category,
+            eulogyText: grave.eulogyText,
+            createdAt: grave.createdAt,
+            photoUrl: grave.photoUrl,
+            reactions: grave.reactions,
+          }}
+          graveUrl={`${baseUrl}/grave/${grave.slug}`}
+        />
+      </section>
 
       <section className="space-y-6 rounded-3xl border border-[rgba(255,255,255,0.05)] bg-[rgba(10,14,25,0.82)] p-6 sm:p-10">
         <SectionHeader title="Sympathies" description="Leave a kind note for fellow mourners." />
