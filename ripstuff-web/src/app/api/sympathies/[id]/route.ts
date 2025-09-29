@@ -50,7 +50,7 @@ export async function DELETE(
     await prisma.moderationAction.create({
       data: {
         graveId: sympathy.grave.id,
-        action: "DELETE_SYMPATHY",
+        action: "DELETE",
         reason: `Moderator ${currentUser.name || currentUser.email} deleted sympathy: "${sympathy.body.substring(0, 50)}${sympathy.body.length > 50 ? '...' : ''}"`
       }
     });
