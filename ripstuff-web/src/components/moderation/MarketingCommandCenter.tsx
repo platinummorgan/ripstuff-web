@@ -348,9 +348,22 @@ export function MarketingCommandCenter() {
                   </div>
                 )}
               </div>
-              <div className="text-sm text-white whitespace-pre-line bg-gray-800 p-3 rounded border border-gray-700" style={{color: '#ffffff', backgroundColor: '#1f2937'}}>
-                {selectedTemplate.template}
-              </div>
+              <textarea
+                readOnly
+                className="marketing-template-text w-full resize-none"
+                value={selectedTemplate.template}
+                rows={Math.max(3, selectedTemplate.template.split('\n').length)}
+                style={{
+                  color: '#ffffff', 
+                  backgroundColor: '#1f2937',
+                  border: '1px solid #374151',
+                  padding: '12px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  outline: 'none'
+                }}
+              />
             </div>
           </div>
 
@@ -370,7 +383,18 @@ export function MarketingCommandCenter() {
                     📋 Copy
                   </Button>
                 </div>
-                <div className="p-3 rounded-lg border border-gray-700 bg-gray-800 text-sm text-white break-all" style={{color: '#ffffff', backgroundColor: '#1f2937'}}>
+                <div 
+                  style={{
+                    color: '#ffffff', 
+                    backgroundColor: '#1f2937',
+                    border: '1px solid #374151',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    wordBreak: 'break-all',
+                    fontFamily: 'inherit'
+                  }}
+                >
                   {generatedLink}
                 </div>
               </div>
@@ -386,7 +410,18 @@ export function MarketingCommandCenter() {
                     📋 Copy
                   </Button>
                 </div>
-                <div className="p-3 rounded-lg border border-gray-700 bg-gray-800 text-sm text-white whitespace-pre-line" style={{color: '#ffffff', backgroundColor: '#1f2937'}}>
+                <div 
+                  style={{
+                    color: '#ffffff', 
+                    backgroundColor: '#1f2937',
+                    border: '1px solid #374151',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    whiteSpace: 'pre-line',
+                    fontFamily: 'inherit'
+                  }}
+                >
                   {generatedMessage}
                 </div>
               </div>
