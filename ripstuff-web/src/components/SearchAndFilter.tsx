@@ -91,33 +91,15 @@ export function SearchAndFilter({ onFiltersChange, initialFilters, className = "
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Debounced filter change handler
-  const debouncedFilterChange = useCallback((newFilters: SearchFilters) => {
-    // Clear any pending timeout
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    // Set a new timeout for debouncing
-    debounceTimeoutRef.current = setTimeout(() => {
-      console.log('[SearchAndFilter] Debounced filter change:', newFilters);
-      onFiltersChange(newFilters);
-    }, 300); // 300ms debounce
-  }, [onFiltersChange]);
-
   // Only trigger onChange after user interaction, not on initial render
   useEffect(() => {
     if (hasUserInteracted) {
-      debouncedFilterChange(filters);
+      // For dropdown changes (category, sort), trigger immediately
+      // For text input, we can add debounce later if needed
+      console.log('[SearchAndFilter] Filter change triggered:', filters);
+      onFiltersChange(filters);
     }
-
-    // Cleanup timeout on unmount
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, [filters, hasUserInteracted, debouncedFilterChange]);
+  }, [filters, hasUserInteracted, onFiltersChange]);
 
   const updateFilter = <K extends keyof SearchFilters>(
     key: K,
@@ -135,18 +117,12 @@ export function SearchAndFilter({ onFiltersChange, initialFilters, className = "
       clearTimeout(debounceTimeoutRef.current);
     }
     
-    // Set user interaction flag and reset filters
-    setHasUserInteracted(true);
+    // Reset filters immediately without debounce
     setShowAdvanced(false);
-    
-    // Reset filters and trigger immediate change (no debounce for reset)
     setFilters(DEFAULT_FILTERS);
     
-    // Trigger immediate reset without debounce
-    setTimeout(() => {
-      console.log('[SearchAndFilter] Immediate reset trigger');
-      onFiltersChange(DEFAULT_FILTERS);
-    }, 0);
+    // Trigger immediate change
+    onFiltersChange(DEFAULT_FILTERS);
   };
 
   const hasActiveFilters = () => {
