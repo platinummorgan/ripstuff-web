@@ -765,9 +765,39 @@ src/app/api/notifications/preferences/route.ts     # API CRUD operations
 ### Production Email System ✅
 #### Google Workspace Business Configuration ✅
 - **Professional Email:** admin@ripstuff.net (Google Workspace Business Starter - $8.40/month)
-- **SMTP Authentication:** Gmail app password (cxzbcqbyghhpcats) with 2FA security
+- **SMTP Authentication:** Gmail app password (mjsracnuocnfffxq) with 2FA security - UPDATED September 28, 2025
 - **Domain Verification:** ripstuff.net verified and configured in Google Workspace
 - **Vercel Environment:** EMAIL_PROVIDER=gmail, GMAIL_FROM_EMAIL=admin@ripstuff.net, GMAIL_APP_PASSWORD configured
+
+### CRITICAL BUG RESOLUTION - September 28, 2025 ✅
+#### Authentication Failure Root Cause ✅
+- **Issue:** SMTP authentication failing with "535-5.7.8 Username and Password not accepted"
+- **Root Cause:** Original app password (cxzbcqbyghhpcats) expired/revoked by Google security
+- **Investigation:** Used Google Workspace Admin Console to verify 2-Step Verification was enabled
+- **Solution:** Generated new app password (mjsracnuocnfffxq) through myaccount.google.com/apppasswords
+
+#### Missing Notification Preferences Bug ✅
+- **Issue:** Users not receiving emails even with working SMTP due to missing notification preferences records
+- **Root Cause:** New users created without corresponding NotificationPreferences database entries
+- **Detection:** Database query revealed users with no notification_preferences records
+- **Solution:** Created notification preferences directly via SQL for existing users
+- **Fix Applied:** 
+```sql
+INSERT INTO notification_preferences (
+  id, user_id, email_on_new_sympathy, quiet_hours_enabled, 
+  timezone, created_at, updated_at
+) VALUES (
+  gen_random_uuid(), 
+  'f82c3758-6adc-482e-b267-027db6d5c0ef'::uuid,
+  true, false, 'UTC', NOW(), NOW()
+);
+```
+
+#### Verification Success ✅
+- **SMTP Test:** Direct nodemailer test confirmed authentication working with new app password
+- **Email Delivery:** Test emails successfully delivered to mdorminey79@gmail.com
+- **Notification System:** Ready to send automated notifications on sympathy creation
+- **User Database:** Notification preferences created and verified for existing users
 
 #### GmailNotificationService Implementation ✅
 ```typescript

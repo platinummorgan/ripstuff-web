@@ -54,9 +54,16 @@ export function SympathySection({ graveId, initialSympathies }: SympathySectionP
     }
   }
 
+  const handleSympathyDeleted = (sympathyId: string) => {
+    setSympathies(prev => prev.filter(s => s.id !== sympathyId));
+  };
+
   return (
     <div className="space-y-6">
-      <SympathyList sympathies={sympathies} />
+      <SympathyList 
+        sympathies={sympathies} 
+        onSympathyDeleted={handleSympathyDeleted}
+      />
       <div className="space-y-3 rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-5">
         <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">Leave a sympathy</p>
         <textarea

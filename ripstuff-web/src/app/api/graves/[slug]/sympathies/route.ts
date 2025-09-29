@@ -87,6 +87,8 @@ export async function POST(req: NextRequest, context: RouteContext) {
 
 		// Trigger notification for grave owner
 		try {
+			console.log(`🔍 Looking for grave owner to notify for grave: ${grave.id}`);
+			
 			// Get grave owner info
 			const graveWithOwner = await prisma.grave.findUnique({
 				where: { id: grave.id },
@@ -96,6 +98,11 @@ export async function POST(req: NextRequest, context: RouteContext) {
 					creatorDeviceHash: true
 				}
 			});
+			
+			console.log(`📋 Grave info:`, {
+				title: graveWithOwner?.title,
+				creatorDeviceHash: graveWithOwner?.creatorDeviceHash
+			});
 
 			if (graveWithOwner?.creatorDeviceHash) {
 				// Find the user who created this grave
@@ -103,8 +110,16 @@ export async function POST(req: NextRequest, context: RouteContext) {
 					where: { deviceHash: graveWithOwner.creatorDeviceHash },
 					select: { id: true, email: true }
 				});
+				
+				console.log(`👤 Grave owner found:`, {
+					id: graveOwner?.id,
+					hasEmail: !!graveOwner?.email,
+					email: graveOwner?.email ? `${graveOwner.email.substring(0, 3)}***` : 'none'
+				});
 
 				if (graveOwner?.email) {
+					console.log(`📧 Attempting to send sympathy notification email...`);
+					
 					// Send automated sympathy notification
 					await GmailNotificationService.sendNewSympathyNotification(
 						graveOwner.id,
@@ -118,11 +133,17 @@ export async function POST(req: NextRequest, context: RouteContext) {
 							graveUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://ripstuff.net'}/grave/${graveWithOwner.slug}`
 						}
 					);
+					
+					console.log(`✅ Sympathy notification email sent successfully`);
+				} else {
+					console.log(`❌ No email found for grave owner - notification skipped`);
 				}
+			} else {
+				console.log(`❌ No grave owner found with deviceHash: ${graveWithOwner?.creatorDeviceHash}`);
 			}
 		} catch (notificationError) {
 			// Don't fail the sympathy creation if notification fails
-			console.error('Failed to queue sympathy notification:', notificationError);
+			console.error('❌ Failed to send sympathy notification:', notificationError);
 		}
 
 		return json(
