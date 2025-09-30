@@ -204,7 +204,7 @@ export async function GET(req: NextRequest) {
     const creators = deviceHashes.length > 0 
       ? await prisma.user.findMany({
           where: { deviceHash: { in: deviceHashes } },
-          select: { deviceHash: true, name: true, picture: true },
+          select: { id: true, deviceHash: true, name: true, picture: true },
         })
       : [];
     
@@ -250,6 +250,7 @@ export async function GET(req: NextRequest) {
         createdAt: grave.createdAt.toISOString(),
         featured: grave.featured,
         creatorInfo: creator ? {
+          id: creator.id,
           name: creator.name,
           picture: creator.picture,
         } : null,

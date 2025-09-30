@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export type Sympathy = {
   id: string;
   body: string;
   createdAt: string;
   creatorInfo?: {
+    id: string;
     name: string | null;
     picture: string | null;
   } | null;
@@ -96,9 +98,16 @@ export function SympathyList({ sympathies, onSympathyDeleted }: SympathyListProp
                   className="h-4 w-4 rounded-full"
                 />
               )}
-              <span className="text-xs text-[var(--muted)]">
-                {entry.creatorInfo?.name ? `by ${entry.creatorInfo.name}` : 'by Anonymous Mourner'}
-              </span>
+              {entry.creatorInfo?.name ? (
+                <Link 
+                  href={`/user/${entry.creatorInfo.id}`}
+                  className="text-xs text-[var(--muted)] hover:text-blue-400 transition-colors"
+                >
+                  by {entry.creatorInfo.name}
+                </Link>
+              ) : (
+                <span className="text-xs text-[var(--muted)]">by Anonymous Mourner</span>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-[var(--muted)]">

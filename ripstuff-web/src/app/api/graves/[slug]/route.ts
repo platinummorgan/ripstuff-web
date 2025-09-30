@@ -57,10 +57,11 @@ export async function GET(_req: NextRequest, context: RouteContext) {
     if (grave?.creatorDeviceHash) {
       const user = await prisma.user.findFirst({
         where: { deviceHash: grave.creatorDeviceHash },
-        select: { name: true, picture: true },
+        select: { id: true, name: true, picture: true },
       });
       if (user) {
         creatorInfo = {
+          id: user.id,
           name: user.name,
           picture: user.picture,
         };
@@ -75,7 +76,7 @@ export async function GET(_req: NextRequest, context: RouteContext) {
     const sympathyCreators = sympathyDeviceHashes.length > 0 
       ? await prisma.user.findMany({
           where: { deviceHash: { in: sympathyDeviceHashes } },
-          select: { deviceHash: true, name: true, picture: true },
+          select: { id: true, deviceHash: true, name: true, picture: true },
         })
       : [];
     
@@ -118,6 +119,7 @@ export async function GET(_req: NextRequest, context: RouteContext) {
           body: sympathy.body,
           createdAt: sympathy.createdAt.toISOString(),
           creatorInfo: creator ? {
+            id: creator.id,
             name: creator.name,
             picture: creator.picture,
           } : null,

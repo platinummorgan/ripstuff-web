@@ -57,7 +57,7 @@ async function fetchFeedItems(featured?: boolean): Promise<FeedResponse> {
     const creators = deviceHashes.length > 0 
       ? await prisma.user.findMany({
           where: { deviceHash: { in: deviceHashes } },
-          select: { deviceHash: true, name: true, picture: true },
+          select: { id: true, deviceHash: true, name: true, picture: true },
         })
       : [];
     
@@ -94,6 +94,7 @@ async function fetchFeedItems(featured?: boolean): Promise<FeedResponse> {
         createdAt: grave.createdAt.toISOString(),
         featured: grave.featured,
         creatorInfo: creator ? {
+          id: creator.id,
           name: creator.name,
           picture: creator.picture,
         } : null,

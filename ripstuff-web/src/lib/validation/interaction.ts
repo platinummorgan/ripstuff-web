@@ -23,6 +23,7 @@ export const sympathyDto = z.object({
   body: z.string(),
   createdAt: z.string().datetime(),
   creatorInfo: z.object({
+    id: z.string(),
     name: z.string().nullable(),
     picture: z.string().nullable(),
   }).nullable(),

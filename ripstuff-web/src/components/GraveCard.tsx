@@ -122,9 +122,12 @@ export function GraveCard({ grave }: GraveCardProps) {
               className="w-4 h-4 rounded-full"
             />
           )}
-          <span className="text-[var(--accent)]">
+          <Link 
+            href={`/user/${grave.creatorInfo.id}`}
+            className="text-[var(--accent)] hover:text-blue-400 transition-colors"
+          >
             {grave.creatorInfo.name || 'Anonymous'}
-          </span>
+          </Link>
         </div>
       )}
       

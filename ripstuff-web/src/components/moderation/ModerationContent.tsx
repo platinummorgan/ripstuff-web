@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/Button";
 import { ModerationTableRow } from "@/components/moderation/ModerationTableRow";
 import { NotificationManager } from "@/components/moderation/NotificationManager";
+import { ContactMessagesPanel } from "@/components/moderation/ContactMessagesPanel";
 import { SectionHeader } from "@/components/SectionHeader";
 import { moderationQueueResponse } from "@/lib/validation";
 
@@ -23,6 +24,7 @@ export function ModerationContent({ searchParams }: ModerationContentProps) {
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'graves' | 'contact'>('graves');
 
   const loadQueue = async (params: SearchParams) => {
     setIsLoading(true);
@@ -156,13 +158,15 @@ export function ModerationContent({ searchParams }: ModerationContentProps) {
       <div className="flex items-start justify-between gap-4">
         <SectionHeader
           eyebrow="Moderator"
-          title="Pending and reported graves"
-          description="Review the latest submissions and community reports."
+          title={activeTab === 'graves' ? "Pending and reported graves" : "Contact Messages"}
+          description={activeTab === 'graves' ? "Review the latest submissions and community reports." : "Review user messages and support requests."}
         />
         <div className="flex gap-2">
-          <Button onClick={() => loadQueue(searchParams)}>
-            Refresh
-          </Button>
+          {activeTab === 'graves' && (
+            <Button onClick={() => loadQueue(searchParams)}>
+              Refresh
+            </Button>
+          )}
           <Button variant="secondary" asChild>
             <Link href="/admin/outreach">📢 Marketing Command Center</Link>
           </Button>
@@ -175,133 +179,164 @@ export function ModerationContent({ searchParams }: ModerationContentProps) {
         </div>
       </div>
 
-      {/* Quick Stats Dashboard */}
-      {data && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">📊</div>
-              <div>
-                <div className="text-xl font-bold text-white">{data.items.length}</div>
-                <div className="text-xs text-blue-300">Items in Queue</div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-red-500/10 to-pink-500/10 border border-red-500/20 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">🚨</div>
-              <div>
-                <div className="text-xl font-bold text-white">
-                  {data.items.reduce((sum: number, item: any) => sum + item.reports, 0)}
-                </div>
-                <div className="text-xs text-red-300">Total Reports</div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">⏳</div>
-              <div>
-                <div className="text-xl font-bold text-white">
-                  {data.items.filter((item: any) => item.status === 'PENDING').length}
-                </div>
-                <div className="text-xs text-yellow-300">Pending Review</div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">⭐</div>
-              <div>
-                <div className="text-xl font-bold text-white">
-                  {data.items.filter((item: any) => item.featured).length}
-                </div>
-                <div className="text-xs text-purple-300">Featured Items</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Filter Controls */}
-      <div className="flex flex-wrap items-center gap-4 p-4 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-xl">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-purple-200">🎯 Status Filter:</span>
-          <div className="flex gap-2">
-            {statusFilters.map((filter) => {
-              const value = filter.value ?? "ALL";
-              const isActive = value === activeStatus;
-              return (
-                <Button key={filter.label} asChild variant={isActive ? "primary" : "ghost"}>
-                  <Link href={buildHref(searchParams, { status: filter.value, cursor: undefined })}>
-                    {filter.label}
-                  </Link>
-                </Button>
-              );
-            })}
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-red-200">🚨 Reports Filter:</span>
-          <div className="flex gap-2">
-            {reportedFilters.map((filter) => {
-              const value = filter.value ?? "all";
-              const isActive = value === activeReported;
-              return (
-                <Button key={filter.label} asChild variant={isActive ? "primary" : "ghost"}>
-                  <Link href={buildHref(searchParams, { reported: filter.value, cursor: undefined })}>
-                    {filter.label}
-                  </Link>
-                </Button>
-              );
-            })}
-          </div>
-        </div>
+      {/* Tab Navigation */}
+      <div className="flex gap-2 p-1 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl w-fit">
+        <button
+          onClick={() => setActiveTab('graves')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'graves'
+              ? 'bg-[var(--accent)] text-black shadow-lg'
+              : 'text-gray-400 hover:text-white hover:bg-[rgba(255,255,255,0.05)]'
+          }`}
+        >
+          🏛️ Grave Moderation
+        </button>
+        <button
+          onClick={() => setActiveTab('contact')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'contact'
+              ? 'bg-[var(--accent)] text-black shadow-lg'
+              : 'text-gray-400 hover:text-white hover:bg-[rgba(255,255,255,0.05)]'
+          }`}
+        >
+          📧 Contact Messages
+        </button>
       </div>
 
-      <div className="overflow-x-auto rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[rgba(10,14,25,0.82)]">
-        {data.items.length === 0 ? (
-          <div className="p-10 text-center text-sm text-[var(--muted)]">No graves match these filters.</div>
-        ) : (
-          <table className="w-full min-w-[1200px] text-sm text-[var(--muted)]">
-            <thead>
-              <tr className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-b border-purple-500/20">
-                <th className="px-4 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wide w-2/5">
-                  📄 Memorial Details
-                </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wide w-1/8">
-                  🎯 Status
-                </th>
-                <th className="px-4 py-4 text-center text-xs font-semibold text-purple-200 uppercase tracking-wide w-1/12">
-                  🚨 Reports
-                </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wide w-1/8">
-                  📅 Created
-                </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wide w-1/4">
-                  ⚡ Moderation Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map((item: any) => (
-                <ModerationTableRow key={item.id} item={item} />
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      {/* Conditional Content Based on Active Tab */}
+      {activeTab === 'contact' ? (
+        <ContactMessagesPanel />
+      ) : (
+        <>
+          {/* Quick Stats Dashboard */}
+          {data && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">📊</div>
+                  <div>
+                    <div className="text-xl font-bold text-white">{data.items.length}</div>
+                    <div className="text-xs text-blue-300">Items in Queue</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-red-500/10 to-pink-500/10 border border-red-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">🚨</div>
+                  <div>
+                    <div className="text-xl font-bold text-white">
+                      {data.items.reduce((sum: number, item: any) => sum + item.reports, 0)}
+                    </div>
+                    <div className="text-xs text-red-300">Total Reports</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">⏳</div>
+                  <div>
+                    <div className="text-xl font-bold text-white">
+                      {data.items.filter((item: any) => item.status === 'PENDING').length}
+                    </div>
+                    <div className="text-xs text-yellow-300">Pending Review</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">⭐</div>
+                  <div>
+                    <div className="text-xl font-bold text-white">
+                      {data.items.filter((item: any) => item.featured).length}
+                    </div>
+                    <div className="text-xs text-purple-300">Featured Items</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-      {data.nextCursor && (
-        <div className="flex justify-center">
-          <Button asChild variant="secondary">
-            <Link href={buildHref(searchParams, { cursor: data.nextCursor })}>Load more</Link>
-          </Button>
-        </div>
+          {/* Filter Controls */}
+          <div className="flex flex-wrap items-center gap-4 p-4 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-xl">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-purple-200">🎯 Status Filter:</span>
+              <div className="flex gap-2">
+                {statusFilters.map((filter) => {
+                  const value = filter.value ?? "ALL";
+                  const isActive = value === activeStatus;
+                  return (
+                    <Button key={filter.label} asChild variant={isActive ? "primary" : "ghost"}>
+                      <Link href={buildHref(searchParams, { status: filter.value, cursor: undefined })}>
+                        {filter.label}
+                      </Link>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-red-200">🚨 Reports Filter:</span>
+              <div className="flex gap-2">
+                {reportedFilters.map((filter) => {
+                  const value = filter.value ?? "all";
+                  const isActive = value === activeReported;
+                  return (
+                    <Button key={filter.label} asChild variant={isActive ? "primary" : "ghost"}>
+                      <Link href={buildHref(searchParams, { reported: filter.value, cursor: undefined })}>
+                        {filter.label}
+                      </Link>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[rgba(10,14,25,0.82)]">
+            {data.items.length === 0 ? (
+              <div className="p-10 text-center text-sm text-[var(--muted)]">No graves match these filters.</div>
+            ) : (
+              <table className="w-full min-w-[1200px] text-sm text-[var(--muted)]">
+                <thead>
+                  <tr className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-b border-purple-500/20">
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wide w-2/5">
+                      📄 Memorial Details
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wide w-1/8">
+                      🎯 Status
+                    </th>
+                    <th className="px-4 py-4 text-center text-xs font-semibold text-purple-200 uppercase tracking-wide w-1/12">
+                      🚨 Reports
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wide w-1/8">
+                      📅 Created
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wide w-1/4">
+                      ⚡ Moderation Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.items.map((item: any) => (
+                    <ModerationTableRow key={item.id} item={item} />
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {data.nextCursor && (
+            <div className="flex justify-center">
+              <Button asChild variant="secondary">
+                <Link href={buildHref(searchParams, { cursor: data.nextCursor })}>Load more</Link>
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

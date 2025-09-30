@@ -284,9 +284,12 @@ export function HeadstoneCard({ grave }: { grave: FeedItem }) {
                       className="w-4 h-4 rounded-full"
                     />
                   )}
-                  <span className="text-white font-medium">
+                  <Link 
+                    href={`/user/${grave.creatorInfo.id}`}
+                    className="text-white font-medium hover:text-blue-400 transition-colors"
+                  >
                     {grave.creatorInfo.name || 'Anonymous'}
-                  </span>
+                  </Link>
                 </div>
               </div>
             )}

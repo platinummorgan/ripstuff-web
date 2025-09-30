@@ -72,6 +72,7 @@ export const feedItem = z.object({
   mapX: z.number().int().nullable().optional(),
   mapY: z.number().int().nullable().optional(),
   creatorInfo: z.object({
+    id: z.string(),
     name: z.string().nullable(),
     picture: z.string().nullable(),
   }).nullable(),
@@ -91,6 +92,7 @@ export const graveDetailResponse = feedItem.extend({
   sympathies: z.array(sympathyDto),
   status: z.nativeEnum(GraveStatus),
   creatorInfo: z.object({
+    id: z.string(),
     name: z.string().nullable(),
     picture: z.string().nullable(),
   }).nullable(),

@@ -133,6 +133,7 @@ async function fetchUserProfile(userId: string): Promise<UserProfileData | null>
       createdAt: memorial.createdAt.toISOString(),
       featured: memorial.featured,
       creatorInfo: {
+        id: user.id,
         name: user.name,
         picture: user.picture,
       },
