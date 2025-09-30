@@ -7,52 +7,83 @@ export async function GET(request: NextRequest) {
   const cause = searchParams.get('cause') || 'Unknown cause';
   const brand = searchParams.get('brand') === 'true';
 
-  // Create SVG grave card (compact format)
+  // Determine cause of death with emoji
+  const causeOfDeath = (() => {
+    const cat = category.toLowerCase();
+    if (cat.includes('electronics') || cat.includes('gadget')) return '⚡ System Overload';
+    if (cat.includes('toy')) return '💧 Childhood Neglect';
+    if (cat.includes('clothing')) return '💧 Fabric Failure';
+    if (cat.includes('furniture')) return '⚡ Structural Collapse';
+    if (cat.includes('vehicle')) return '🔥 Mechanical Failure';
+    if (cat.includes('accessory')) return '💧 Wear and Tear';
+    return '🔋 Natural Obsolescence';
+  })();
+
+  // Create professional SVG grave card matching app design
   const svg = `
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    <svg width="500" height="400" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#0f1419;stop-opacity:1" />
-          <stop offset="100%" style="stop-color:#1a202c;stop-opacity:1" />
-        </linearGradient>
-        <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color:#8e7bff;stop-opacity:1" />
-          <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+        <!-- Professional gradient matching death certificate -->
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+          <stop offset="50%" style="stop-color:#374151;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
         </linearGradient>
       </defs>
       
-      <!-- Background -->
-      <rect width="400" height="300" fill="url(#bg)" stroke="url(#accent)" stroke-width="2" rx="12"/>
+      <!-- Background with professional styling -->
+      <rect width="500" height="400" fill="url(#bgGradient)"/>
       
-      <!-- Header -->
-      <text x="200" y="40" font-family="sans-serif" font-size="20" font-weight="bold" fill="#fff" text-anchor="middle">
-        🪦 MEMORIAL CARD
+      <!-- Decorative borders -->
+      <rect x="15" y="15" width="470" height="370" fill="none" stroke="#d97706" stroke-width="4" rx="8"/>
+      <rect x="25" y="25" width="450" height="350" fill="none" stroke="#f59e0b" stroke-width="2" rx="4" opacity="0.5"/>
+      
+      <!-- Content background -->
+      <rect x="40" y="40" width="420" height="320" fill="rgba(0,0,0,0.3)" rx="6"/>
+      
+      <!-- Header with professional styling -->
+      <text x="250" y="75" font-family="serif" font-size="24" font-weight="bold" fill="#fcd34d" text-anchor="middle">
+        🪦 MEMORIAL CARD 🪦
       </text>
       
-      <!-- Item name -->
-      <text x="200" y="80" font-family="sans-serif" font-size="18" font-weight="bold" fill="#8e7bff" text-anchor="middle">
-        ${title.length > 25 ? title.substring(0, 25) + '...' : title}
+      <text x="250" y="95" font-family="sans-serif" font-size="12" fill="#d97706" text-anchor="middle">
+        Virtual Graveyard Registry
       </text>
       
-      <!-- Cause -->
-      <text x="200" y="120" font-family="sans-serif" font-size="14" fill="#ccc" text-anchor="middle">
-        Cause: ${cause.length > 30 ? cause.substring(0, 30) + '...' : cause}
+      <!-- Deceased name with proper styling -->
+      <text x="250" y="140" font-family="sans-serif" font-size="22" font-weight="bold" fill="white" text-anchor="middle">
+        ${title.length > 30 ? title.substring(0, 30) + '...' : title}
+      </text>
+      
+      <!-- Category -->
+      <text x="250" y="170" font-family="sans-serif" font-size="14" fill="#9ca3af" text-anchor="middle">
+        ${category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+      </text>
+      
+      <!-- Cause of death with icon -->
+      <text x="250" y="210" font-family="sans-serif" font-size="16" fill="#d1d5db" text-anchor="middle">
+        Cause: ${causeOfDeath}
       </text>
       
       <!-- Date -->
-      <text x="200" y="145" font-family="sans-serif" font-size="12" fill="#999" text-anchor="middle">
-        ${new Date().toLocaleDateString()}
+      <text x="250" y="240" font-family="sans-serif" font-size="14" fill="#9ca3af" text-anchor="middle">
+        Passed: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
       </text>
       
-      <!-- RIP -->
-      <text x="200" y="200" font-family="serif" font-size="32" fill="#666" text-anchor="middle">
+      <!-- Memorial message -->
+      <text x="250" y="280" font-family="serif" font-size="18" fill="#fcd34d" text-anchor="middle" font-style="italic">
+        "Gone but not forgotten"
+      </text>
+      
+      <!-- RIP with enhanced styling -->
+      <text x="250" y="320" font-family="serif" font-size="28" fill="#d97706" text-anchor="middle" font-weight="bold">
         R.I.P.
       </text>
       
       ${brand ? `
-      <!-- Brand -->
-      <text x="200" y="270" font-family="sans-serif" font-size="12" fill="#8e7bff" text-anchor="middle">
-        Made with ❤️ at RipStuff.net
+      <!-- Professional branding -->
+      <text x="250" y="350" font-family="sans-serif" font-size="10" fill="#6b7280" text-anchor="middle">
+        💭 Share memories at RipStuff.net
       </text>
       ` : ''}
     </svg>

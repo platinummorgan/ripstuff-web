@@ -7,61 +7,96 @@ export async function GET(request: NextRequest) {
   const cta = searchParams.get('cta') === 'true';
   const style = searchParams.get('style') || 'dark';
 
-  // Create SVG Twitter card (16:9 format)
+  // Determine cause of death for visual display
+  const causeOfDeath = (() => {
+    const lowerCause = cause.toLowerCase();
+    if (lowerCause.includes('overload') || lowerCause.includes('system')) return '⚡ System Overload';
+    if (lowerCause.includes('neglect') || lowerCause.includes('childhood')) return '💧 Childhood Neglect';
+    if (lowerCause.includes('fabric') || lowerCause.includes('integrity')) return '💧 Fabric Failure';
+    if (lowerCause.includes('structural') || lowerCause.includes('collapse')) return '⚡ Structural Collapse';
+    if (lowerCause.includes('mechanical') || lowerCause.includes('failure')) return '🔥 Mechanical Failure';
+    if (lowerCause.includes('wear') || lowerCause.includes('tear')) return '💧 Wear and Tear';
+    return cause.includes('🔋') || cause.includes('⚡') || cause.includes('💧') || cause.includes('🔥') ? cause : '🔋 ' + cause;
+  })();
+
+  // Create professional SVG Twitter card (16:9 format) matching app design
   const svg = `
     <svg width="1200" height="675" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#0f1419;stop-opacity:1" />
-          <stop offset="50%" style="stop-color:#1a202c;stop-opacity:1" />
-          <stop offset="100%" style="stop-color:#0f1419;stop-opacity:1" />
+        <!-- Professional gradient background -->
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+          <stop offset="50%" style="stop-color:#374151;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
         </linearGradient>
+        
+        <!-- Accent gradient -->
         <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color:#8e7bff;stop-opacity:1" />
-          <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+          <stop offset="0%" style="stop-color:#d97706;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+        </linearGradient>
+        
+        <!-- CTA button gradient -->
+        <linearGradient id="ctaGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
         </linearGradient>
       </defs>
       
       <!-- Background -->
-      <rect width="1200" height="675" fill="url(#bg)"/>
+      <rect width="1200" height="675" fill="url(#bgGradient)"/>
       
-      <!-- Top accent bar -->
-      <rect width="1200" height="8" fill="url(#accent)"/>
+      <!-- Decorative borders -->
+      <rect x="30" y="30" width="1140" height="615" fill="none" stroke="#d97706" stroke-width="4" rx="12"/>
+      <rect x="40" y="40" width="1120" height="595" fill="none" stroke="#f59e0b" stroke-width="2" rx="8" opacity="0.5"/>
       
-      <!-- Main content area -->
-      <rect x="100" y="100" width="1000" height="475" fill="rgba(255,255,255,0.02)" stroke="rgba(142,123,255,0.3)" stroke-width="2" rx="16"/>
+      <!-- Main content area with professional background -->
+      <rect x="80" y="80" width="1040" height="515" fill="rgba(0,0,0,0.3)" stroke="#d97706" stroke-width="1" stroke-opacity="0.5" rx="16"/>
       
-      <!-- Skull emoji background -->
-      <text x="900" y="400" font-family="sans-serif" font-size="200" fill="rgba(255,255,255,0.05)" text-anchor="middle">
-        💀
+      <!-- Decorative certificate icons -->
+      <text x="150" y="180" font-family="sans-serif" font-size="60" fill="rgba(252,211,77,0.1)" text-anchor="middle">⚰️</text>
+      <text x="1050" y="180" font-family="sans-serif" font-size="60" fill="rgba(252,211,77,0.1)" text-anchor="middle">🪦</text>
+      
+      <!-- Header -->
+      <text x="600" y="150" font-family="serif" font-size="36" font-weight="bold" fill="#fcd34d" text-anchor="middle">
+        Official Death Certificate
       </text>
       
-      <!-- Title -->
-      <text x="600" y="200" font-family="sans-serif" font-size="48" font-weight="bold" fill="#fff" text-anchor="middle">
-        RIP ${title.length > 20 ? title.substring(0, 20) + '...' : title}
+      <!-- Deceased item title -->
+      <text x="600" y="220" font-family="sans-serif" font-size="42" font-weight="bold" fill="white" text-anchor="middle">
+        RIP: ${title.length > 25 ? title.substring(0, 25) + '...' : title}
       </text>
       
-      <!-- Subtitle -->
-      <text x="600" y="280" font-family="sans-serif" font-size="28" fill="#8e7bff" text-anchor="middle">
-        Death Certificate Generator
+      <!-- Cause of death with enhanced styling -->
+      <text x="600" y="280" font-family="sans-serif" font-size="24" fill="#d1d5db" text-anchor="middle">
+        Cause of Death: ${causeOfDeath}
       </text>
       
-      <!-- Cause -->
-      <text x="600" y="340" font-family="sans-serif" font-size="20" fill="#ccc" text-anchor="middle">
-        Cause: ${cause.length > 40 ? cause.substring(0, 40) + '...' : cause}
+      <!-- Date -->
+      <text x="600" y="320" font-family="sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle">
+        Certified: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </text>
+      
+      <!-- Roast meter preview -->
+      <text x="600" y="380" font-family="sans-serif" font-size="16" fill="#fcd34d" text-anchor="middle">
+        ROAST METER: Beloved • Vote Condolences or Roasts
       </text>
       
       ${cta ? `
-      <!-- CTA -->
-      <rect x="400" y="420" width="400" height="60" fill="url(#accent)" rx="30"/>
-      <text x="600" y="460" font-family="sans-serif" font-size="24" font-weight="bold" fill="#fff" text-anchor="middle">
-        Make Your Own Free 🪦
+      <!-- Enhanced CTA button -->
+      <rect x="400" y="430" width="400" height="70" fill="url(#ctaGradient)" rx="35" stroke="#d97706" stroke-width="2"/>
+      <text x="600" y="475" font-family="sans-serif" font-size="26" font-weight="bold" fill="#000" text-anchor="middle">
+        🪦 Create Your Memorial Free
       </text>
       ` : ''}
       
-      <!-- Brand -->
-      <text x="600" y="620" font-family="sans-serif" font-size="18" fill="#8e7bff" text-anchor="middle">
-        RipStuff.net - Free Death Certificates for Broken Things
+      <!-- Professional branding -->
+      <text x="600" y="560" font-family="sans-serif" font-size="20" fill="#d97706" text-anchor="middle">
+        Virtual Graveyard Registry • RipStuff.net
+      </text>
+      
+      <text x="600" y="590" font-family="sans-serif" font-size="14" fill="#9ca3af" text-anchor="middle">
+        Official Digital Death Certificates for Broken Things
       </text>
     </svg>
   `;
