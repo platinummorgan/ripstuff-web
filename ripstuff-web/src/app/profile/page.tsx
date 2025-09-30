@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useUser } from '@/components/UserContext';
 import { Button } from '@/components/Button';
 import { NotificationPreferencesSection } from '@/components/NotificationPreferencesSection';
@@ -341,9 +342,28 @@ export default function ProfilePage() {
                 className="w-16 h-16 rounded-full border-2 border-white/20"
               />
             )}
-            <div>
+            <div className="flex-1">
               <h2 className="text-xl text-white">{user.name || 'Anonymous'}</h2>
               <p className="text-sm text-gray-400">{user.email}</p>
+            </div>
+          </div>
+
+          {/* View Public Profile Button */}
+          <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-white font-medium mb-1">Public Profile</h3>
+                <p className="text-sm text-gray-400">See how your profile appears to other users</p>
+              </div>
+              <Button 
+                asChild
+                variant="secondary"
+                className="bg-blue-500 hover:bg-blue-600 text-white border-blue-500"
+              >
+                <Link href={`/user/${user.id}`}>
+                  👁️ View Public Profile
+                </Link>
+              </Button>
             </div>
           </div>
 
