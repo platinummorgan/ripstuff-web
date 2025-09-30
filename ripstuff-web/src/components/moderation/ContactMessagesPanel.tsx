@@ -30,12 +30,24 @@ export function ContactMessagesPanel() {
   const fetchMessages = async () => {
     try {
       const response = await fetch("/api/moderation/contact-messages");
-      if (!response.ok) throw new Error("Failed to fetch messages");
+      
+      if (response.status === 401) {
+        setError("Unauthorized - please log in as a moderator");
+        return;
+      }
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
-      setMessages(data.messages);
+      setMessages(data.messages || []);
+      setError(null); // Clear any previous errors
     } catch (err) {
-      setError("Failed to load contact messages");
-      console.error(err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to load contact messages";
+      setError(`Error: ${errorMessage}`);
+      console.error("Contact messages fetch error:", err);
     } finally {
       setLoading(false);
     }
@@ -72,7 +84,19 @@ export function ContactMessagesPanel() {
 
   if (error) {
     return (
-      <div className="text-center py-8 text-red-400">{error}</div>
+      <div className="text-center py-8 text-red-400">
+        <div className="mb-4">{error}</div>
+        <button
+          onClick={() => {
+            setError(null);
+            setLoading(true);
+            fetchMessages();
+          }}
+          className="px-4 py-2 bg-[var(--accent)] text-black rounded-lg hover:bg-[#a3e635]"
+        >
+          Retry
+        </button>
+      </div>
     );
   }
 
