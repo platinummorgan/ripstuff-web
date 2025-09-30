@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/Button";
 
 interface OutreachTemplate {
@@ -173,6 +173,13 @@ export function MarketingCommandCenter() {
     const message = selectedTemplate.template.replace('{PREFILL_LINK}', link);
     setGeneratedMessage(message);
   };
+
+  // Auto-generate link when inputs change
+  useEffect(() => {
+    if (itemName.trim()) {
+      generatePrefillLink();
+    }
+  }, [itemName, category, causeOfDeath, epitaph, platform, selectedTemplate]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
