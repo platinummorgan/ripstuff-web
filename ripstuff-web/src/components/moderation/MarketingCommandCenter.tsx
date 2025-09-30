@@ -12,116 +12,132 @@ interface OutreachTemplate {
 }
 
 const DEFAULT_TEMPLATES: OutreachTemplate[] = [
-  // Twitter Templates (280 char limit)
+  // Twitter Templates (280 char limit) - Natural, Empathetic
   {
     id: "broken-item-twitter",
-    name: "Broken Item - Twitter",
+    name: "Sympathetic Response - Twitter",
     platform: "Twitter",
     scenario: "General Broken Item",
-    template: "Ouch! Built a free Death Certificate maker for broken stuff like this 😅\nPrefilled: {PREFILL_LINK}\nRIP little guy 🪦"
+    template: "Oh no! � RIP little buddy\n\nSomeone showed me this memorial thing for dead gadgets: {PREFILL_LINK}\nKinda therapeutic tbh"
   },
   {
     id: "expensive-fail-twitter",
     name: "Expensive Tech Fail - Twitter", 
     platform: "Twitter",
     scenario: "Expensive Device Death",
-    template: "That's a $200+ oops 😬\nFree memorial maker: {PREFILL_LINK}\nAt least get a shareable RIP card out of it 💀📱"
+    template: "That physically hurts to look at 😬💸\n\nMy friend told me about this RIP generator: {PREFILL_LINK}\nAt least you can give it a proper sendoff?"
   },
   {
     id: "collectible-twitter",
     name: "Collectible/Figurine - Twitter",
     platform: "Twitter", 
     scenario: "Collectible/Toy Damage",
-    template: "F in the chat 💀\nMade a Death Certificate generator for moments like this: {PREFILL_LINK}\nTurn your L into a W 📜✨"
+    template: "Noooo not the collectible! �\n\nSaw someone do a memorial for their broken figurine here: {PREFILL_LINK}\nActually pretty cool way to honor it"
+  },
+  {
+    id: "visual-asset-twitter",
+    name: "Shared Discovery - Twitter",
+    platform: "Twitter", 
+    scenario: "With Image Asset",
+    template: "This is genius! Someone in my group chat shared this memorial maker: {PREFILL_LINK}\nPerfect for moments like this 💀"
   },
   
-  // TikTok Templates (casual, emoji-heavy)
+  // TikTok Templates (casual, helpful)
   {
     id: "phone-drop-tiktok",
     name: "Phone Drop - TikTok",
     platform: "TikTok",
     scenario: "Phone Death",
-    template: "NOOO not the phone 😭💔 Made this for u: {PREFILL_LINK} Get ur RIP certificate bestie ✨📱⚰️"
+    template: "PAIN 😭💔 My cousin did one of those RIP certificates for her dead phone and it was actually hilarious: {PREFILL_LINK}"
   },
   {
     id: "gaming-fail-tiktok", 
     name: "Gaming Death - TikTok",
     platform: "TikTok",
     scenario: "Gaming Device",
-    template: "RIP to a real one 🎮💀 Free death cert here: {PREFILL_LINK} Post it and tag me! 🔥📜"
+    template: "RIP to a real one 🎮💀 Someone showed me this memorial thing for dead consoles: {PREFILL_LINK} kinda fire ngl"
   },
   {
     id: "liquid-damage-tiktok",
     name: "Liquid Damage - TikTok", 
     platform: "TikTok",
     scenario: "Water/Liquid Damage",
-    template: "Water said ✨violence✨ 💧☠️ Get a memorial card: {PREFILL_LINK} ur device deserves a proper funeral fr 🪦"
+    template: "Water damage is pure evil 💧☠️ bestie shared this memorial maker with me: {PREFILL_LINK} actually therapeutic lol"
   },
 
-  // YouTube Templates (longer, helpful tone)
+  // YouTube Templates (helpful, natural)
   {
     id: "tutorial-fail-youtube",
     name: "Tutorial Fail - YouTube",
     platform: "YouTube",
     scenario: "DIY/Repair Gone Wrong", 
-    template: "Oof, that tutorial didn't go as planned! 😅 I built a Death Certificate generator for moments like this: {PREFILL_LINK}\nPerfect for the thumbnail or just for closure. RIP to your project! 🔧⚰️"
+    template: "Oof, been there! 😅 A friend showed me this death certificate thing for failed projects: {PREFILL_LINK}\nMight be good for a follow-up video or just for closure lol"
   },
   {
     id: "unboxing-disaster-youtube",
     name: "Unboxing Disaster - YouTube",
     platform: "YouTube",
     scenario: "Unboxing/New Item Damage",
-    template: "That's the worst unboxing ever! 📦💔 Made a memorial maker for dead gadgets: {PREFILL_LINK}\nMight make a good follow-up video - 'Death Certificate for My Dead [Device]' 😂🪦"
+    template: "That's brutal! 📦💔 Saw someone do a memorial for their DOA gadget: {PREFILL_LINK}\nCould make an interesting follow-up - from unboxing to obituary 😂"
   },
 
-  // Facebook Templates (detailed, friendly)
+  // Facebook Templates (conversational, helpful)
   {
     id: "phone-liquid-facebook",
-    name: "Phone Liquid Damage - Facebook",
+    name: "Water Damage Sympathy - Facebook",
     platform: "Facebook",
     scenario: "Phone/Liquid Damage",
-    template: "Ouch. I built a free Death Certificate maker for dead gadgets—gives you a shareable card (cause, age, roast vs condolences).\nPrefilled for yours: {PREFILL_LINK}\nIf you post it, I'll feature it on the homepage today."
+    template: "Ugh, water damage is the worst! 😭 A friend told me about this quirky memorial site for dead gadgets: {PREFILL_LINK}\nMight give you some closure (and it's actually pretty funny)"
   },
   {
     id: "family-device-facebook",
-    name: "Family Device Death - Facebook",
+    name: "Family Device Loss - Facebook",
     platform: "Facebook",
     scenario: "Family/Shared Device",
-    template: "Oh no! The family [device] has passed 😢 I made a Death Certificate generator that might give you some closure: {PREFILL_LINK}\nIt's free and kind of therapeutic. Plus you get a shareable memorial card!"
+    template: "Oh no, not the family device! 😢 My neighbor did one of those RIP certificates for her broken tablet and the kids thought it was hilarious: {PREFILL_LINK}\nMight be worth a try for some closure!"
   },
 
-  // Reddit Templates (community-focused, helpful)
+  // Reddit Templates (community-focused, natural)
   {
     id: "console-reddit",
     name: "Console Death - Reddit",
     platform: "Reddit", 
     scenario: "Gaming Console",
-    template: "Been there. Make a clean RIP card in 30s (great for the story + selling for parts).\nPrefilled: {PREFILL_LINK}\nI can also drop it into our \"Console Week\" spotlight if you want."
+    template: "F in chat 💀 Someone in r/gaming showed me this memorial thing: {PREFILL_LINK}\nActually therapeutic + good if you're selling for parts (shows the backstory)"
   },
   {
     id: "pc-build-reddit",
     name: "PC Build Fail - Reddit",
     platform: "Reddit",
     scenario: "PC Building/Hardware",
-    template: "F for your build 💀 Made a Death Certificate maker for these exact moments: {PREFILL_LINK}\nMight help with the grieving process, plus you get a meme-worthy certificate to share."
+    template: "RIP your build � Saw someone post a death certificate for their fried motherboard here: {PREFILL_LINK}\nKinda genius way to process the grief lol"
   },
 
-  // Marketplace Templates (business-focused)
+  // Discord Templates (casual gaming community)
   {
-    id: "marketplace-seller",
-    name: "Marketplace Seller - Any Platform", 
-    platform: "Marketplace",
-    scenario: "Selling for Parts",
-    template: "Selling for parts? A Death Certificate pic helps buyers get the story fast.\nPrefilled for your listing: {PREFILL_LINK}\nDownload the image and add it to your photos; it shows cause + age at a glance."
+    id: "controller-discord",
+    name: "Controller Death - Discord",
+    platform: "Discord",
+    scenario: "Gaming Controller",
+    template: "RIP controller 🎮 someone in another server showed me this memorial thing: {PREFILL_LINK}\npretty funny way to honor fallen gaming gear ngl"
   },
 
-  // Partnership Templates
+  // Instagram Templates (visual, trendy)
   {
-    id: "repair-shop",
-    name: "Repair Shop Partnership",
-    platform: "Direct Message",
-    scenario: "Business Partnership", 
-    template: "I run RIPStuff—we generate a clean certificate for dead devices (cause, age, roast/sympathy meter).\nHere's a co-branded link for your customers: https://ripstuff.net/bury?ref={SHOP_NAME}\nIt's free; they get a shareable image. I'll feature a few weekly and shout out your shop."
+    id: "aesthetic-fail-instagram",
+    name: "Aesthetic Item Break - Instagram", 
+    platform: "Instagram",
+    scenario: "Aesthetic/Decor Items",
+    template: "the aesthetic is ruined 😭✨ bestie showed me this memorial maker for broken stuff: {PREFILL_LINK}\nkinda cute way to say goodbye"
+  },
+
+  // General Empathy Templates
+  {
+    id: "general-empathy",
+    name: "General Sympathy - Any Platform",
+    platform: "Any Platform",
+    scenario: "General Empathy",
+    template: "That's rough! 😭 Someone shared this memorial thing with me and it's actually pretty therapeutic: {PREFILL_LINK}\nMight be worth checking out for closure"
   }
 ];
 
@@ -135,6 +151,11 @@ export function MarketingCommandCenter() {
   const [platform, setPlatform] = useState("facebook");
   const [generatedLink, setGeneratedLink] = useState("");
   const [generatedMessage, setGeneratedMessage] = useState("");
+  const [generatedAssets, setGeneratedAssets] = useState<{
+    deathCert: string;
+    graveCard: string;
+    twitterCard: string;
+  } | null>(null);
 
   const generatePrefillLink = () => {
     const params = new URLSearchParams();
@@ -156,6 +177,26 @@ export function MarketingCommandCenter() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     // You might want to add a toast notification here
+  };
+
+  const generateMarketingAssets = () => {
+    // Generate visual assets for social media
+    const baseParams = new URLSearchParams();
+    if (itemName) baseParams.set('title', itemName);
+    if (category) baseParams.set('category', category);
+    if (causeOfDeath) baseParams.set('cause', causeOfDeath);
+    if (epitaph) baseParams.set('epitaph', epitaph);
+    baseParams.set('utm_source', platform);
+    baseParams.set('utm_campaign', 'outreach');
+
+    // Generate different asset URLs
+    const assets = {
+      deathCert: `https://ripstuff.net/api/generate/death-certificate?${baseParams.toString()}&format=image&watermark=ripstuff.net`,
+      graveCard: `https://ripstuff.net/api/generate/grave-card?${baseParams.toString()}&format=twitter&brand=true`,
+      twitterCard: `https://ripstuff.net/api/generate/twitter-card?${baseParams.toString()}&cta=true&style=dark`
+    };
+    
+    setGeneratedAssets(assets);
   };
 
   const quickFillExamples = [
@@ -270,9 +311,14 @@ export function MarketingCommandCenter() {
               </select>
             </div>
 
-            <Button onClick={generatePrefillLink} className="w-full">
-              🔗 Generate Prefill Link
-            </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Button onClick={generatePrefillLink} className="w-full">
+                🔗 Generate Prefill Link
+              </Button>
+              <Button onClick={generateMarketingAssets} variant="secondary" className="w-full">
+                🎨 Generate Visual Assets
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -431,6 +477,127 @@ export function MarketingCommandCenter() {
                 <div className="text-green-400 font-medium mb-2">✅ Ready to Send!</div>
                 <div className="text-sm text-green-300">
                   Copy the message above and paste it as a reply. The prefilled link will take them directly to a memorial form with their item details already filled in.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Generated Visual Assets */}
+          {generatedAssets && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-[var(--foreground)]">🎨 Marketing Assets</h3>
+              <div className="text-sm text-[var(--muted)] mb-4">
+                Post these images instead of raw links for 10x better engagement!
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* Death Certificate */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-[var(--foreground)]">🪦 Death Certificate</h4>
+                    <Button
+                      variant="secondary"
+                      onClick={() => copyToClipboard(generatedAssets.deathCert)}
+                      className="text-xs px-3 py-1"
+                    >
+                      📋 Copy URL
+                    </Button>
+                  </div>
+                  <div className="aspect-[4/3] rounded-lg border border-[var(--border)] bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
+                    <img 
+                      src={generatedAssets.deathCert} 
+                      alt="Death Certificate Preview"
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling!.classList.remove('hidden');
+                      }}
+                    />
+                    <div className="hidden text-center text-[var(--muted)]">
+                      <div className="text-2xl mb-2">📜</div>
+                      <div className="text-sm">Official Death Certificate</div>
+                      <div className="text-xs">{itemName}</div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-[var(--muted)]">
+                    Professional certificate - Perfect for Twitter posts
+                  </div>
+                </div>
+
+                {/* Grave Card */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-[var(--foreground)]">🎯 Grave Card</h4>
+                    <Button
+                      variant="secondary"
+                      onClick={() => copyToClipboard(generatedAssets.graveCard)}
+                      className="text-xs px-3 py-1"
+                    >
+                      📋 Copy URL
+                    </Button>
+                  </div>
+                  <div className="aspect-[4/3] rounded-lg border border-[var(--border)] bg-gradient-to-br from-purple-900/20 to-blue-900/20 flex items-center justify-center">
+                    <img 
+                      src={generatedAssets.graveCard} 
+                      alt="Grave Card Preview"
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling!.classList.remove('hidden');
+                      }}
+                    />
+                    <div className="hidden text-center text-[var(--muted)]">
+                      <div className="text-2xl mb-2">🪦</div>
+                      <div className="text-sm">Memorial Card</div>
+                      <div className="text-xs">{itemName}</div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-[var(--muted)]">
+                    Compact memorial - Great for replies and shares
+                  </div>
+                </div>
+
+                {/* Twitter Optimized Card */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-[var(--foreground)]">🐦 Twitter Card</h4>
+                    <Button
+                      variant="secondary"
+                      onClick={() => copyToClipboard(generatedAssets.twitterCard)}
+                      className="text-xs px-3 py-1"
+                    >
+                      📋 Copy URL
+                    </Button>
+                  </div>
+                  <div className="aspect-[16/9] rounded-lg border border-[var(--border)] bg-gradient-to-r from-blue-900/20 to-cyan-900/20 flex items-center justify-center">
+                    <img 
+                      src={generatedAssets.twitterCard} 
+                      alt="Twitter Card Preview"
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling!.classList.remove('hidden');
+                      }}
+                    />
+                    <div className="hidden text-center text-[var(--muted)]">
+                      <div className="text-2xl mb-2">📱</div>
+                      <div className="text-sm">Twitter Optimized</div>
+                      <div className="text-xs">{itemName}</div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-[var(--muted)]">
+                    16:9 format with CTA - Perfect for maximum engagement
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-lg border border-blue-500/20 bg-blue-500/5">
+                <div className="text-blue-400 font-medium mb-2">🚀 Pro Marketing Tip</div>
+                <div className="text-sm text-blue-300">
+                  Post the image first, then add your message as a comment. This gets much better engagement than posting links directly in tweets!
                 </div>
               </div>
             </div>
