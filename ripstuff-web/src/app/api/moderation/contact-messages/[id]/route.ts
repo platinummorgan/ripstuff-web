@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireModerator } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
@@ -10,8 +11,8 @@ export async function POST(
 ) {
   try {
     // Ensure user is a moderator
-    const user = await getCurrentUser();
-    if (!user || !user.isModerator) {
+    const isAllowed = await requireModerator(req);
+    if (!isAllowed) {
       return new Response("Unauthorized", { status: 401 });
     }
 
