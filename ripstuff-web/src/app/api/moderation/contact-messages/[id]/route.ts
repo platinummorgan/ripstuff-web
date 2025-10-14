@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { requireModerator } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +10,10 @@ export async function POST(
 ) {
   try {
     // Ensure user is a moderator
-    await requireModerator(req);
+    const user = await getCurrentUser();
+    if (!user || !user.isModerator) {
+      return new Response("Unauthorized", { status: 401 });
+    }
 
     const { notes } = await req.json();
 
@@ -26,12 +29,6 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    // Handle authentication errors
-    if (error instanceof Error) {
-      if (error.message === "UNAUTHORIZED" || error.message === "MOD_AUTH_NOT_CONFIGURED") {
-        return new Response("Unauthorized", { status: 401 });
-      }
-    }
     console.error("Failed to update contact message:", error);
     return NextResponse.json(
       { message: "Failed to update message" },
